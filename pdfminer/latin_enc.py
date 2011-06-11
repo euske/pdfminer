@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 """ Standard encoding tables used in PDF.
 
@@ -7,7 +7,6 @@ This table is extracted from PDF Reference Manual 1.6, pp.925
 
 """
 
-from __future__ import unicode_literals
 
 ENCODING = [
   # (name, std, mac, win, pdf)

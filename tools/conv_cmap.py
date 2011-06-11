@@ -1,8 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 import sys
 import os.path
 import gzip
-import cPickle as pickle
+import pickle as pickle
 
 def process_cid2code(fp, check_codecs=[]):
 
@@ -18,7 +18,7 @@ def process_cid2code(fp, check_codecs=[]):
         # determine the "most popular" candidate.
         d = {}
         for code in codes:
-            char = unicode(code, 'utf-8')
+            char = str(code, 'utf-8')
             if char not in d:
                 d[char] = 0
             for codec in check_codecs:
@@ -27,7 +27,7 @@ def process_cid2code(fp, check_codecs=[]):
                     d[char] += 1
                 except UnicodeError:
                     pass
-        chars = sorted(d.keys(), key=lambda char:d[char], reverse=True)
+        chars = sorted(list(d.keys()), key=lambda char:d[char], reverse=True)
         return chars[0]
 
     def put(dmap, code, cid, force=False):
@@ -117,7 +117,7 @@ def process_cid2code(fp, check_codecs=[]):
 def main(argv):
 
     def usage():
-        print 'usage: %s output_dir regname cid2code.txt codecs ...' % argv[0]
+        print('usage: %s output_dir regname cid2code.txt codecs ...' % argv[0])
         return 100
     
     args = argv[1:]
@@ -125,14 +125,14 @@ def main(argv):
     (outdir, regname, src) = args[:3]
     check_codecs = args[3:]
 
-    print >>sys.stderr, 'reading %r...' % src
+    print('reading %r...' % src, file=sys.stderr)
     fp = file(src)
     (code2cid, is_vertical, cid2unichr_h, cid2unichr_v) = process_cid2code(fp, check_codecs)
     fp.close()
 
-    for (name, cmap) in code2cid.iteritems():
+    for (name, cmap) in code2cid.items():
         fname = '%s.pickle.gz' % name
-        print >>sys.stderr, 'writing %r...' % fname
+        print('writing %r...' % fname, file=sys.stderr)
         fp = gzip.open(os.path.join(outdir, fname), 'wb')
         data = dict(
             IS_VERTICAL=is_vertical.get(name, False),
@@ -142,7 +142,7 @@ def main(argv):
         fp.close()
 
     fname = 'to-unicode-%s.pickle.gz' % regname
-    print >>sys.stderr, 'writing %r...' % fname
+    print('writing %r...' % fname, file=sys.stderr)
     fp = gzip.open(os.path.join(outdir, fname), 'wb')
     data = dict(
         CID2UNICHR_H=cid2unichr_h,

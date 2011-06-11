@@ -1,10 +1,9 @@
-#!/usr/bin/env python2.7
-from __future__ import unicode_literals
+#!/usr/bin/env python3
 
 import sys
-from utils import mult_matrix, translate_matrix
-from utils import htmlescape, bbox2str
-from pdffont import PDFUnicodeNotDefined
+from .utils import mult_matrix, translate_matrix
+from .utils import htmlescape, bbox2str
+from .pdffont import PDFUnicodeNotDefined
 
 
 ##  PDFDevice
@@ -160,7 +159,7 @@ class TagExtractor(PDFDevice):
         s = ''
         if isinstance(props, dict):
             s = ''.join( ' %s="%s"' % (htmlescape(k), htmlescape(str(v))) for (k,v)
-                         in sorted(props.iteritems()) )
+                         in sorted(props.items()) )
         self.outfp.write('<%s%s>' % (htmlescape(tag.name), s))
         self._stack.append(tag)
         return

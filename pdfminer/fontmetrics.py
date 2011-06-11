@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 """ Font metrics for the Adobe core 14 fonts.
 
@@ -11,7 +11,6 @@ The following data were extracted from the AFM files:
   
 """
 
-from __future__ import unicode_literals
 
 ###  BEGIN Verbatim copy of the license part
 

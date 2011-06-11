@@ -1,20 +1,19 @@
-#!/usr/bin/env python2.7
-from __future__ import unicode_literals
+#!/usr/bin/env python3
 
 import sys
 import io
 import struct
-from cmapdb import CMapDB, CMapParser, FileUnicodeMap, CMap
-from encodingdb import EncodingDB, name2unicode
-from psparser import PSStackParser
-from psparser import PSSyntaxError, PSEOF
-from psparser import LIT, KWD, STRICT
-from psparser import PSLiteral, literal_name
-from pdftypes import PDFException, resolve1
-from pdftypes import int_value, float_value, num_value
-from pdftypes import str_value, list_value, dict_value, stream_value
-from fontmetrics import FONT_METRICS
-from utils import apply_matrix_norm, nunpack, choplist
+from .cmapdb import CMapDB, CMapParser, FileUnicodeMap, CMap
+from .encodingdb import EncodingDB, name2unicode
+from .psparser import PSStackParser
+from .psparser import PSSyntaxError, PSEOF
+from .psparser import LIT, KWD, STRICT
+from .psparser import PSLiteral, literal_name
+from .pdftypes import PDFException, resolve1
+from .pdftypes import int_value, float_value, num_value
+from .pdftypes import str_value, list_value, dict_value, stream_value
+from .fontmetrics import FONT_METRICS
+from .utils import apply_matrix_norm, nunpack, choplist
 
 
 def get_widths(seq):
@@ -31,7 +30,7 @@ def get_widths(seq):
             r.append(v)
             if len(r) == 3:
                 (char1,char2,w) = r
-                for i in xrange(char1, char2+1):
+                for i in range(char1, char2+1):
                     widths[i] = w
                 r = []
     return widths
@@ -53,7 +52,7 @@ def get_widths2(seq):
             r.append(v)
             if len(r) == 5:
                 (char1,char2,w,vx,vy) = r
-                for i in xrange(char1, char2+1):
+                for i in range(char1, char2+1):
                     widths[i] = (w,(vx,vy))
                 r = []
     return widths
@@ -246,8 +245,7 @@ class CFFFont(object):
             self.fp = fp
             self.offsets = []
             (count, offsize) = struct.unpack(b'>HB', self.fp.read(3))
-            print 'foo', count, offsize
-            for i in xrange(count+1):
+            for i in range(count+1):
                 self.offsets.append(nunpack(self.fp.read(offsize)))
             self.base = self.fp.tell()-1
             self.fp.seek(self.base+self.offsets[-1])
@@ -264,7 +262,7 @@ class CFFFont(object):
             return self.fp.read(self.offsets[i+1]-self.offsets[i])
 
         def __iter__(self):
-            return iter( self[i] for i in xrange(len(self)) )
+            return iter( self[i] for i in range(len(self)) )
 
     def __init__(self, name, fp):
         self.name = name
@@ -304,9 +302,9 @@ class CFFFont(object):
             # Format 1
             (n,) = struct.unpack(b'B', self.fp.read(1))
             code = 0
-            for i in xrange(n):
+            for i in range(n):
                 (first,nleft) = struct.unpack(b'BB', self.fp.read(2))
-                for gid in xrange(first,first+nleft+1):
+                for gid in range(first,first+nleft+1):
                     self.code2gid[code] = gid
                     self.gid2code[gid] = code
                     code += 1
@@ -329,9 +327,9 @@ class CFFFont(object):
             # Format 1
             (n,) = struct.unpack(b'B', self.fp.read(1))
             sid = 0
-            for i in xrange(n):
+            for i in range(n):
                 (first,nleft) = struct.unpack(b'BB', self.fp.read(2))
-                for gid in xrange(first,first+nleft+1):
+                for gid in range(first,first+nleft+1):
                     name = self.getstr(sid)
                     self.name2gid[name] = gid
                     self.gid2name[gid] = name
@@ -364,7 +362,7 @@ class TrueTypeFont(object):
         self.tables = {}
         self.fonttype = fp.read(4)
         (ntables, _1, _2, _3) = struct.unpack(b'>HHHH', fp.read(8))
-        for _ in xrange(ntables):
+        for _ in range(ntables):
             (name, tsum, offset, length) = struct.unpack(b'>4sLLL', fp.read(16))
             self.tables[name] = (offset, length)
         return
@@ -377,7 +375,7 @@ class TrueTypeFont(object):
         fp.seek(base_offset)
         (version, nsubtables) = struct.unpack(b'>HH', fp.read(4))
         subtables = []
-        for i in xrange(nsubtables):
+        for i in range(nsubtables):
             subtables.append(struct.unpack(b'>HHL', fp.read(8)))
         char2gid = {}
         # Only supports subtable type 0, 2 and 4.
@@ -393,14 +391,14 @@ class TrueTypeFont(object):
                     firstbytes[k/8] = i
                 nhdrs = max(subheaderkeys)/8 + 1
                 hdrs = []
-                for i in xrange(nhdrs):
+                for i in range(nhdrs):
                     (firstcode,entcount,delta,offset) = struct.unpack(b'>HHhH', fp.read(8))
                     hdrs.append((i,firstcode,entcount,delta,fp.tell()-2+offset))
                 for (i,firstcode,entcount,delta,pos) in hdrs:
                     if not entcount: continue
                     first = firstcode + (firstbytes[i] << 8)
                     fp.seek(pos)
-                    for c in xrange(entcount):
+                    for c in range(entcount):
                         gid = struct.unpack(b'>H', fp.read(2))
                         if gid:
                             gid += delta
@@ -417,16 +415,16 @@ class TrueTypeFont(object):
                 for (ec,sc,idd,idr) in zip(ecs, scs, idds, idrs):
                     if idr:
                         fp.seek(pos+idr)
-                        for c in xrange(sc, ec+1):
+                        for c in range(sc, ec+1):
                             char2gid[c] = (struct.unpack(b'>H', fp.read(2))[0] + idd) & 0xffff
                     else:
-                        for c in xrange(sc, ec+1):
+                        for c in range(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
             else:
                 assert 0
         # create unicode map
         unicode_map = FileUnicodeMap()
-        for (char,gid) in char2gid.iteritems():
+        for (char,gid) in char2gid.items():
             unicode_map.add_cid2unichr(gid, char)
         return unicode_map
 
@@ -470,7 +468,7 @@ class PDFFont(object):
         return False
 
     def decode(self, bytes):
-        return map(ord, bytes)
+        return list(map(ord, bytes))
 
     def get_ascent(self):
         return self.ascent * self.vscale
@@ -615,7 +613,7 @@ class PDFCIDFont(PDFFont):
             name = 'unknown'
         try:
             self.cmap = CMapDB.get_cmap(name)
-        except CMapDB.CMapNotFound, e:
+        except CMapDB.CMapNotFound as e:
             if STRICT:
                 raise PDFFontError(e)
             self.cmap = CMap()
@@ -644,17 +642,17 @@ class PDFCIDFont(PDFFont):
         else:
             try:
                 self.unicode_map = CMapDB.get_unicode_map(self.cidcoding, self.cmap.is_vertical())
-            except CMapDB.CMapNotFound, e:
+            except CMapDB.CMapNotFound as e:
                 pass
 
         self.vertical = self.cmap.is_vertical()
         if self.vertical:
             # writing mode: vertical
             widths = get_widths2(list_value(spec.get('W2', [])))
-            self.disps = dict( (cid,(vx,vy)) for (cid,(_,(vx,vy))) in widths.iteritems() )
+            self.disps = dict( (cid,(vx,vy)) for (cid,(_,(vx,vy))) in widths.items() )
             (vy,w) = spec.get('DW2', [880, -1000])
             self.default_disp = (None,vy)
-            widths = dict( (cid,w) for (cid,(w,_)) in widths.iteritems() )
+            widths = dict( (cid,w) for (cid,(w,_)) in widths.items() )
             default_width = w
         else:
             # writing mode: horizontal
@@ -695,7 +693,7 @@ def main(argv):
         fp = io.open(fname, 'rb')
         #font = TrueTypeFont(fname, fp)
         font = CFFFont(fname, fp)
-        print font
+        print(font)
         fp.close()
     return
 

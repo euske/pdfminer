@@ -12,7 +12,6 @@ The following data was taken by
 
 """
 
-from __future__ import unicode_literals
 
 # ###################################################################################
 # Copyright (c) 1997,1998,2002,2007 Adobe Systems Incorporated

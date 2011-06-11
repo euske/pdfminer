@@ -1,6 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 import sys
 import io
+import getopt
+
 from pdfminer.pdfparser import PDFDocument, PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter, process_pdf
 from pdfminer.pdfdevice import PDFDevice, TagExtractor
@@ -8,13 +10,11 @@ from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 
-# main
 def main(argv):
-    import getopt
     def usage():
-        print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output] [-C] '
+        print(('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output] [-C] '
                '[-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin] [-F boxes_flow] '
-               '[-Y layout_mode] [-O output_dir] [-t text|html|xml|tag] [-c codec] [-s scale] file ...' % argv[0])
+               '[-Y layout_mode] [-O output_dir] [-t text|html|xml|tag] [-c codec] [-s scale] file ...' % argv[0]))
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dp:m:P:o:CnAVM:L:W:F:Y:O:t:c:s:')
@@ -77,8 +77,10 @@ def main(argv):
                 outtype = 'tag'
     if outfile:
         outfp = io.open(outfile, 'wt', encoding=codec, errors='ignore')
+        close_outfp = True
     else:
         outfp = sys.stdout
+        close_outfp = False
     if outtype == 'text':
         device = TextConverter(rsrcmgr, outfp, laparams=laparams)
     elif outtype == 'xml':
@@ -96,7 +98,8 @@ def main(argv):
                     caching=caching, check_extractable=True)
         fp.close()
     device.close()
-    outfp.close()
-    return
+    if close_outfp:
+        outfp.close()
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

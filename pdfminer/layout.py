@@ -1,8 +1,7 @@
-#!/usr/bin/env python2.7
-from __future__ import unicode_literals
+#!/usr/bin/env python3
 import sys
-from utils import INF, Plane, get_bound, uniq, csort, fsplit
-from utils import bbox2str, matrix2str, apply_matrix_pt
+from .utils import INF, Plane, get_bound, uniq, csort, fsplit
+from .utils import bbox2str, matrix2str, apply_matrix_pt
 
 
 ##  IndexAssigner
@@ -83,7 +82,8 @@ class LTComponent(LTItem):
         return ('<%s %s>' %
                 (self.__class__.__name__, bbox2str(self.bbox)))
 
-    def set_bbox(self, (x0,y0,x1,y1)):
+    def set_bbox(self, bbox):
+        (x0,y0,x1,y1) = bbox
         self.x0 = x0
         self.y0 = y0
         self.x1 = x1
@@ -160,7 +160,8 @@ class LTLine(LTCurve):
 ##
 class LTRect(LTCurve):
 
-    def __init__(self, linewidth, (x0,y0,x1,y1)):
+    def __init__(self, linewidth, rect):
+        (x0,y0,x1,y1) = rect
         LTCurve.__init__(self, linewidth, [(x0,y0), (x1,y0), (x1,y1), (x0,y1)])
         return
 
@@ -581,9 +582,9 @@ class LTLayoutContainer(LTContainer):
             return objs.difference((obj1,obj2))
         # XXX this still takes O(n^2)  :(
         dists = []
-        for i in xrange(len(boxes)):
+        for i in range(len(boxes)):
             obj1 = boxes[i]
-            for j in xrange(i+1, len(boxes)):
+            for j in range(i+1, len(boxes)):
                 obj2 = boxes[j]
                 dists.append((0, dist(obj1, obj2), obj1, obj2))
         dists.sort()

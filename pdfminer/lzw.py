@@ -1,5 +1,4 @@
-#!/usr/bin/env python2.7
-from __future__ import unicode_literals
+#!/usr/bin/env python3
 
 import sys
 import io
@@ -46,7 +45,7 @@ class LZWDecoder(object):
     def feed(self, code):
         x = ''
         if code == 256:
-            self.table = [ chr(c) for c in xrange(256) ] # 0-255
+            self.table = [ chr(c) for c in range(256) ] # 0-255
             self.table.append(None) # 256
             self.table.append(None) # 257
             self.prevbuf = ''
@@ -81,8 +80,8 @@ class LZWDecoder(object):
             x = self.feed(code)
             yield x
             if self.debug:
-                print >>sys.stderr, ('nbits=%d, code=%d, output=%r, table=%r' %
-                                     (self.nbits, code, x, self.table[258:]))
+                print(('nbits=%d, code=%d, output=%r, table=%r' %
+                                     (self.nbits, code, x, self.table[258:])), file=sys.stderr)
         return
 
 # lzwdecode
@@ -91,7 +90,7 @@ def lzwdecode(data):
     return ''.join(LZWDecoder(fp).run())
 
 def test():
-    assert lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01') == b'\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
+    assert lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01') == '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
     
 if __name__ == '__main__':
     test()

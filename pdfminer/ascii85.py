@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 """ Python implementation of ASCII85/ASCIIHex decoder (Adobe version).
 
@@ -6,11 +6,9 @@ This code is in the public domain.
 
 """
 
-from __future__ import unicode_literals
 import re
 import struct
 
-# ascii85decode(data)
 def ascii85decode(data):
     """
     In ASCII85 encoding, every four bytes are encoded with five ASCII
@@ -24,10 +22,11 @@ def ascii85decode(data):
     The sample string is taken from:
       http://en.wikipedia.org/w/index.php?title=Ascii85
     """
+    if isinstance(data, str):
+        data = data.encode('ascii')
     n = b = 0
     out = b''
     for c in data:
-        c = ord(c)
         if ord('!') <= c and c <= ord('u'):
             n += 1
             b = b*85+(c-33)
@@ -39,11 +38,11 @@ def ascii85decode(data):
             out += b'\0\0\0\0'
         elif c == ord('~'):
             if n:
-                for _ in xrange(5-n):
+                for _ in range(5-n):
                     b = b*85+84
                 out += struct.pack(b'>L',b)[:n-1]
             break
-    return out
+    return out.decode('ascii')
 
 hex_re = re.compile(r'([a-f\d]{2})', re.IGNORECASE)
 trail_re = re.compile(r'^(?:[a-f\d]{2}|\s)*([a-f\d])[\s>]*$', re.IGNORECASE)
@@ -58,7 +57,7 @@ def asciihexdecode(data):
     will behave as if a 0 followed the last digit.
     """
     decode = (lambda hx: chr(int(hx, 16)))
-    out = map(decode, hex_re.findall(data))
+    out = list(map(decode, hex_re.findall(data)))
     m = trail_re.search(data)
     if m:
         out.append(decode("%c0" % m.group(1)))
