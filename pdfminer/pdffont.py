@@ -1,10 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
+
 import sys
+import io
 import struct
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 from cmapdb import CMapDB, CMapParser, FileUnicodeMap, CMap
 from encodingdb import EncodingDB, name2unicode
 from psparser import PSStackParser
@@ -119,7 +118,7 @@ class Type1FontHeaderParser(PSStackParser):
 NIBBLES = ('0','1','2','3','4','5','6','7','8','9','.','e','e-',None,'-')
 def getdict(data):
     d = {}
-    fp = StringIO(data)
+    fp = io.BytesIO(data)
     stack = []
     while 1:
         c = fp.read(1)
@@ -246,7 +245,8 @@ class CFFFont(object):
         def __init__(self, fp):
             self.fp = fp
             self.offsets = []
-            (count, offsize) = struct.unpack('>HB', self.fp.read(3))
+            (count, offsize) = struct.unpack(b'>HB', self.fp.read(3))
+            print 'foo', count, offsize
             for i in xrange(count+1):
                 self.offsets.append(nunpack(self.fp.read(offsize)))
             self.base = self.fp.tell()-1
@@ -270,7 +270,7 @@ class CFFFont(object):
         self.name = name
         self.fp = fp
         # Header
-        (_major,_minor,hdrsize,offsize) = struct.unpack('BBBB', self.fp.read(4))
+        (_major,_minor,hdrsize,offsize) = struct.unpack(b'BBBB', self.fp.read(4))
         self.fp.read(hdrsize-4)
         # Name INDEX
         self.name_index = self.INDEX(self.fp)
@@ -294,18 +294,18 @@ class CFFFont(object):
         self.gid2code = {}
         self.fp.seek(encoding_pos)
         format = self.fp.read(1)
-        if format == '\x00':
+        if format == b'\x00':
             # Format 0
-            (n,) = struct.unpack('B', self.fp.read(1))
-            for (code,gid) in enumerate(struct.unpack('B'*n, self.fp.read(n))):
+            (n,) = struct.unpack(b'B', self.fp.read(1))
+            for (code,gid) in enumerate(struct.unpack(b'B'*n, self.fp.read(n))):
                 self.code2gid[code] = gid
                 self.gid2code[gid] = code
-        elif format == '\x01':
+        elif format == b'\x01':
             # Format 1
-            (n,) = struct.unpack('B', self.fp.read(1))
+            (n,) = struct.unpack(b'B', self.fp.read(1))
             code = 0
             for i in xrange(n):
-                (first,nleft) = struct.unpack('BB', self.fp.read(2))
+                (first,nleft) = struct.unpack(b'BB', self.fp.read(2))
                 for gid in xrange(first,first+nleft+1):
                     self.code2gid[code] = gid
                     self.gid2code[gid] = code
@@ -320,17 +320,17 @@ class CFFFont(object):
         if format == '\x00':
             # Format 0
             n = self.nglyphs-1
-            for (gid,sid) in enumerate(struct.unpack('>'+'H'*n, self.fp.read(2*n))):
+            for (gid,sid) in enumerate(struct.unpack(b'>'+b'H'*n, self.fp.read(2*n))):
                 gid += 1
                 name = self.getstr(sid)
                 self.name2gid[name] = gid
                 self.gid2name[gid] = name
         elif format == '\x01':
             # Format 1
-            (n,) = struct.unpack('B', self.fp.read(1))
+            (n,) = struct.unpack(b'B', self.fp.read(1))
             sid = 0
             for i in xrange(n):
-                (first,nleft) = struct.unpack('BB', self.fp.read(2))
+                (first,nleft) = struct.unpack(b'BB', self.fp.read(2))
                 for gid in xrange(first,first+nleft+1):
                     name = self.getstr(sid)
                     self.name2gid[name] = gid
@@ -363,9 +363,9 @@ class TrueTypeFont(object):
         self.fp = fp
         self.tables = {}
         self.fonttype = fp.read(4)
-        (ntables, _1, _2, _3) = struct.unpack('>HHHH', fp.read(8))
+        (ntables, _1, _2, _3) = struct.unpack(b'>HHHH', fp.read(8))
         for _ in xrange(ntables):
-            (name, tsum, offset, length) = struct.unpack('>4sLLL', fp.read(16))
+            (name, tsum, offset, length) = struct.unpack(b'>4sLLL', fp.read(16))
             self.tables[name] = (offset, length)
         return
 
@@ -375,50 +375,50 @@ class TrueTypeFont(object):
         (base_offset, length) = self.tables['cmap']
         fp = self.fp
         fp.seek(base_offset)
-        (version, nsubtables) = struct.unpack('>HH', fp.read(4))
+        (version, nsubtables) = struct.unpack(b'>HH', fp.read(4))
         subtables = []
         for i in xrange(nsubtables):
-            subtables.append(struct.unpack('>HHL', fp.read(8)))
+            subtables.append(struct.unpack(b'>HHL', fp.read(8)))
         char2gid = {}
         # Only supports subtable type 0, 2 and 4.
         for (_1, _2, st_offset) in subtables:
             fp.seek(base_offset+st_offset)
-            (fmttype, fmtlen, fmtlang) = struct.unpack('>HHH', fp.read(6))
+            (fmttype, fmtlen, fmtlang) = struct.unpack(b'>HHH', fp.read(6))
             if fmttype == 0:
-                char2gid.update(enumerate(struct.unpack('>256B', fp.read(256))))
+                char2gid.update(enumerate(struct.unpack(b'>256B', fp.read(256))))
             elif fmttype == 2:
-                subheaderkeys = struct.unpack('>256H', fp.read(512))
+                subheaderkeys = struct.unpack(b'>256H', fp.read(512))
                 firstbytes = [0]*8192
                 for (i,k) in enumerate(subheaderkeys):
                     firstbytes[k/8] = i
                 nhdrs = max(subheaderkeys)/8 + 1
                 hdrs = []
                 for i in xrange(nhdrs):
-                    (firstcode,entcount,delta,offset) = struct.unpack('>HHhH', fp.read(8))
+                    (firstcode,entcount,delta,offset) = struct.unpack(b'>HHhH', fp.read(8))
                     hdrs.append((i,firstcode,entcount,delta,fp.tell()-2+offset))
                 for (i,firstcode,entcount,delta,pos) in hdrs:
                     if not entcount: continue
                     first = firstcode + (firstbytes[i] << 8)
                     fp.seek(pos)
                     for c in xrange(entcount):
-                        gid = struct.unpack('>H', fp.read(2))
+                        gid = struct.unpack(b'>H', fp.read(2))
                         if gid:
                             gid += delta
                         char2gid[first+c] = gid
             elif fmttype == 4:
-                (segcount, _1, _2, _3) = struct.unpack('>HHHH', fp.read(8))
+                (segcount, _1, _2, _3) = struct.unpack(b'>HHHH', fp.read(8))
                 segcount /= 2
-                ecs = struct.unpack('>%dH' % segcount, fp.read(2*segcount))
+                ecs = struct.unpack(b'>%dH' % segcount, fp.read(2*segcount))
                 fp.read(2)
-                scs = struct.unpack('>%dH' % segcount, fp.read(2*segcount))
-                idds = struct.unpack('>%dh' % segcount, fp.read(2*segcount))
+                scs = struct.unpack(b'>%dH' % segcount, fp.read(2*segcount))
+                idds = struct.unpack(b'>%dh' % segcount, fp.read(2*segcount))
                 pos = fp.tell()
-                idrs = struct.unpack('>%dH' % segcount, fp.read(2*segcount))
+                idrs = struct.unpack(b'>%dH' % segcount, fp.read(2*segcount))
                 for (ec,sc,idd,idr) in zip(ecs, scs, idds, idrs):
                     if idr:
                         fp.seek(pos+idr)
                         for c in xrange(sc, ec+1):
-                            char2gid[c] = (struct.unpack('>H', fp.read(2))[0] + idd) & 0xffff
+                            char2gid[c] = (struct.unpack(b'>H', fp.read(2))[0] + idd) & 0xffff
                     else:
                         for c in xrange(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
@@ -519,7 +519,7 @@ class PDFSimpleFont(PDFFont):
         if 'ToUnicode' in spec:
             strm = stream_value(spec['ToUnicode'])
             self.unicode_map = FileUnicodeMap()
-            CMapParser(self.unicode_map, StringIO(strm.get_data())).run()
+            CMapParser(self.unicode_map, io.BytesIO(strm.get_data())).run()
         PDFFont.__init__(self, descriptor, widths)
         return
 
@@ -558,7 +558,7 @@ class PDFType1Font(PDFSimpleFont):
             self.fontfile = stream_value(descriptor.get('FontFile'))
             length1 = int_value(self.fontfile['Length1'])
             data = self.fontfile.get_data()[:length1]
-            parser = Type1FontHeaderParser(StringIO(data))
+            parser = Type1FontHeaderParser(io.BytesIO(data))
             self.cid2unicode = parser.get_encoding()
         return
 
@@ -629,12 +629,12 @@ class PDFCIDFont(PDFFont):
         if 'FontFile2' in descriptor:
             self.fontfile = stream_value(descriptor.get('FontFile2'))
             ttf = TrueTypeFont(self.basefont,
-                               StringIO(self.fontfile.get_data()))
+                               io.BytesIO(self.fontfile.get_data()))
         self.unicode_map = None
         if 'ToUnicode' in spec:
             strm = stream_value(spec['ToUnicode'])
             self.unicode_map = FileUnicodeMap()
-            CMapParser(self.unicode_map, StringIO(strm.get_data())).run()
+            CMapParser(self.unicode_map, io.BytesIO(strm.get_data())).run()
         elif self.cidcoding == 'Adobe-Identity':
             if ttf:
                 try:
@@ -692,7 +692,7 @@ class PDFCIDFont(PDFFont):
 # main
 def main(argv):
     for fname in argv[1:]:
-        fp = file(fname, 'rb')
+        fp = io.open(fname, 'rb')
         #font = TrueTypeFont(fname, fp)
         font = CFFFont(fname, fp)
         print font

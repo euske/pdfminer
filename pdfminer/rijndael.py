@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 
 """ Python implementation of Rijndael encryption algorithm.
 

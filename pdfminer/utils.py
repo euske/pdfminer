@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 """
 Miscellaneous Routines.
 """
@@ -157,11 +157,11 @@ def nunpack(s, default=0):
     elif l == 1:
         return ord(s)
     elif l == 2:
-        return struct.unpack('>H', s)[0]
+        return struct.unpack(b'>H', s)[0]
     elif l == 3:
-        return struct.unpack('>L', '\x00'+s)[0]
+        return struct.unpack(b'>L', b'\x00'+s)[0]
     elif l == 4:
-        return struct.unpack('>L', s)[0]
+        return struct.unpack(b'>L', s)[0]
     else:
         raise TypeError('invalid length: %d' % l)
 
@@ -207,11 +207,13 @@ def decode_text(s):
     else:
         return ''.join( PDFDocEncoding[ord(c)] for c in s )
 
-# enc
-def enc(x, codec='ascii'):
-    """Encodes a string for SGML/XML/HTML"""
-    x = x.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
-    return x.encode(codec, 'xmlcharrefreplace')
+def htmlescape(s, encoding='ascii'):
+    """Escapes a string for SGML/XML/HTML"""
+    s = s.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
+    # Additionally to basic replaces, we also make sure that all characters are convertible to our
+    # target encoding. If they're not, they're replaced by XML entities.
+    encoded = s.encode(encoding, errors='xmlcharrefreplace')
+    return encoded.decode(encoding)
 
 def bbox2str(bbox):
     (x0,y0,x1,y1) = bbox

@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
 from psparser import LIT
 
 

@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
 import re
 from psparser import PSLiteral
 from glyphlist import glyphname2unicode
@@ -41,8 +41,8 @@ class EncodingDB(object):
       }
 
     @classmethod
-    def get_encoding(klass, name, diff=None):
-        cid2unicode = klass.encodings.get(name, klass.std2unicode)
+    def get_encoding(cls, name, diff=None):
+        cid2unicode = cls.encodings.get(name, cls.std2unicode)
         if diff:
             cid2unicode = cid2unicode.copy()
             cid = 0

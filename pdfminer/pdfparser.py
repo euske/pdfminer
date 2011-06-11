@@ -1,15 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
+
 import sys
+import io
 import re
 import struct
-try:
-    import hashlib as md5
-except ImportError:
-    import md5
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+import hashlib as md5
 from psparser import PSStackParser
 from psparser import PSSyntaxError, PSEOF
 from psparser import literal_name
@@ -768,7 +764,7 @@ class PDFStreamParser(PDFParser):
     """
 
     def __init__(self, data):
-        PDFParser.__init__(self, StringIO(data))
+        PDFParser.__init__(self, io.StringIO(data))
         return
 
     def flush(self):

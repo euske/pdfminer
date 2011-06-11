@@ -1,10 +1,8 @@
-#!/usr/bin/env python2
-import sys
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
 
+import sys
+import io
 
 ##  LZWDecoder
 ##
@@ -89,13 +87,11 @@ class LZWDecoder(object):
 
 # lzwdecode
 def lzwdecode(data):
-    """
-    >>> lzwdecode('\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01')
-    '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
-    """
-    fp = StringIO(data)
+    fp = io.BytesIO(data)
     return ''.join(LZWDecoder(fp).run())
 
+def test():
+    assert lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01') == b'\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
+    
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    test()

@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 import sys
+import io
 from pdfminer.pdfparser import PDFDocument, PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter, process_pdf
 from pdfminer.pdfdevice import PDFDevice, TagExtractor
@@ -75,22 +76,22 @@ def main(argv):
             elif outfile.endswith('.tag'):
                 outtype = 'tag'
     if outfile:
-        outfp = file(outfile, 'w')
+        outfp = io.open(outfile, 'wt', encoding=codec, errors='ignore')
     else:
         outfp = sys.stdout
     if outtype == 'text':
-        device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams)
+        device = TextConverter(rsrcmgr, outfp, laparams=laparams)
     elif outtype == 'xml':
-        device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams, outdir=outdir)
+        device = XMLConverter(rsrcmgr, outfp, laparams=laparams, outdir=outdir)
     elif outtype == 'html':
-        device = HTMLConverter(rsrcmgr, outfp, codec=codec, scale=scale,
-                               layoutmode=layoutmode, laparams=laparams, outdir=outdir)
+        device = HTMLConverter(rsrcmgr, outfp, scale=scale, layoutmode=layoutmode,
+            laparams=laparams, outdir=outdir)
     elif outtype == 'tag':
-        device = TagExtractor(rsrcmgr, outfp, codec=codec)
+        device = TagExtractor(rsrcmgr, outfp)
     else:
         return usage()
     for fname in args:
-        fp = file(fname, 'rb')
+        fp = io.open(fname, 'rt', encoding='ascii')
         process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages, password=password,
                     caching=caching, check_extractable=True)
         fp.close()

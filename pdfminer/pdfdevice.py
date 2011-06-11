@@ -1,7 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
+
 import sys
 from utils import mult_matrix, translate_matrix
-from utils import enc, bbox2str
+from utils import htmlescape, bbox2str
 from pdffont import PDFUnicodeNotDefined
 
 
@@ -75,8 +77,9 @@ class PDFTextDevice(PDFDevice):
                 scaling, charspace, wordspace, rise, dxscale)
         return
     
-    def render_string_horizontal(self, seq, matrix, (x,y), 
-                                 font, fontsize, scaling, charspace, wordspace, rise, dxscale):
+    def render_string_horizontal(self, seq, matrix, point, font, fontsize, scaling, charspace,
+            wordspace, rise, dxscale):
+        (x,y) = point
         needcharspace = False
         for obj in seq:
             if isinstance(obj, int) or isinstance(obj, float):
@@ -93,8 +96,9 @@ class PDFTextDevice(PDFDevice):
                     needcharspace = True
         return (x, y)
 
-    def render_string_vertical(self, seq, matrix, (x,y), 
-                               font, fontsize, scaling, charspace, wordspace, rise, dxscale):
+    def render_string_vertical(self, seq, matrix, point, font, fontsize, scaling, charspace,
+            wordspace, rise, dxscale):
+        (x,y) = point
         needcharspace = False
         for obj in seq:
             if isinstance(obj, int) or isinstance(obj, float):
@@ -119,10 +123,9 @@ class PDFTextDevice(PDFDevice):
 ##
 class TagExtractor(PDFDevice):
 
-    def __init__(self, rsrcmgr, outfp, codec='utf-8', debug=0):
+    def __init__(self, rsrcmgr, outfp, debug=0):
         PDFDevice.__init__(self, rsrcmgr)
         self.outfp = outfp
-        self.codec = codec
         self.debug = debug
         self.pageno = 0
         self._stack = []
@@ -140,7 +143,7 @@ class TagExtractor(PDFDevice):
                     text += char
                 except PDFUnicodeNotDefined:
                     pass
-        self.outfp.write(enc(text, self.codec))
+        self.outfp.write(htmlescape(text, self.outfp.encoding))
         return
 
     def begin_page(self, page, ctm):
@@ -156,16 +159,16 @@ class TagExtractor(PDFDevice):
     def begin_tag(self, tag, props=None):
         s = ''
         if isinstance(props, dict):
-            s = ''.join( ' %s="%s"' % (enc(k), enc(str(v))) for (k,v)
+            s = ''.join( ' %s="%s"' % (htmlescape(k), htmlescape(str(v))) for (k,v)
                          in sorted(props.iteritems()) )
-        self.outfp.write('<%s%s>' % (enc(tag.name), s))
+        self.outfp.write('<%s%s>' % (htmlescape(tag.name), s))
         self._stack.append(tag)
         return
 
     def end_tag(self):
         assert self._stack
         tag = self._stack.pop(-1)
-        self.outfp.write('</%s>' % enc(tag.name))
+        self.outfp.write('</%s>' % htmlescape(tag.name))
         return
 
     def do_tag(self, tag, props=None):

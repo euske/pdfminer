@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 
 """ Python implementation of Arcfour encryption algorithm.
 
@@ -6,19 +6,9 @@ This code is in the public domain.
 
 """
 
-##  Arcfour
-##
+from __future__ import unicode_literals
+
 class Arcfour(object):
-
-    """
-    >>> Arcfour('Key').process('Plaintext').encode('hex')
-    'bbf316e8d940af0ad3'
-    >>> Arcfour('Wiki').process('pedia').encode('hex')
-    '1021bf0420'
-    >>> Arcfour('Secret').process('Attack at dawn').encode('hex')
-    '45a01f645fc35b383552544b9bf5'
-    """
-
     def __init__(self, key):
         s = range(256)
         j = 0
@@ -33,7 +23,7 @@ class Arcfour(object):
     def process(self, data):
         (i, j) = (self.i, self.j)
         s = self.s
-        r = ''
+        r = b''
         for c in data:
             i = (i+1) % 256
             j = (j+s[i]) % 256
@@ -43,7 +33,10 @@ class Arcfour(object):
         (self.i, self.j) = (i, j)
         return r
 
-# test
+def test():
+    assert Arcfour(b'Key').process(b'Plaintext').encode('hex') == 'bbf316e8d940af0ad3'
+    assert Arcfour(b'Wiki').process(b'pedia').encode('hex') == '1021bf0420'
+    assert Arcfour(b'Secret').process(b'Attack at dawn').encode('hex') == '45a01f645fc35b383552544b9bf5'
+
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    test()

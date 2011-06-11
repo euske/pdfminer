@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
+from __future__ import unicode_literals
 import sys
 import re
 from utils import choplist
@@ -335,7 +336,7 @@ class PSBaseParser(object):
             self.hex += c
             return i+1
         if self.hex:
-            self._curtoken += chr(int(self.hex, 16))
+            self._curtoken += unichr(int(self.hex, 16))
         self._parse1 = self._parse_literal
         return i
 
@@ -420,11 +421,11 @@ class PSBaseParser(object):
             self.oct += c
             return i+1
         if self.oct:
-            self._curtoken += chr(int(self.oct, 8))
+            self._curtoken += unichr(int(self.oct, 8))
             self._parse1 = self._parse_string
             return i
         if c in ESC_STRING:
-            self._curtoken += chr(ESC_STRING[c])
+            self._curtoken += unichr(ESC_STRING[c])
         self._parse1 = self._parse_string
         return i+1
 
@@ -453,7 +454,7 @@ class PSBaseParser(object):
             return len(s)
         j = m.start(0)
         self._curtoken += s[i:j]
-        token = HEX_PAIR.sub(lambda m: chr(int(m.group(0), 16)),
+        token = HEX_PAIR.sub(lambda m: unichr(int(m.group(0), 16)),
                              SPC.sub('', self._curtoken))
         self._add_token(token)
         self._parse1 = self._parse_main
@@ -541,7 +542,7 @@ class PSStackParser(PSBaseParser):
             if (isinstance(token, int) or
                 isinstance(token, float) or
                 isinstance(token, bool) or
-                isinstance(token, str) or
+                isinstance(token, unicode) or
                 isinstance(token, PSLiteral)):
                 # normal token
                 self.push((pos, token))
@@ -682,5 +683,5 @@ func/a/b{(c)do*}def
         print objs
         self.assertEqual(objs, self.OBJS)
         return
-
+    
 if __name__ == '__main__': unittest.main()
