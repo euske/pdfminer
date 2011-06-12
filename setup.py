@@ -1,12 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from distutils.core import setup
 from pdfminer import __version__
 
 setup(
-    name='pdfminer',
+    name='pdfminer3k',
     version=__version__,
     description='PDF parser and analyzer',
-    long_description='''PDFMiner is a tool for extracting information from PDF documents.
+    long_description='''pdfminer3k is a Python 3 port of pdfminer.
+PDFMiner is a tool for extracting information from PDF documents.
 Unlike other PDF-related tools, it focuses entirely on getting 
 and analyzing text data. PDFMiner allows to obtain
 the exact location of texts in a page, as well as 
@@ -17,7 +18,9 @@ PDF parser that can be used for other purposes instead of text analysis.''',
     license='MIT/X',
     author='Yusuke Shinyama',
     author_email='yusuke at cs dot nyu dot edu',
-    url='http://www.unixuser.org/~euske/python/pdfminer/index.html',
+    maintainer='Virgil Dupras',
+    maintainer_email='hsoft@hardcoded.net',
+    url='http://bitbucket.org/hsoft/pdfminer3k',
     packages=[
     'pdfminer',
     'pdfminer.cmap',
@@ -39,4 +42,4 @@ PDF parser that can be used for other purposes instead of text analysis.''',
     'License :: OSI Approved :: MIT License',
     'Topic :: Text Processing',
     ],
-    )
+)
