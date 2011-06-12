@@ -125,6 +125,16 @@ def keyword_name(x):
 
 ##  PSBaseParser
 ##
+##  About PSParser, bytes and strings and all that
+##  
+##  Most of the contents (well, maybe not in size, but in "parsing effort") of a PDF file is text,
+##  but in some cases, namely streams, there's binary data involved. Because of this, file pointers
+##  to the file to parse must be opened in binary mode. Conversion to text happen at a low level,
+##  in fillbuf() and revreadlines(), so we can treat the stuff we read as text pretty much
+##  transparently. We use errors='replace' during decoding because this data will not be interpreted
+##  by the 'normal parsing mechanism'. The stream parser reads directly to the file pointer, without
+##  going through the buffer, so we get binary data.
+
 EOL = re.compile(r'[\r\n]')
 SPC = re.compile(r'\s')
 NONSPC = re.compile(r'\S')
@@ -193,7 +203,10 @@ class PSBaseParser(object):
         if self.charpos < len(self.buf): return
         # fetch next chunk.
         self.bufpos = self.fp.tell()
-        self.buf = self.fp.read(self.BUFSIZ)
+        read_bytes = self.fp.read(self.BUFSIZ)
+        if not isinstance(read_bytes, bytes):
+            raise Exception("Files read with PSParser must be opened in binary mode")
+        self.buf = read_bytes.decode('ascii', errors='replace')
         if not self.buf:
             raise PSEOF('Unexpected EOF')
         self.charpos = 0
@@ -241,9 +254,10 @@ class PSBaseParser(object):
             prevpos = pos
             pos = max(0, pos-self.BUFSIZ)
             self.fp.seek(pos)
-            s = self.fp.read(prevpos-pos)
-            if not s: break
-            while 1:
+            read_bytes = self.fp.read(prevpos-pos)
+            if not read_bytes: break
+            s = read_bytes.decode('ascii', errors='replace')
+            while True:
                 n = max(s.rfind('\r'), s.rfind('\n'))
                 if n == -1:
                     buf = s + buf
@@ -597,7 +611,7 @@ class PSStackParser(PSBaseParser):
 import unittest
 class TestPSBaseParser(unittest.TestCase):
 
-    TESTDATA = r'''%!PS
+    TESTDATA = br'''%!PS
 begin end
  "  @ #
 /a/BCD /Some_Name /foo#5f#xbaa
@@ -648,7 +662,7 @@ func/a/b{(c)do*}def
         class MyParser(PSBaseParser):
             def flush(self):
                 self.add_results(*self.popall())
-        parser = MyParser(io.StringIO(s))
+        parser = MyParser(io.BytesIO(s))
         r = []
         try:
             while 1:
@@ -662,7 +676,7 @@ func/a/b{(c)do*}def
         class MyParser(PSStackParser):
             def flush(self):
                 self.add_results(*self.popall())
-        parser = MyParser(io.StringIO(s))
+        parser = MyParser(io.BytesIO(s))
         r = []
         try:
             while 1:

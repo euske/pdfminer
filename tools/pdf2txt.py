@@ -93,7 +93,7 @@ def main(argv):
     else:
         return usage()
     for fname in args:
-        fp = io.open(fname, 'rt', encoding='ascii')
+        fp = io.open(fname, 'rb')
         process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages, password=password,
                     caching=caching, check_extractable=True)
         fp.close()

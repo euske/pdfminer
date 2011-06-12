@@ -433,7 +433,7 @@ class PDFDocument(object):
                 if strmid in self._parsed_objs:
                     objs = self._parsed_objs[strmid]
                 else:
-                    parser = PDFStreamParser(stream.get_data())
+                    parser = PDFStreamParser(stream.get_data().decode('ascii'))
                     parser.set_document(self)
                     objs = []
                     try:
@@ -652,20 +652,19 @@ class PDFParser(PSStackParser):
             self.fp.seek(pos)
             data = self.fp.read(objlen)
             self.seek(pos+objlen)
-            while 1:
-                try:
-                    (linepos, line) = self.nextline()
-                except PSEOF:
+            while True:
+                next_chunk = self.fp.read(self.BUFSIZ)
+                if not next_chunk:
                     if STRICT:
                         raise PDFSyntaxError('Unexpected EOF')
                     break
-                if 'endstream' in line:
-                    i = line.index('endstream')
+                if b'endstream' in next_chunk:
+                    i = next_chunk.index(b'endstream')
                     objlen += i
-                    data += line[:i]
+                    data += next_chunk[:i]
                     break
-                objlen += len(line)
-                data += line
+                objlen += len(next_chunk)
+                data += next_chunk
             self.seek(pos+objlen)
             # XXX limit objlen not to exceed object boundary
             if 2 <= self.debug:

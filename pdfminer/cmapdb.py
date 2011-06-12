@@ -96,6 +96,8 @@ class IdentityCMap(object):
         return self.vertical
 
     def decode(self, code):
+        if isinstance(code, str):
+            code = code.encode('ascii')
         n = len(code)/2
         if n:
             return struct.unpack('>%dH' % n, code)
@@ -367,6 +369,9 @@ class CMapParser(PSStackParser):
             return
         if name == 'endbfrange':
             objs = [ obj for (_,obj) in self.popall() ]
+            # These objects were hex numbers and have been parsed into a string. But what we want
+            # are bytes. Convert them.
+            objs = [o.encode('ascii') for o in objs]
             for (s,e,code) in choplist(3, objs):
                 if (not isinstance(s, str) or not isinstance(e, str) or
                     len(s) != len(e)): continue
