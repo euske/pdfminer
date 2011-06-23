@@ -30,11 +30,3 @@ class Arcfour(object):
             r.append(c ^ k)
         (self.i, self.j) = (i, j)
         return bytes(r)
-
-def test():
-    assert Arcfour(b'Key').process(b'Plaintext') == bytes.fromhex('bbf316e8d940af0ad3')
-    assert Arcfour(b'Wiki').process(b'pedia') == bytes.fromhex('1021bf0420')
-    assert Arcfour(b'Secret').process(b'Attack at dawn') == bytes.fromhex('45a01f645fc35b383552544b9bf5')
-
-if __name__ == '__main__':
-    test()

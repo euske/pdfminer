@@ -21,9 +21,6 @@ def rldecode(data):
         129 to 255, the following single byte is to be copied 257 - length
         (2 to 128) times during decompression. A length value of 128
         denotes EOD.
-    >>> s = "\x05123456\xfa7\x04abcde\x80junk"
-    >>> rldecode(s)
-    '1234567777777abcde'
     """
     decoded = []
     i=0
@@ -43,8 +40,3 @@ def rldecode(data):
             decoded.append(run)
             i = (i+1) + 1
     return ''.join(decoded)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

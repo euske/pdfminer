@@ -62,14 +62,3 @@ def asciihexdecode(data):
     if m:
         out.append(decode("%c0" % m.group(1)))
     return ''.join(out)
-
-
-def test():
-    assert ascii85decode('9jqo^BlbD-BleB1DJ+*+F(f,q') == 'Man is distinguished'
-    assert ascii85decode('E,9)oF*2M7/c~>') == 'pleasure.'
-    assert asciihexdecode('61 62 2e6364   65') == 'ab.cde'
-    assert asciihexdecode('61 62 2e6364   657>') == 'ab.cdep'
-    assert asciihexdecode('7>') == 'p'
-
-if __name__ == '__main__':
-    test()

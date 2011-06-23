@@ -13,9 +13,9 @@ by Philip J. Erdelsky:
 import sys
 import struct
 
-def KEYLENGTH(keybits): return (keybits)/8
-def RKLENGTH(keybits): return (keybits)/8+28
-def NROUNDS(keybits): return (keybits)/32+6
+def KEYLENGTH(keybits): return (keybits)//8
+def RKLENGTH(keybits): return (keybits)//8+28
+def NROUNDS(keybits): return (keybits)//32+6
 
 Te0 = [
   0xc66363a5, 0xf87c7c84, 0xee777799, 0xf67b7b8d,
@@ -890,7 +890,7 @@ def rijndaelEncrypt(rk, nrounds, plaintext):
           Te3[(t2      ) & 0xff] ^
           rk[p+3])
 
-    ciphertext = ''
+    ciphertext = b''
 
     # apply last round and
     # map cipher state to byte array block:
@@ -993,7 +993,7 @@ def rijndaelDecrypt(rk, nrounds, ciphertext):
           Td3[(t0      ) & 0xff] ^
           rk[p+3])
 
-    plaintext = ''
+    plaintext = b''
 
     # apply last round and
     # map cipher state to byte array block:
@@ -1032,14 +1032,6 @@ def rijndaelDecrypt(rk, nrounds, ciphertext):
 
 # decrypt(key, fin, fout, keybits=256)
 class RijndaelDecryptor(object):
-
-    """
-    >>> key = '00010203050607080a0b0c0d0f101112'.decode('hex')
-    >>> ciphertext = 'd8f532538289ef7d06b506a4fd5be9c9'.decode('hex')
-    >>> RijndaelDecryptor(key, 128).decrypt(ciphertext).encode('hex')
-    '506812a45f08c889b97f5980038b8359'
-    """
-
     def __init__(self, key, keybits=256):
         assert len(key) == KEYLENGTH(keybits)
         (self.rk, self.nrounds) = rijndaelSetupDecrypt(key, keybits)
@@ -1053,14 +1045,6 @@ class RijndaelDecryptor(object):
 
 # encrypt(key, fin, fout, keybits=256)
 class RijndaelEncryptor(object):
-
-    """
-    >>> key = '00010203050607080a0b0c0d0f101112'.decode('hex')
-    >>> plaintext = '506812a45f08c889b97f5980038b8359'.decode('hex')
-    >>> RijndaelEncryptor(key, 128).encrypt(plaintext).encode('hex')
-    'd8f532538289ef7d06b506a4fd5be9c9'
-    """
-    
     def __init__(self, key, keybits=256):
         assert len(key) == KEYLENGTH(keybits)
         (self.rk, self.nrounds) = rijndaelSetupEncrypt(key, keybits)
@@ -1071,8 +1055,3 @@ class RijndaelEncryptor(object):
     def encrypt(self, plaintext):
         assert len(plaintext) == 16
         return rijndaelEncrypt(self.rk, self.nrounds, plaintext)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

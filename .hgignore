@@ -3,3 +3,5 @@ syntax: glob
 *.pyc
 build
 dist
+MANIFEST
+__pycache__
