@@ -30,7 +30,7 @@ def pytest_generate_tests(metafunc):
     
 
 def test_convert_sample(samplepath, tmpdir):
-    EXTS = ['html', 'txt', 'xml']
+    EXTS = ['txt', 'html', 'xml']
     destfolder = str(tmpdir)
     assert op.exists(samplepath)
     dirname, filename = op.split(samplepath)

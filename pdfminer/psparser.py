@@ -206,7 +206,8 @@ class PSBaseParser(object):
         read_bytes = self.fp.read(self.BUFSIZ)
         if not isinstance(read_bytes, bytes):
             raise Exception("Files read with PSParser must be opened in binary mode")
-        self.buf = read_bytes.decode('ascii', errors='replace')
+        self.rawbuf = read_bytes
+        self.buf = read_bytes.decode('latin-1')
         if not self.buf:
             raise PSEOF('Unexpected EOF')
         self.charpos = 0
@@ -256,7 +257,7 @@ class PSBaseParser(object):
             self.fp.seek(pos)
             read_bytes = self.fp.read(prevpos-pos)
             if not read_bytes: break
-            s = read_bytes.decode('ascii', errors='replace')
+            s = read_bytes.decode('latin-1')
             while True:
                 n = max(s.rfind('\r'), s.rfind('\n'))
                 if n == -1:
@@ -424,6 +425,8 @@ class PSBaseParser(object):
             if self.paren: # WTF, they said balanced parens need no special treatment.
                 self._curtoken += c
                 return j+1
+        if any(ord(c) > 0x7f for c in self._curtoken): # need to be a bytes token!
+            self._curtoken = self._curtoken.encode('latin-1')
         self._add_token(self._curtoken)
         self._parse1 = self._parse_main
         return j+1
@@ -467,8 +470,14 @@ class PSBaseParser(object):
             return len(s)
         j = m.start(0)
         self._curtoken += s[i:j]
-        token = HEX_PAIR.sub(lambda m: chr(int(m.group(0), 16)),
-                             SPC.sub('', self._curtoken))
+        cleaned = SPC.sub('', self._curtoken)
+        pairs = HEX_PAIR.findall(cleaned)
+        token_bytes = bytes([int(pair, 16) for pair in pairs])
+        try:
+            token = token_bytes.decode('ascii')
+        except UnicodeDecodeError:
+            # should be kept as bytes
+            token = token_bytes
         self._add_token(token)
         self._parse1 = self._parse_main
         return j
@@ -556,6 +565,7 @@ class PSStackParser(PSBaseParser):
                 isinstance(token, float) or
                 isinstance(token, bool) or
                 isinstance(token, str) or
+                isinstance(token, bytes) or
                 isinstance(token, PSLiteral)):
                 # normal token
                 self.push((pos, token))

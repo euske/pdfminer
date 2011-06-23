@@ -116,7 +116,7 @@ def num_value(x):
 
 def str_value(x):
     x = resolve1(x)
-    if not isinstance(x, str):
+    if not isinstance(x, (str, bytes)):
         if STRICT:
             raise PDFTypeError('String required: %r' % x)
         return ''

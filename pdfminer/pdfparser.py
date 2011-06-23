@@ -335,7 +335,7 @@ class PDFDocument(object):
     #   Perform the initialization with a given password.
     #   This step is mandatory even if there's no password associated
     #   with the document.
-    PASSWORD_PADDING = '(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08..\x00\xb6\xd0h>\x80/\x0c\xa9\xfedSiz'
+    PASSWORD_PADDING = b'(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08..\x00\xb6\xd0h>\x80/\x0c\xa9\xfedSiz'
     def initialize(self, password=''):
         if not self.encryption:
             self.is_printable = self.is_modifiable = self.is_extractable = True
@@ -357,6 +357,8 @@ class PDFDocument(object):
         self.is_modifiable = bool(P & 8)
         self.is_extractable = bool(P & 16)
         # Algorithm 3.2
+        # XXX is latin-1 the correct encoding???
+        password = password.encode('latin-1')
         password = (password+self.PASSWORD_PADDING)[:32] # 1
         hash = md5.md5(password) # 2
         hash.update(O) # 3
@@ -368,8 +370,8 @@ class PDFDocument(object):
         if 3 <= R:
             # 8
             for _ in range(50):
-                hash = md5.md5(hash.digest()[:length/8])
-        key = hash.digest()[:length/8]
+                hash = md5.md5(hash.digest()[:length//8])
+        key = hash.digest()[:length//8]
         if R == 2:
             # Algorithm 3.4
             u1 = Arcfour(key).process(self.PASSWORD_PADDING)

@@ -587,7 +587,10 @@ class LTLayoutContainer(LTContainer):
             for j in range(i+1, len(boxes)):
                 obj2 = boxes[j]
                 dists.append((0, dist(obj1, obj2), obj1, obj2))
-        dists.sort()
+        try:
+            dists.sort()
+        except TypeError:
+            dists.sort(key=lambda o: id(o))
         plane = Plane(boxes)
         while dists:
             (c,d,obj1,obj2) = dists.pop(0)
@@ -607,7 +610,10 @@ class LTLayoutContainer(LTContainer):
                       if o1 in plane and o2 in plane ]
             for other in plane:
                 dists.append((0, dist(group,other), group, other))
-            dists.sort()
+            try:
+                dists.sort()
+            except TypeError:
+                dists.sort(key=lambda o: id(o))
             plane.add(group)
         assert len(plane) == 1
         return list(plane)

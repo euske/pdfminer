@@ -467,8 +467,11 @@ class PDFFont(object):
     def is_multibyte(self):
         return False
 
-    def decode(self, bytes):
-        return list(map(ord, bytes))
+    def decode(self, s):
+        if isinstance(s, str):
+            return list(map(ord, s))
+        else: # it's already bytes
+            return s
 
     def get_ascent(self):
         return self.ascent * self.vscale
