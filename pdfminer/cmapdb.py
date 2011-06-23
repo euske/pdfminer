@@ -183,9 +183,9 @@ class FileUnicodeMap(UnicodeMap):
         if isinstance(code, PSLiteral):
             # Interpret as an Adobe glyph name.
             self.cid2unichr[cid] = name2unicode(code.name)
-        elif isinstance(code, str):
+        elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
-            self.cid2unichr[cid] = str(code, 'UTF-16BE', 'ignore')
+            self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
         elif isinstance(code, int):
             self.cid2unichr[cid] = chr(code)
         else:
@@ -373,7 +373,7 @@ class CMapParser(PSStackParser):
             # are bytes. Convert them.
             objs = [o.encode('ascii') for o in objs]
             for (s,e,code) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                     len(s) != len(e)): continue
                 s1 = nunpack(s)
                 e1 = nunpack(e)
