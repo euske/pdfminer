@@ -12,35 +12,41 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     if bitspercomponent != 8:
         # unsupported
         raise ValueError(bitspercomponent)
-    nbytes = colors*columns*bitspercomponent/8
+    nbytes = colors*columns*bitspercomponent//8
     i = 0
-    buf = ''
-    line0 = '\x00' * columns
+    buf = b''
+    line0 = b'\x00' * columns
     while i < len(data):
         pred = data[i]
         i += 1
         line1 = data[i:i+nbytes]
         i += nbytes
-        if pred == '\x00':
+        if pred == 0:
             # PNG none
             buf += line1
-        elif pred == '\x01':
+        elif pred == 1:
             # PNG sub (UNTESTED)
             c = 0
+            bufline = []
             for b in line1:
-                c = (c+ord(b)) & 255
-                buf += chr(c)
-        elif pred == '\x02':
+                c = (c+b) & 255
+                bufline.append(c)
+            buf += bytes(bufline)
+        elif pred == 2:
             # PNG up
+            bufline = []
             for (a,b) in zip(line0,line1):
-                c = (ord(a)+ord(b)) & 255
-                buf += chr(c)
-        elif pred == '\x03':
+                c = (a+b) & 255
+                bufline.append(c)
+            buf += bytes(bufline)
+        elif pred == 3:
             # PNG average (UNTESTED)
             c = 0
+            bufline = []
             for (a,b) in zip(line0,line1):
-                c = ((c+ord(a)+ord(b))/2) & 255
-                buf += chr(c)
+                c = ((c+a+b)//2) & 255
+                bufline.append(c)
+            buf += bytes(bufline)
         else:
             # unsupported
             raise ValueError(pred)
