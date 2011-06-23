@@ -97,7 +97,7 @@ class IdentityCMap(object):
 
     def decode(self, code):
         if isinstance(code, str):
-            code = code.encode('ascii')
+            code = code.encode('latin-1')
         n = len(code)/2
         if n:
             return struct.unpack('>%dH' % n, code)

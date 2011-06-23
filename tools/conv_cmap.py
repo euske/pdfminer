@@ -32,14 +32,13 @@ def process_cid2code(fp, check_codecs=[]):
 
     def put(dmap, code, cid, force=False):
         for b in code[:-1]:
-            b = ord(b)
             if b in dmap:
                 dmap = dmap[b]
             else:
                 d = {}
                 dmap[b] = d
                 dmap = d
-        b = ord(code[-1])
+        b = code[-1]
         if force or ((b not in dmap) or dmap[b] == cid):
             dmap[b] = cid
         return
@@ -82,9 +81,9 @@ def process_cid2code(fp, check_codecs=[]):
                 if vertical:
                     code = code[:-1]
                 try:
-                    code = code.decode('hex')
-                except:
-                    code = chr(int(code, 16))
+                    code = bytes.fromhex(code)
+                except Exception:
+                    code = bytes([int(code, 16)])
                 if vertical:
                     vcodes.append(code)
                 else:
@@ -126,7 +125,7 @@ def main(argv):
     check_codecs = args[3:]
 
     print('reading %r...' % src, file=sys.stderr)
-    fp = file(src)
+    fp = open(src, 'rt', encoding='ascii')
     (code2cid, is_vertical, cid2unichr_h, cid2unichr_v) = process_cid2code(fp, check_codecs)
     fp.close()
 
