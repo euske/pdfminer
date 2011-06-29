@@ -61,17 +61,13 @@ def get_widths2(seq):
 #assert get_widths2([1,[2,3,4,5],6,[7,8,9]]) == {1:(2,(3,4)), 6:(7,(8,9))}
 
 
-##  FontMetricsDB
-##
-class FontMetricsDB(object):
+class FontMetricsDB:
 
     @classmethod
     def get_metrics(klass, fontname):
         return FONT_METRICS[fontname]
 
 
-##  Type1FontHeaderParser
-##
 class Type1FontHeaderParser(PSStackParser):
 
     KEYWORD_BEGIN = KWD('begin')
@@ -156,7 +152,7 @@ def getdict(data):
         stack.append(value)
     return d
 
-class CFFFont(object):
+class CFFFont:
 
     STANDARD_STRINGS = (
       '.notdef', 'space', 'exclam', 'quotedbl', 'numbersign',
@@ -239,7 +235,7 @@ class CFFFont(object):
       'Light', 'Medium', 'Regular', 'Roman', 'Semibold',
       )
 
-    class INDEX(object):
+    class INDEX:
 
         def __init__(self, fp):
             self.fp = fp
@@ -350,9 +346,7 @@ class CFFFont(object):
         return self.string_index[sid-len(self.STANDARD_STRINGS)]
 
 
-##  TrueTypeFont
-##
-class TrueTypeFont(object):
+class TrueTypeFont:
 
     class CMapNotFound(Exception): pass
 
@@ -439,8 +433,7 @@ LITERAL_STANDARD_ENCODING = LIT('StandardEncoding')
 LITERAL_TYPE1C = LIT('Type1C')
 
 
-# PDFFont
-class PDFFont(object):
+class PDFFont:
 
     def __init__(self, descriptor, widths, default_width=None):
         self.descriptor = descriptor
@@ -499,7 +492,6 @@ class PDFFont(object):
         return sum( self.char_width(cid) for cid in self.decode(s) )
 
 
-# PDFSimpleFont
 class PDFSimpleFont(PDFFont):
 
     def __init__(self, descriptor, widths, spec):
@@ -535,7 +527,6 @@ class PDFSimpleFont(PDFFont):
         except KeyError:
             raise PDFUnicodeNotDefined(None, cid)
 
-# PDFType1Font
 class PDFType1Font(PDFSimpleFont):
 
     def __init__(self, rsrcmgr, spec):
@@ -566,13 +557,11 @@ class PDFType1Font(PDFSimpleFont):
     def __repr__(self):
         return '<PDFType1Font: basefont=%r>' % self.basefont
 
-# PDFTrueTypeFont
 class PDFTrueTypeFont(PDFType1Font):
 
     def __repr__(self):
         return '<PDFTrueTypeFont: basefont=%r>' % self.basefont
 
-# PDFType3Font
 class PDFType3Font(PDFSimpleFont):
 
     def __init__(self, rsrcmgr, spec):
@@ -595,7 +584,6 @@ class PDFType3Font(PDFSimpleFont):
         return '<PDFType3Font>'
 
 
-# PDFCIDFont
 class PDFCIDFont(PDFFont):
 
     def __init__(self, rsrcmgr, spec):
@@ -690,7 +678,6 @@ class PDFCIDFont(PDFFont):
             raise PDFUnicodeNotDefined(self.cidcoding, cid)
 
 
-# main
 def main(argv):
     for fname in argv[1:]:
         fp = io.open(fname, 'rb')
@@ -700,4 +687,5 @@ def main(argv):
         fp.close()
     return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

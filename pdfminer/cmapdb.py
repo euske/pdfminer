@@ -12,7 +12,6 @@ More information is available on the Adobe website:
 """
 
 import sys
-import re
 import os
 import os.path
 import gzip
@@ -20,9 +19,9 @@ import pickle as pickle
 from . import cmap
 import struct
 from .psparser import PSStackParser
-from .psparser import PSException, PSSyntaxError, PSTypeError, PSEOF
-from .psparser import PSLiteral, PSKeyword
-from .psparser import literal_name, keyword_name
+from .psparser import PSSyntaxError, PSEOF
+from .psparser import PSLiteral
+from .psparser import literal_name
 from .encodingdb import name2unicode
 from .utils import choplist, nunpack
 
@@ -30,9 +29,7 @@ from .utils import choplist, nunpack
 class CMapError(Exception): pass
 
 
-##  CMap
-##
-class CMap(object):
+class CMap:
 
     debug = 0
 
@@ -84,9 +81,7 @@ class CMap(object):
         return
     
 
-##  IdentityCMap
-##
-class IdentityCMap(object):
+class IdentityCMap:
 
     def __init__(self, vertical):
         self.vertical = vertical
@@ -106,9 +101,7 @@ class IdentityCMap(object):
         
             
 
-##  UnicodeMap
-##
-class UnicodeMap(object):
+class UnicodeMap:
 
     debug = 0
 
@@ -127,8 +120,6 @@ class UnicodeMap(object):
         return
 
 
-##  FileCMap
-##
 class FileCMap(CMap):
 
     def __init__(self):
@@ -162,8 +153,6 @@ class FileCMap(CMap):
         return
 
 
-##  FileUnicodeMap
-##
 class FileUnicodeMap(UnicodeMap):
     
     def __init__(self):
@@ -196,8 +185,6 @@ class FileUnicodeMap(UnicodeMap):
         return
 
 
-##  PyCMap
-##
 class PyCMap(CMap):
 
     def __init__(self, name, module):
@@ -213,8 +200,6 @@ class PyCMap(CMap):
         return self._is_vertical
     
 
-##  PyUnicodeMap
-##
 class PyUnicodeMap(UnicodeMap):
     
     def __init__(self, name, module, vertical):
@@ -230,9 +215,7 @@ class PyUnicodeMap(UnicodeMap):
         return '<PyUnicodeMap: %s>' % (self.name)
 
 
-##  CMapDB
-##
-class CMapDB(object):
+class CMapDB:
 
     debug = 0
     _cmap_cache = {}
@@ -282,8 +265,6 @@ class CMapDB(object):
         return umaps[vertical]
 
 
-##  CMapParser
-##
 class CMapParser(PSStackParser):
 
     def __init__(self, cmap, fp):
@@ -420,7 +401,7 @@ class CMapParser(PSStackParser):
 def main(argv):
     args = argv[1:]
     for fname in args:
-        fp = file(fname, 'rb')
+        fp = open(fname, 'rb')
         cmap = FileUnicodeMap()
         #cmap = FileCMap()
         CMapParser(cmap, fp).run()
@@ -428,4 +409,5 @@ def main(argv):
         cmap.dump()
     return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

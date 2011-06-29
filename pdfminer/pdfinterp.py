@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 import io
 import re
@@ -39,9 +38,7 @@ LITERAL_FORM = LIT('Form')
 LITERAL_IMAGE = LIT('Image')
 
 
-##  PDFTextState
-##
-class PDFTextState(object):
+class PDFTextState:
 
     def __init__(self):
         self.font = None
@@ -85,9 +82,7 @@ class PDFTextState(object):
         return
 
 
-##  PDFGraphicState
-##
-class PDFGraphicState(object):
+class PDFGraphicState:
 
     def __init__(self):
         self.linewidth = 0
@@ -116,9 +111,7 @@ class PDFGraphicState(object):
                 (self.linewidth, self.linecap, self.linejoin,
                  self.miterlimit, self.dash, self.intent, self.flatness))
 
-##  Resource Manager
-##
-class PDFResourceManager(object):
+class PDFResourceManager:
 
     """Repository of shared resources.
     
@@ -197,8 +190,6 @@ class PDFResourceManager(object):
         return font
 
 
-##  PDFContentParser
-##
 class PDFContentParser(PSStackParser):
 
     def __init__(self, streams):
@@ -291,9 +282,7 @@ class PDFContentParser(PSStackParser):
         return
 
 
-##  Interpreter
-##
-class PDFPageInterpreter(object):
+class PDFPageInterpreter:
 
     debug = 0
 
@@ -802,8 +791,6 @@ class PDFPageInterpreter(object):
         return
 
 
-##  process_pdf
-##
 class PDFTextExtractionNotAllowed(PDFInterpreterError): pass
 
 def process_pdf(rsrcmgr, device, fp, pagenos=None, maxpages=0, password='',

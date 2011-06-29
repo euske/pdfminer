@@ -1,14 +1,10 @@
-#!/usr/bin/env python3
-
 import sys
 from .utils import mult_matrix, translate_matrix
 from .utils import htmlescape, bbox2str
 from .pdffont import PDFUnicodeNotDefined
 
 
-##  PDFDevice
-##
-class PDFDevice(object):
+class PDFDevice:
 
     debug = 0
 
@@ -51,8 +47,6 @@ class PDFDevice(object):
         return
 
 
-##  PDFTextDevice
-##
 class PDFTextDevice(PDFDevice):
 
     def render_string(self, textstate, seq):
@@ -118,8 +112,6 @@ class PDFTextDevice(PDFDevice):
         return 0
 
 
-##  TagExtractor
-##
 class TagExtractor(PDFDevice):
 
     def __init__(self, rsrcmgr, outfp, debug=0):

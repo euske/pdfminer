@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 import sys
 from .utils import INF, Plane, get_bound, uniq, csort, fsplit
 from .utils import bbox2str, matrix2str, apply_matrix_pt
 
 
-##  IndexAssigner
-##
-class IndexAssigner(object):
+class IndexAssigner:
 
     def __init__(self, index=0):
         self.index = index
@@ -22,18 +19,10 @@ class IndexAssigner(object):
         return
 
 
-##  LAParams
-##
-class LAParams(object):
+class LAParams:
 
-    def __init__(self,
-                 line_overlap=0.5,
-                 char_margin=2.0,
-                 line_margin=0.5,
-                 word_margin=0.1,
-                 boxes_flow=0.5,
-                 detect_vertical=False,
-                 all_texts=False):
+    def __init__(self, line_overlap=0.5, char_margin=2.0, line_margin=0.5, word_margin=0.1,
+            boxes_flow=0.5, detect_vertical=False, all_texts=False):
         self.line_overlap = line_overlap
         self.char_margin = char_margin
         self.line_margin = line_margin
@@ -48,18 +37,14 @@ class LAParams(object):
                 (self.char_margin, self.line_margin, self.word_margin, self.all_texts))
 
 
-##  LTItem
-##
-class LTItem(object):
+class LTItem:
 
     def analyze(self, laparams):
         """Perform the layout analysis."""
         return
 
 
-##  LTText
-##
-class LTText(object):
+class LTText:
 
     def __repr__(self):
         return ('<%s %r>' %
@@ -69,8 +54,6 @@ class LTText(object):
         raise NotImplementedError
 
 
-##  LTComponent
-##
 class LTComponent(LTItem):
 
     def __init__(self, bbox):
@@ -133,8 +116,6 @@ class LTComponent(LTItem):
             return 0
 
 
-##  LTCurve
-##
 class LTCurve(LTComponent):
 
     def __init__(self, linewidth, pts):
@@ -147,8 +128,6 @@ class LTCurve(LTComponent):
         return ','.join( '%.3f,%.3f' % p for p in self.pts )
 
 
-##  LTLine
-##
 class LTLine(LTCurve):
 
     def __init__(self, linewidth, p0, p1):
@@ -156,8 +135,6 @@ class LTLine(LTCurve):
         return
 
 
-##  LTRect
-##
 class LTRect(LTCurve):
 
     def __init__(self, linewidth, rect):
@@ -166,8 +143,6 @@ class LTRect(LTCurve):
         return
 
 
-##  LTImage
-##
 class LTImage(LTComponent):
 
     def __init__(self, name, stream, bbox):
@@ -189,8 +164,6 @@ class LTImage(LTComponent):
                  bbox2str(self.bbox), self.srcsize))
 
 
-##  LTAnon
-##
 class LTAnon(LTItem, LTText):
 
     def __init__(self, text):
@@ -201,8 +174,6 @@ class LTAnon(LTItem, LTText):
         return self._text
 
 
-##  LTChar
-##
 class LTChar(LTComponent, LTText):
 
     def __init__(self, matrix, font, fontsize, scaling, rise, text, textwidth, textdisp):
@@ -261,8 +232,6 @@ class LTChar(LTComponent, LTText):
         return True
 
     
-##  LTContainer
-##
 class LTContainer(LTComponent):
 
     def __init__(self, bbox):
@@ -291,8 +260,6 @@ class LTContainer(LTComponent):
         return
     
 
-##  LTExpandableContainer
-##
 class LTExpandableContainer(LTContainer):
 
     def __init__(self):
@@ -306,8 +273,6 @@ class LTExpandableContainer(LTContainer):
         return
 
 
-##  LTTextContainer
-##
 class LTTextContainer(LTExpandableContainer, LTText):
 
     def __init__(self):
@@ -319,8 +284,6 @@ class LTTextContainer(LTExpandableContainer, LTText):
         return ''.join( obj.get_text() for obj in self if isinstance(obj, LTText) )
     
 
-##  LTTextLine
-##
 class LTTextLine(LTTextContainer):
 
     def __init__(self, word_margin):
@@ -384,11 +347,9 @@ class LTTextLineVertical(LTTextLine):
         return [ obj for obj in objs if isinstance(obj, LTTextLineVertical) ]
     
 
-##  LTTextBox
-##
 ##  A set of text objects that are grouped within
 ##  a certain rectangular area.
-##
+
 class LTTextBox(LTTextContainer):
 
     def __init__(self):
@@ -422,8 +383,6 @@ class LTTextBoxVertical(LTTextBox):
         return 'tb-rl'
 
 
-##  LTTextGroup
-##
 class LTTextGroup(LTTextContainer):
 
     def __init__(self, objs):
@@ -452,8 +411,6 @@ class LTTextGroupTBRL(LTTextGroup):
         return
 
 
-##  LTLayoutContainer
-##
 class LTLayoutContainer(LTContainer):
 
     def __init__(self, bbox):
@@ -643,8 +600,6 @@ class LTLayoutContainer(LTContainer):
         return
 
 
-##  LTFigure
-##
 class LTFigure(LTLayoutContainer):
 
     def __init__(self, name, bbox, matrix):
@@ -667,8 +622,6 @@ class LTFigure(LTLayoutContainer):
         return 
 
 
-##  LTPage
-##
 class LTPage(LTLayoutContainer):
 
     def __init__(self, pageid, bbox, rotate=0):

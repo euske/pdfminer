@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 import re
 from .utils import choplist
@@ -18,17 +17,11 @@ class PSValueError(PSException): pass
 ##  Basic PostScript Types
 ##
 
-##  PSObject
-##
-class PSObject(object):
+class PSObject:
 
     """Base class for all PS or PDF-related data types."""
 
-    pass
 
-
-##  PSLiteral
-##
 class PSLiteral(PSObject):
 
     """A class that represents a PostScript literal.
@@ -50,8 +43,6 @@ class PSLiteral(PSObject):
         return '/%s' % self.name
 
 
-##  PSKeyword
-##
 class PSKeyword(PSObject):
 
     """A class that represents a PostScript keyword.
@@ -72,9 +63,7 @@ class PSKeyword(PSObject):
         return self.name
 
 
-##  PSSymbolTable
-##
-class PSSymbolTable(object):
+class PSSymbolTable:
 
     """A utility class for storing PSLiteral/PSKeyword objects.
 
@@ -123,8 +112,6 @@ def keyword_name(x):
     return x.name
 
 
-##  PSBaseParser
-##
 ##  About PSParser, bytes and strings and all that
 ##  
 ##  Most of the contents (well, maybe not in size, but in "parsing effort") of a PDF file is text,
@@ -147,7 +134,7 @@ END_KEYWORD = re.compile(r'[#/%\[\]()<>{}\s]')
 END_STRING = re.compile(r'[()\134]')
 OCT_STRING = re.compile(r'[0-7]')
 ESC_STRING = { 'b':8, 't':9, 'n':10, 'f':12, 'r':13, '(':40, ')':41, '\\':92 }
-class PSBaseParser(object):
+class PSBaseParser:
 
     """Most basic PostScript parser that performs only tokenization.
     """
@@ -492,8 +479,6 @@ class PSBaseParser(object):
         return token
 
 
-##  PSStackParser
-##
 class PSStackParser(PSBaseParser):
 
     def __init__(self, fp):

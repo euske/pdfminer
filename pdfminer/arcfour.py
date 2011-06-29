@@ -6,7 +6,7 @@ This code is in the public domain.
 
 """
 
-class Arcfour(object):
+class Arcfour:
     def __init__(self, key):
         s = list(range(256))
         j = 0

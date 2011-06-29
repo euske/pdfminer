@@ -71,9 +71,7 @@ def convert(infp, outfp, path, codec='utf-8',
     return
 
 
-##  WebApp
-##
-class WebApp(object):
+class WebApp:
 
     TITLE = 'pdf2html demo'
     MAXFILESIZE = 10000000             # set to zero if unlimited.
@@ -190,7 +188,7 @@ class WebApp(object):
             try:
                 convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
                         maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
-            except Exception, e:
+            except Exception as e:
                 self.put('<p>Sorry, an error has occured: %s' % q(repr(e)))
                 self.logger.error('convert: %r: path=%r: %s' % (e, traceback.format_exc()))
         finally:

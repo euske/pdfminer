@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import io
 import re
@@ -36,9 +34,7 @@ LITERAL_PAGES = LIT('Pages')
 LITERAL_CATALOG = LIT('Catalog')
 
 
-##  XRefs
-##
-class PDFBaseXRef(object):
+class PDFBaseXRef:
 
     def get_trailer(self):
         raise NotImplementedError
@@ -50,8 +46,6 @@ class PDFBaseXRef(object):
         raise KeyError(objid)
 
 
-##  PDFXRef
-##
 class PDFXRef(PDFBaseXRef):
     
     def __init__(self):
@@ -142,8 +136,6 @@ class PDFXRef(PDFBaseXRef):
         return (None, pos)
 
 
-##  PDFXRefStream
-##
 class PDFXRefStream(PDFBaseXRef):
 
     def __init__(self):
@@ -214,9 +206,7 @@ class PDFXRefStream(PDFBaseXRef):
         raise KeyError(objid)
 
 
-##  PDFPage
-##
-class PDFPage(object):
+class PDFPage:
 
     """An object that holds the information about a page.
 
@@ -271,9 +261,7 @@ class PDFPage(object):
         return '<PDFPage: Resources=%r, MediaBox=%r>' % (self.resources, self.mediabox)
 
 
-##  PDFDocument
-##
-class PDFDocument(object):
+class PDFDocument:
 
     """PDFDocument object represents a PDF document.
 
@@ -573,8 +561,6 @@ class PDFDocument(object):
         return obj
 
 
-##  PDFParser
-##
 class PDFParser(PSStackParser):
 
     """
@@ -751,8 +737,6 @@ class PDFParser(PSStackParser):
         return xrefs
 
 
-##  PDFStreamParser
-##
 class PDFStreamParser(PDFParser):
 
     """

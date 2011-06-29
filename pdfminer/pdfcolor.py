@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from .psparser import LIT
 
 
@@ -8,7 +7,7 @@ LITERAL_DEVICE_GRAY = LIT('DeviceGray')
 LITERAL_DEVICE_RGB = LIT('DeviceRGB')
 LITERAL_DEVICE_CMYK = LIT('DeviceCMYK')
 
-class PDFColorSpace(object):
+class PDFColorSpace:
 
     def __init__(self, name, ncomponents):
         self.name = name

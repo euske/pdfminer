@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-
 import sys
 import io
 
-##  LZWDecoder
-##
-class LZWDecoder(object):
+class LZWDecoder:
 
     debug = 0
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ Python implementation of Rijndael encryption algorithm.
 
 This code is in the public domain.
@@ -1031,7 +1029,7 @@ def rijndaelDecrypt(rk, nrounds, ciphertext):
 
 
 # decrypt(key, fin, fout, keybits=256)
-class RijndaelDecryptor(object):
+class RijndaelDecryptor:
     def __init__(self, key, keybits=256):
         assert len(key) == KEYLENGTH(keybits)
         (self.rk, self.nrounds) = rijndaelSetupDecrypt(key, keybits)
@@ -1044,7 +1042,7 @@ class RijndaelDecryptor(object):
         return rijndaelDecrypt(self.rk, self.nrounds, ciphertext)
 
 # encrypt(key, fin, fout, keybits=256)
-class RijndaelEncryptor(object):
+class RijndaelEncryptor:
     def __init__(self, key, keybits=256):
         assert len(key) == KEYLENGTH(keybits)
         (self.rk, self.nrounds) = rijndaelSetupEncrypt(key, keybits)

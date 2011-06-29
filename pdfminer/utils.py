@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Miscellaneous Routines.
-"""
 import struct
 from sys import maxsize as INF
 
@@ -230,9 +226,7 @@ def matrix2str(matrix):
     return '[%.2f,%.2f,%.2f,%.2f, (%.2f,%.2f)]' % (a,b,c,d,e,f)
 
 
-##  ObjIdRange
-##
-class ObjIdRange(object):
+class ObjIdRange:
 
     "A utility class to represent a range of object IDs."
     
@@ -261,7 +255,7 @@ class ObjIdRange(object):
 ##  It maintains two parallel lists of objects, each of
 ##  which is sorted by its x or y coordinate.
 ##
-class Plane(object):
+class Plane:
 
     def __init__(self, objs=None, gridsize=50):
         self._objs = []

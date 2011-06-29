@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 import re
 from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
 
 
-##  name2unicode
-##
 STRIP_NAME = re.compile(r'[0-9]+')
 def name2unicode(name):
     """Converts Adobe glyph names to Unicode numbers."""
@@ -17,9 +14,7 @@ def name2unicode(name):
     return chr(int(m.group(0)))
 
 
-##  EncodingDB
-##
-class EncodingDB(object):
+class EncodingDB:
 
     std2unicode = {}
     mac2unicode = {}
