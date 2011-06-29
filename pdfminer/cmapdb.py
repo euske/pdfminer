@@ -186,10 +186,13 @@ class FileUnicodeMap(UnicodeMap):
         elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
             self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
+        elif isinstance(code, str):
+            # We sometimes get nullchars in there
+            self.cid2unichr[cid] = code.replace('\0', '')
         elif isinstance(code, int):
             self.cid2unichr[cid] = chr(code)
         else:
-            raise TypeError(code)
+            raise TypeError(repr(code))
         return
 
 
@@ -371,7 +374,9 @@ class CMapParser(PSStackParser):
             objs = [ obj for (_,obj) in self.popall() ]
             # These objects were hex numbers and have been parsed into a string. But what we want
             # are bytes. Convert them.
-            objs = [o.encode('ascii') for o in objs]
+            # Oh wait, it seems that sometimes we have bytes...
+            tobytes = lambda o: (o.encode('ascii') if isinstance(o, str) else o)
+            objs = [tobytes(o) for o in objs]
             for (s,e,code) in choplist(3, objs):
                 if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                     len(s) != len(e)): continue
