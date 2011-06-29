@@ -1,5 +1,5 @@
 import sys
-from .utils import INF, Plane, get_bound, uniq, csort, fsplit
+from .utils import INF, Plane, get_bound, uniq, fsplit
 from .utils import bbox2str, matrix2str, apply_matrix_pt
 
 
@@ -339,7 +339,7 @@ class LTTextBoxHorizontal(LTTextBox):
     
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
-        self._objs = csort(self._objs, key=lambda obj: -obj.y1)
+        self._objs = sorted(self._objs, key=lambda obj: -obj.y1)
 
     def get_writing_mode(self):
         return 'lr-tb'
@@ -348,7 +348,7 @@ class LTTextBoxVertical(LTTextBox):
 
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
-        self._objs = csort(self._objs, key=lambda obj: -obj.x1)
+        self._objs = sorted(self._objs, key=lambda obj: -obj.x1)
 
     def get_writing_mode(self):
         return 'tb-rl'
@@ -365,7 +365,7 @@ class LTTextGroupLRTB(LTTextGroup):
     def analyze(self, laparams):
         LTTextGroup.analyze(self, laparams)
         # reorder the objects from top-left to bottom-right.
-        self._objs = csort(self._objs, key=lambda obj:
+        self._objs = sorted(self._objs, key=lambda obj:
                            (1-laparams.boxes_flow)*(obj.x0) -
                            (1+laparams.boxes_flow)*(obj.y0+obj.y1))
 
@@ -374,7 +374,7 @@ class LTTextGroupTBRL(LTTextGroup):
     def analyze(self, laparams):
         LTTextGroup.analyze(self, laparams)
         # reorder the objects from top-right to bottom-left.
-        self._objs = csort(self._objs, key=lambda obj:
+        self._objs = sorted(self._objs, key=lambda obj:
                            -(1+laparams.boxes_flow)*(obj.x0+obj.x1)
                            -(1-laparams.boxes_flow)*(obj.y1))
 

@@ -93,12 +93,6 @@ def uniq(objs):
         done.add(obj)
         yield obj
 
-# csort
-def csort(objs, key=lambda x:x):
-    """Order-preserving sorting function."""
-    idxs = dict( (obj,i) for (i,obj) in enumerate(objs) )
-    return sorted(objs, key=lambda obj: (key(obj), idxs[obj]))
-
 # fsplit
 def fsplit(pred, objs):
     """Split a list into two classes according to the predicate."""
