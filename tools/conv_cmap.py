@@ -41,7 +41,6 @@ def process_cid2code(fp, check_codecs=[]):
         b = code[-1]
         if force or ((b not in dmap) or dmap[b] == cid):
             dmap[b] = cid
-        return
 
     names = []
     code2cid = {} # {'cmapname': ...}

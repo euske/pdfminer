@@ -82,7 +82,6 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         status = app.setup()
         self.send_response(status, responses[status])
         app.run()
-        return
 
 # main
 def main(argv):
@@ -108,6 +107,5 @@ def main(argv):
     print('Listening %s:%d...' % (host,port))
     httpd = HTTPServer((host,port), WebAppHandler)
     httpd.serve_forever()
-    return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

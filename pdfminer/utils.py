@@ -92,7 +92,6 @@ def uniq(objs):
         if obj in done: continue
         done.add(obj)
         yield obj
-    return
 
 # csort
 def csort(objs, key=lambda x:x):
@@ -148,7 +147,6 @@ def choplist(n, seq):
         if len(r) == n:
             yield tuple(r)
             r = []
-    return
 
 # nunpack
 def nunpack(s, default=0):
@@ -233,7 +231,6 @@ class ObjIdRange:
     def __init__(self, start, nobjs):
         self.start = start
         self.nobjs = nobjs
-        return
 
     def __repr__(self):
         return '<ObjIdRange: %d-%d>' % (self.get_start_id(), self.get_end_id())
@@ -264,7 +261,6 @@ class Plane:
         if objs is not None:
             for obj in objs:
                 self.add(obj)
-        return
 
     def __repr__(self):
         return ('<Plane objs=%r>' % list(self))
@@ -283,7 +279,6 @@ class Plane:
         for y in drange(y0, y1, self.gridsize):
             for x in drange(x0, x1, self.gridsize):
                 yield (x,y)
-        return
     
     # add(obj): place an object.
     def add(self, obj):
@@ -295,7 +290,6 @@ class Plane:
                 r = self._grid[k]
             r.append(obj)
         self._objs.append(obj)
-        return
 
     # remove(obj): displace an object.
     def remove(self, obj):
@@ -305,7 +299,6 @@ class Plane:
             except (KeyError, ValueError):
                 pass
         self._objs.remove(obj)
-        return
 
     # find(): finds objects that are in a certain area.
     def find(self, area):
@@ -319,7 +312,6 @@ class Plane:
                 if (obj.x1 <= x0 or x1 <= obj.x0 or
                     obj.y1 <= y0 or y1 <= obj.y0): continue
                 yield obj
-        return
 
 
 # create_bmp

@@ -51,7 +51,6 @@ class PDFXRef(PDFBaseXRef):
     def __init__(self):
         self.offsets = {}
         self.trailer = {}
-        return
 
     def load(self, parser, debug=0):
         while 1:
@@ -86,7 +85,6 @@ class PDFXRef(PDFBaseXRef):
         if 1 <= debug:
             print('xref objects:', self.offsets, file=sys.stderr)
         self.load_trailer(parser)
-        return
 
     KEYWORD_TRAILER = KWD('trailer')
     def load_trailer(self, parser):
@@ -100,7 +98,6 @@ class PDFXRef(PDFBaseXRef):
                 raise PDFNoValidXRef('Unexpected EOF - file corrupted')
             (_,dic) = x[0]
         self.trailer.update(dict_value(dic))
-        return
 
     PDFOBJ_CUE = re.compile(r'^(\d+)\s+(\d+)\s+obj\b')
     def load_fallback(self, parser, debug=0):
@@ -120,7 +117,6 @@ class PDFXRef(PDFBaseXRef):
             if not m: continue
             (objid, genno) = m.groups()
             self.offsets[int(objid)] = (0, pos)
-        return
 
     def get_trailer(self):
         return self.trailer
@@ -143,7 +139,6 @@ class PDFXRefStream(PDFBaseXRef):
         self.entlen = None
         self.fl1 = self.fl2 = self.fl3 = None
         self.objid_ranges = []
-        return
 
     def __repr__(self):
         return '<PDFXRefStream: fields=%d,%d,%d>' % (self.fl1, self.fl2, self.fl3)
@@ -169,7 +164,6 @@ class PDFXRefStream(PDFBaseXRef):
             print(('xref stream: objid=%s, fields=%d,%d,%d' %
                              (', '.join(map(repr, self.objid_ranges)),
                               self.fl1, self.fl2, self.fl3)), file=sys.stderr)
-        return
 
     def get_trailer(self):
         return self.trailer
@@ -178,7 +172,6 @@ class PDFXRefStream(PDFBaseXRef):
         for objid_range in self.objid_ranges:
             for x in range(objid_range.get_start_id(), objid_range.get_end_id()+1):
                 yield x
-        return
 
     def get_pos(self, objid):
         offset = 0
@@ -255,7 +248,6 @@ class PDFPage:
         if not isinstance(contents, list):
             contents = [ contents ]
         self.contents = contents
-        return
 
     def __repr__(self):
         return '<PDFPage: Resources=%r, MediaBox=%r>' % (self.resources, self.mediabox)
@@ -289,11 +281,11 @@ class PDFDocument:
         self._parser = None
         self._cached_objs = {}
         self._parsed_objs = {}
-        return
 
     def set_parser(self, parser):
         "Set the document to use a given PDFParser object."
-        if self._parser: return
+        if self._parser:
+            return
         self._parser = parser
         # Retrieve the information of each header that was appended
         # (maybe multiple times) at the end of the document.
@@ -317,7 +309,6 @@ class PDFDocument:
         if self.catalog.get('Type') is not LITERAL_CATALOG:
             if STRICT:
                 raise PDFSyntaxError('Catalog not found!')
-        return
 
     # initialize(password='')
     #   Perform the initialization with a given password.
@@ -380,7 +371,6 @@ class PDFDocument:
             raise PDFPasswordIncorrect
         self.decrypt_key = key
         self.decipher = self.decrypt_rc4  # XXX may be AES
-        return
 
     def decrypt_rc4(self, objid, genno, data):
         key = self.decrypt_key + struct.pack('<L',objid)[:3]+struct.pack('<L',genno)[:2]
@@ -498,10 +488,10 @@ class PDFDocument:
                 if 1 <= self.debug:
                     print('Page: %r' % tree, file=sys.stderr)
                 yield (objid, tree)
-        if 'Pages' not in self.catalog: return
+        if 'Pages' not in self.catalog:
+            return
         for (pageid,tree) in search(self.catalog['Pages'], self.catalog):
             yield PDFPage(self, pageid, tree)
-        return
 
     def get_outlines(self):
         if 'Outlines' not in self.catalog:
@@ -521,7 +511,6 @@ class PDFDocument:
             if 'Next' in entry:
                 for x in search(entry['Next'], level):
                     yield x
-            return
         return search(self.catalog['Outlines'], 0)
 
     def lookup_name(self, cat, key):
@@ -582,12 +571,10 @@ class PDFParser(PSStackParser):
         PSStackParser.__init__(self, fp)
         self.doc = None
         self.fallback = False
-        return
 
     def set_document(self, doc):
         """Associates the parser with a PDFDocument object."""
         self.doc = doc
-        return
 
     KEYWORD_R = KWD('R')
     KEYWORD_NULL = KWD('null')
@@ -665,7 +652,6 @@ class PDFParser(PSStackParser):
             # others
             self.push((pos, token))
         
-        return
 
     def find_xref(self):
         """Internal function used to locate the first XRef."""
@@ -717,7 +703,6 @@ class PDFParser(PSStackParser):
             # find previous xref
             pos = int_value(trailer['Prev'])
             self.read_xref_from(pos, xrefs)
-        return
 
     # read xref tables and trailers
     def read_xref(self):
@@ -749,11 +734,9 @@ class PDFStreamParser(PDFParser):
 
     def __init__(self, data):
         PDFParser.__init__(self, io.StringIO(data))
-        return
 
     def flush(self):
         self.add_results(*self.popall())
-        return
 
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_R:
@@ -768,4 +751,3 @@ class PDFStreamParser(PDFParser):
             return
         # others
         self.push((pos, token))
-        return

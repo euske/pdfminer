@@ -12,7 +12,6 @@ class PDFColorSpace:
     def __init__(self, name, ncomponents):
         self.name = name
         self.ncomponents = ncomponents
-        return
 
     def __repr__(self):
         return '<PDFColorSpace: %s, ncomponents=%d>' % (self.name, self.ncomponents)

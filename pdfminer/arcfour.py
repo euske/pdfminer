@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """ Python implementation of Arcfour encryption algorithm.
 
 This code is in the public domain.
@@ -16,7 +14,6 @@ class Arcfour:
             (s[i], s[j]) = (s[j], s[i])
         self.s = s
         (self.i, self.j) = (0, 0)
-        return
 
     def process(self, data):
         (i, j) = (self.i, self.j)

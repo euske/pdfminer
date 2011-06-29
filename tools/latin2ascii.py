@@ -125,6 +125,6 @@ def main(argv):
     for line in fileinput.input(args):
         line = latin2ascii(str(line, codec, 'ignore'))
         sys.stdout.write(line.encode('ascii', 'replace'))
-    return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

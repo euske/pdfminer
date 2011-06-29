@@ -84,7 +84,6 @@ def dumptrailers(out, doc):
         out.write('<trailer>\n')
         dumpxml(out, xref.trailer)
         out.write('\n</trailer>\n\n')
-    return
 
 # dumpallobjs
 def dumpallobjs(out, doc, codec=None):
@@ -101,7 +100,6 @@ def dumpallobjs(out, doc, codec=None):
                 raise
     dumptrailers(out, doc)
     out.write('</pdf>')
-    return
 
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password='',
@@ -150,7 +148,6 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
         pass
     parser.close()
     fp.close()
-    return
 
 # dumppdf
 def dumppdf(outfp, fname, objids, pagenos, password='',
@@ -181,7 +178,6 @@ def dumppdf(outfp, fname, objids, pagenos, password='',
     fp.close()
     if codec not in ('raw','binary'):
         outfp.write('\n')
-    return
 
 
 # main
@@ -221,6 +217,6 @@ def main(argv):
     for fname in args:
         proc(outfp, fname, objids, pagenos, password=password,
              dumpall=dumpall, codec=codec)
-    return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

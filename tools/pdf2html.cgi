@@ -68,7 +68,6 @@ def convert(infp, outfp, path, codec='utf-8',
     fp = file(path, 'rb')
     process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages)
     fp.close()
-    return
 
 
 class WebApp:
@@ -91,7 +90,6 @@ class WebApp:
         self.tmpdir = self.environ.get('TEMP', './var/')
         self.content_type = 'text/html; charset=%s' % codec
         self.logger = logging.getLogger()
-        return
 
     def put(self, *args):
         for x in args:
@@ -99,7 +97,6 @@ class WebApp:
                 self.outfp.write(x)
             elif isinstance(x, unicode):
                 self.outfp.write(x.encode(self.codec, 'xmlcharrefreplace'))
-        return
 
     def response_200(self):
         if self.server.startswith('cgi-httpd'):
@@ -107,7 +104,6 @@ class WebApp:
             self.outfp.write('HTTP/1.0 200 OK\r\n')
         self.outfp.write('Content-type: %s\r\n' % self.content_type)
         self.outfp.write('Connection: close\r\n\r\n')
-        return
 
     def response_404(self):
         if self.server.startswith('cgi-httpd'):
@@ -116,14 +112,12 @@ class WebApp:
         self.outfp.write('Content-type: text/html\r\n')
         self.outfp.write('Connection: close\r\n\r\n')
         self.outfp.write('<html><body>page does not exist</body></body>\n')
-        return
 
     def response_301(self, url):
         if self.server.startswith('cgi-httpd'):
             # required for cgi-httpd
             self.outfp.write('HTTP/1.0 301 Moved\r\n')
         self.outfp.write('Location: %s\r\n\r\n' % url)
-        return
 
     def coverpage(self):
         self.put(
@@ -142,7 +136,6 @@ class WebApp:
           '<p>Powered by <a href="http://www.unixuser.org/~euske/python/pdfminer/">PDFMiner</a>-%s\n' % pdfminer.__version__,
           '</body></html>\n',
           )
-        return
 
     def setup(self):
         self.run = self.response_404
@@ -196,7 +189,6 @@ class WebApp:
                 os.remove(tmppath)
             except:
                 pass
-        return
 
 
 # main
