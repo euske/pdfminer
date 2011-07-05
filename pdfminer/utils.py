@@ -143,19 +143,21 @@ def choplist(n, seq):
             r = []
 
 # nunpack
-def nunpack(s, default=0):
+def nunpack(b, default=0):
     """Unpacks 1 to 4 byte integers (big endian)."""
-    l = len(s)
+    if isinstance(b, str):
+        b = b.encode('latin-1')
+    l = len(b)
     if not l:
         return default
     elif l == 1:
-        return ord(s)
+        return b[0]
     elif l == 2:
-        return struct.unpack(b'>H', s)[0]
+        return struct.unpack(b'>H', b)[0]
     elif l == 3:
-        return struct.unpack(b'>L', b'\x00'+s)[0]
+        return struct.unpack(b'>L', b'\x00'+b)[0]
     elif l == 4:
-        return struct.unpack(b'>L', s)[0]
+        return struct.unpack(b'>L', b)[0]
     else:
         raise TypeError('invalid length: %d' % l)
 

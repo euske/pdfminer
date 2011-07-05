@@ -1,6 +1,8 @@
 # test for support units around pdfminer
 
-from pdfminer import arcfour, ascii85, lzw, rijndael, runlength
+from pytest import raises
+
+from pdfminer import arcfour, ascii85, lzw, rijndael, runlength, utils
 from .util import eq_
 
 def test_arcfour():
@@ -35,3 +37,14 @@ def test_RijndaelEncryptor():
 def test_rldecode():
     s = "\x05123456\xfa7\x04abcde\x80junk"
     eq_(runlength.rldecode(s), '1234567777777abcde')
+
+def test_nunpack():
+    eq_(utils.nunpack(b'\x42'), 0x42)
+    eq_(utils.nunpack(b'\x41\x42'), 0x4142)
+    eq_(utils.nunpack(b'\x40\x41\x42'), 0x404142)
+    eq_(utils.nunpack(b'\x39\x40\x41\x42'), 0x39404142)
+    eq_(utils.nunpack(b'', default=42), 42)
+    with raises(TypeError):
+        utils.nunpack(b'\x42\x42\x42\x42\x42')
+    # strings are correctly converted to bytes
+    eq_(utils.nunpack('\x42\xfc'), 0x42fc)
