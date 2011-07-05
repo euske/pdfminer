@@ -1,4 +1,3 @@
-import sys
 from .utils import INF, Plane, get_bound, uniq, fsplit
 from .utils import bbox2str, matrix2str, apply_matrix_pt
 

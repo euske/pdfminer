@@ -3,15 +3,9 @@ import io
 import re
 import struct
 import hashlib as md5
-from .psparser import PSStackParser
-from .psparser import PSSyntaxError, PSEOF
-from .psparser import literal_name
-from .psparser import LIT, KWD, STRICT
-from .pdftypes import PDFException, PDFTypeError, PDFNotImplementedError
-from .pdftypes import PDFStream, PDFObjRef
-from .pdftypes import resolve1, decipher_all
-from .pdftypes import int_value, float_value, num_value
-from .pdftypes import str_value, list_value, dict_value, stream_value
+from .psparser import PSStackParser, PSSyntaxError, PSEOF, literal_name, LIT, KWD, STRICT
+from .pdftypes import (PDFException, PDFTypeError, PDFNotImplementedError, PDFStream, PDFObjRef,
+    resolve1, decipher_all, int_value, str_value, list_value, dict_value, stream_value)
 from .arcfour import Arcfour
 from .utils import choplist, nunpack
 from .utils import decode_text, ObjIdRange

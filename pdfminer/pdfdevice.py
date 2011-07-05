@@ -72,7 +72,7 @@ class PDFTextDevice(PDFDevice):
         (x,y) = point
         needcharspace = False
         for obj in seq:
-            if isinstance(obj, int) or isinstance(obj, float):
+            if isinstance(obj, (int, float)):
                 x -= obj*dxscale
                 needcharspace = True
             else:
@@ -91,7 +91,7 @@ class PDFTextDevice(PDFDevice):
         (x,y) = point
         needcharspace = False
         for obj in seq:
-            if isinstance(obj, int) or isinstance(obj, float):
+            if isinstance(obj, (int, float)):
                 y -= obj*dxscale
                 needcharspace = True
             else:
@@ -122,7 +122,8 @@ class TagExtractor(PDFDevice):
         font = textstate.font
         text = ''
         for obj in seq:
-            if not isinstance(obj, str): continue
+            if not isinstance(obj, str):
+                continue
             chars = font.decode(obj)
             for cid in chars:
                 try:

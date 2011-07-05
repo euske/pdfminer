@@ -2,23 +2,15 @@ import sys
 import io
 import re
 from .cmapdb import CMapDB, CMap
-from .psparser import PSException, PSTypeError, PSEOF
+from .psparser import PSTypeError, PSEOF
 from .psparser import PSKeyword, literal_name, keyword_name
 from .psparser import PSStackParser
 from .psparser import LIT, KWD, STRICT
-from .pdftypes import PDFException, PDFStream, PDFObjRef
-from .pdftypes import resolve1
-from .pdftypes import int_value, float_value, num_value
-from .pdftypes import str_value, list_value, dict_value, stream_value
-from .pdffont import PDFFontError
-from .pdffont import PDFType1Font, PDFTrueTypeFont, PDFType3Font
-from .pdffont import PDFCIDFont
+from .pdftypes import (PDFException, PDFStream, PDFObjRef, resolve1, list_value, dict_value,
+    stream_value)
+from .pdffont import PDFFontError, PDFType1Font, PDFTrueTypeFont, PDFType3Font, PDFCIDFont
 from .pdfparser import PDFDocument, PDFParser
-from .pdfparser import PDFPasswordIncorrect
-from .pdfcolor import PDFColorSpace
-from .pdfcolor import PREDEFINED_COLORSPACE
-from .pdfcolor import LITERAL_DEVICE_GRAY, LITERAL_DEVICE_RGB
-from .pdfcolor import LITERAL_DEVICE_CMYK
+from .pdfcolor import PDFColorSpace, PREDEFINED_COLORSPACE
 from .utils import choplist
 from .utils import mult_matrix, MATRIX_IDENTITY
 

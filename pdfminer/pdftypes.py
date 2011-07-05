@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import sys
+from functools import partial
 import zlib
 from .lzw import lzwdecode
 from .ascii85 import ascii85decode, asciihexdecode
 from .runlength import rldecode
 from .psparser import PSException, PSObject
-from .psparser import LIT, KWD, STRICT
+from .psparser import LIT, STRICT
 from .utils import apply_png_predictor
 
 LITERAL_CRYPT = LIT('Crypt')
@@ -89,53 +89,21 @@ def decipher_all(decipher, objid, genno, x):
     return x
 
 # Type cheking
-def int_value(x):
+def typecheck_value(x, type):
     x = resolve1(x)
-    if not isinstance(x, int):
+    if not isinstance(x, type):
         if STRICT:
-            raise PDFTypeError('Integer required: %r' % x)
-        return 0
+            raise PDFTypeError('Wrong type: %r required: %r' % (x, type))
+        default_type = type[0] if isinstance(type, tuple) else type
+        return default_type()
     return x
 
-def float_value(x):
-    x = resolve1(x)
-    if not isinstance(x, float):
-        if STRICT:
-            raise PDFTypeError('Float required: %r' % x)
-        return 0.0
-    return x
-
-def num_value(x):
-    x = resolve1(x)
-    if not (isinstance(x, int) or isinstance(x, float)):
-        if STRICT:
-            raise PDFTypeError('Int or Float required: %r' % x)
-        return 0
-    return x
-
-def str_value(x):
-    x = resolve1(x)
-    if not isinstance(x, (str, bytes)):
-        if STRICT:
-            raise PDFTypeError('String required: %r' % x)
-        return ''
-    return x
-
-def list_value(x):
-    x = resolve1(x)
-    if not (isinstance(x, list) or isinstance(x, tuple)):
-        if STRICT:
-            raise PDFTypeError('List required: %r' % x)
-        return []
-    return x
-
-def dict_value(x):
-    x = resolve1(x)
-    if not isinstance(x, dict):
-        if STRICT:
-            raise PDFTypeError('Dict required: %r' % x)
-        return {}
-    return x
+int_value = partial(typecheck_value, type=int)
+float_value = partial(typecheck_value, type=float)
+num_value = partial(typecheck_value, type=(int, float))
+str_value = partial(typecheck_value, type=(str, bytes))
+list_value = partial(typecheck_value, type=(list, tuple))
+dict_value = partial(typecheck_value, type=dict)
 
 def stream_value(x):
     x = resolve1(x)
