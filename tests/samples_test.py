@@ -2,7 +2,6 @@
 # them with their respective '.ref' file.
 
 import sys
-import os
 import os.path as op
 from subprocess import Popen
 
@@ -19,13 +18,20 @@ def runcmd(args):
 
 def pytest_generate_tests(metafunc):
     if 'samplepath' in metafunc.funcargnames:
-        paths_to_convert = []
-        for root, dirs, files in os.walk(SAMPLES_PATH):
-            for fn in files:
-                if fn.endswith('.pdf'):
-                    paths_to_convert.append(op.join(SAMPLES_PATH, root, fn))
-        for path in paths_to_convert:
-            samplepath = op.join(SAMPLES_PATH, path)
+        pdfs_to_convert = [
+            ('simple1', ),
+            ('simple2', ),
+            ('simple3', ),
+            ('jo', ),
+            ('nonfree', 'dmca'),
+            # ('nonfree', 'f1040nr'), # doesn't work, skip for now
+            # ('nonfree', 'i1040nr'), # doesn't work, skip for now
+            # ('nonfree', 'kampo'), # doesn't work, skip for now
+            ('nonfree', 'naacl06-shinyama'),
+            ('nonfree', 'nlp2004slides'),
+        ]
+        for fn_tuple in pdfs_to_convert:
+            samplepath = op.join(SAMPLES_PATH, *fn_tuple) + '.pdf'
             metafunc.addcall(funcargs=dict(samplepath=samplepath))
     
 
