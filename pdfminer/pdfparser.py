@@ -407,7 +407,7 @@ class PDFDocument:
                 if strmid in self._parsed_objs:
                     objs = self._parsed_objs[strmid]
                 else:
-                    parser = PDFStreamParser(stream.get_data().decode('ascii'))
+                    parser = PDFStreamParser(stream.get_data())
                     parser.set_document(self)
                     objs = []
                     try:
@@ -727,7 +727,7 @@ class PDFStreamParser(PDFParser):
     """
 
     def __init__(self, data):
-        PDFParser.__init__(self, io.StringIO(data))
+        PDFParser.__init__(self, io.BytesIO(data))
 
     def flush(self):
         self.add_results(*self.popall())
