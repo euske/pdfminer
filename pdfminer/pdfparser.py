@@ -354,7 +354,7 @@ class PDFDocument:
             hash.update(docid[0]) # 3
             x = Arcfour(key).process(hash.digest()[:16]) # 4
             for i in range(1,19+1):
-                k = ''.join( chr(ord(c) ^ i) for c in key )
+                k = bytes( c ^ i for c in key )
                 x = Arcfour(k).process(x)
             u1 = x+x # 32bytes total
         if R == 2:
