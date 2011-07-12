@@ -110,7 +110,7 @@ def stream_value(x):
     if not isinstance(x, PDFStream):
         if STRICT:
             raise PDFTypeError('PDFStream required: %r' % x)
-        return PDFStream({}, '')
+        return PDFStream({}, b'')
     return x
 
 
@@ -177,7 +177,7 @@ class PDFStream(PDFObject):
                 except zlib.error as e:
                     if STRICT:
                         raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
-                    data = ''
+                    data = b''
             elif f in LITERALS_LZW_DECODE:
                 data = lzwdecode(data)
             elif f in LITERALS_ASCII85_DECODE:
