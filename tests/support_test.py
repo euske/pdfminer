@@ -20,7 +20,13 @@ def test_asciihexdecode():
     eq_(ascii85.asciihexdecode('7>'), 'p')
 
 def test_lzwdecode():
-    eq_(lzw.lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01'), '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42')
+    eq_(lzw.lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01'), b'\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42')
+
+def test_lzwdecode_garbage():
+    # Sometimes, there's garbage at the end of the data like space characters and newline. If a code
+    # can't be found in the table, don't raise an Index error, but just return what has been decoded
+    # yet.
+    eq_(lzw.lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01\xff\xff'), b'\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42')
 
 def test_RijndaelDecryptor():
     key = bytes.fromhex('00010203050607080a0b0c0d0f101112')

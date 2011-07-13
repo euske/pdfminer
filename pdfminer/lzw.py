@@ -1,6 +1,9 @@
 import sys
 import io
 
+class CorruptDataError(Exception):
+    pass
+
 class LZWDecoder:
 
     debug = 0
@@ -38,12 +41,12 @@ class LZWDecoder:
         return v
 
     def feed(self, code):
-        x = ''
+        x = b''
         if code == 256:
-            self.table = [ chr(c) for c in range(256) ] # 0-255
+            self.table = [bytes([i]) for i in range(256)] # 0-255
             self.table.append(None) # 256
             self.table.append(None) # 257
-            self.prevbuf = ''
+            self.prevbuf = b''
             self.nbits = 9
         elif code == 257:
             pass
@@ -52,10 +55,12 @@ class LZWDecoder:
         else:
             if code < len(self.table):
                 x = self.table[code]
-                self.table.append(self.prevbuf+x[0])
-            else:
-                self.table.append(self.prevbuf+self.prevbuf[0])
+                self.table.append(self.prevbuf+x[:1])
+            elif code == len(self.table):
+                self.table.append(self.prevbuf+self.prevbuf[:1])
                 x = self.table[code]
+            else:
+                raise CorruptDataError()
             l = len(self.table)
             if l == 511:
                 self.nbits = 10
@@ -72,7 +77,11 @@ class LZWDecoder:
                 code = self.readbits(self.nbits)
             except EOFError:
                 break
-            x = self.feed(code)
+            try:
+                x = self.feed(code)
+            except CorruptDataError:
+                # just ignore corrupt data and stop yielding there
+                break
             yield x
             if self.debug:
                 print(('nbits=%d, code=%d, output=%r, table=%r' %
@@ -81,4 +90,4 @@ class LZWDecoder:
 # lzwdecode
 def lzwdecode(data):
     fp = io.BytesIO(data)
-    return ''.join(LZWDecoder(fp).run())
+    return b''.join(LZWDecoder(fp).run())
