@@ -11,8 +11,8 @@ def test_arcfour():
     eq_(arcfour.Arcfour(b'Secret').process(b'Attack at dawn'), bytes.fromhex('45a01f645fc35b383552544b9bf5'))
 
 def test_ascii85decode():
-    eq_(ascii85.ascii85decode('9jqo^BlbD-BleB1DJ+*+F(f,q'), 'Man is distinguished')
-    eq_(ascii85.ascii85decode('E,9)oF*2M7/c~>'), 'pleasure.')
+    eq_(ascii85.ascii85decode('9jqo^BlbD-BleB1DJ+*+F(f,q'), b'Man is distinguished')
+    eq_(ascii85.ascii85decode('E,9)oF*2M7/c~>'), b'pleasure.')
 
 def test_asciihexdecode():
     eq_(ascii85.asciihexdecode('61 62 2e6364   65'), 'ab.cde')

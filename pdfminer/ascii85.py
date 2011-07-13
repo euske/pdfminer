@@ -25,7 +25,7 @@ def ascii85decode(data):
     if isinstance(data, str):
         data = data.encode('ascii')
     n = b = 0
-    out = b''
+    out = bytearray()
     for c in data:
         if ord('!') <= c and c <= ord('u'):
             n += 1
@@ -42,7 +42,7 @@ def ascii85decode(data):
                     b = b*85+84
                 out += struct.pack(b'>L',b)[:n-1]
             break
-    return out.decode('ascii')
+    return bytes(out)
 
 hex_re = re.compile(r'([a-f\d]{2})', re.IGNORECASE)
 trail_re = re.compile(r'^(?:[a-f\d]{2}|\s)*([a-f\d])[\s>]*$', re.IGNORECASE)
