@@ -1,4 +1,4 @@
-from .utils import INF, Plane, get_bound, uniq, fsplit
+from .utils import INF, get_bound, uniq, fsplit, drange
 from .utils import bbox2str, matrix2str, apply_matrix_pt
 
 
@@ -592,3 +592,71 @@ class LTPage(LTLayoutContainer):
         return ('<%s(%r) %s rotate=%r>' %
                 (self.__class__.__name__, self.pageid,
                  bbox2str(self.bbox), self.rotate))
+
+##  Plane
+##
+##  A set-like data structure for objects placed on a plane.
+##  Can efficiently find objects in a certain rectangular area.
+##  It maintains two parallel lists of objects, each of
+##  which is sorted by its x or y coordinate.
+##
+class Plane:
+
+    def __init__(self, objs=None, gridsize=50):
+        self._objs = []
+        self._grid = {}
+        self.gridsize = gridsize
+        if objs is not None:
+            for obj in objs:
+                self.add(obj)
+
+    def __repr__(self):
+        return ('<Plane objs=%r>' % list(self))
+
+    def __iter__(self):
+        return iter(self._objs)
+
+    def __len__(self):
+        return len(self._objs)
+
+    def __contains__(self, obj):
+        return obj in self._objs
+
+    def _getrange(self, area):
+        (x0,y0,x1,y1) = area
+        for y in drange(y0, y1, self.gridsize):
+            for x in drange(x0, x1, self.gridsize):
+                yield (x,y)
+    
+    # add(obj): place an object.
+    def add(self, obj):
+        for k in self._getrange((obj.x0, obj.y0, obj.x1, obj.y1)):
+            if k not in self._grid:
+                r = []
+                self._grid[k] = r
+            else:
+                r = self._grid[k]
+            r.append(obj)
+        self._objs.append(obj)
+
+    # remove(obj): displace an object.
+    def remove(self, obj):
+        for k in self._getrange((obj.x0, obj.y0, obj.x1, obj.y1)):
+            try:
+                self._grid[k].remove(obj)
+            except (KeyError, ValueError):
+                pass
+        self._objs.remove(obj)
+
+    # find(): finds objects that are in a certain area.
+    def find(self, area):
+        (x0,y0,x1,y1) = area
+        done = set()
+        for k in self._getrange((x0,y0,x1,y1)):
+            if k not in self._grid: continue
+            for obj in self._grid[k]:
+                if obj in done: continue
+                done.add(obj)
+                if (obj.x1 <= x0 or x1 <= obj.x0 or
+                    obj.y1 <= y0 or y1 <= obj.y0): continue
+                yield obj
