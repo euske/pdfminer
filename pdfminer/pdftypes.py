@@ -206,7 +206,10 @@ class PDFStream(PDFObject):
                     colors = int_value(params.get('Colors', 1))
                     columns = int_value(params.get('Columns', 1))
                     bitspercomponent = int_value(params.get('BitsPerComponent', 8))
-                    data = apply_png_predictor(pred, colors, columns, bitspercomponent, data)
+                    try:
+                        data = apply_png_predictor(pred, colors, columns, bitspercomponent, data)
+                    except ValueError: # predictor not supported
+                        data = b''
                 else:
                     raise PDFNotImplementedError('Unsupported predictor: %r' % pred)
         self.data = data
