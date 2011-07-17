@@ -200,16 +200,14 @@ class PDFContentParser(PSStackParser):
         self.fillfp()
         PSStackParser.seek(self, pos)
 
-    def fillbuf(self):
-        if self.charpos < len(self.buf):
+    def fillbuf(self, force=False):
+        if (not force) and (self.charpos < len(self.buf)):
             return
-        while 1:
+        while True:
             self.fillfp()
-            self.bufpos = self.fp.tell()
-            self.buf = self.fp.read(self.BUFSIZ)
+            self.buf = self._readbuf(force)
             if self.buf: break
             self.fp = None
-        self.charpos = 0
 
     def get_inline_data(self, pos, target='EI'):
         self.seek(pos)

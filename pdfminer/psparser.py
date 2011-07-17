@@ -1,6 +1,7 @@
 import sys
 import re
 from .utils import choplist
+from . import pslexer
 
 STRICT = 0
 
@@ -120,17 +121,6 @@ def keyword_name(x):
 ##  going through the buffer, so we get binary data.
 
 EOL = re.compile(r'[\r\n]')
-SPC = re.compile(r'\s')
-NONSPC = re.compile(r'\S')
-HEX = re.compile(r'[0-9a-fA-F]')
-END_LITERAL = re.compile(r'[#/%\[\]()<>{}\s]')
-END_HEX_STRING = re.compile(r'[^\s0-9a-fA-F]')
-HEX_PAIR = re.compile(r'[0-9a-fA-F]{2}|.')
-END_NUMBER = re.compile(r'[^0-9]')
-END_KEYWORD = re.compile(r'[#/%\[\]()<>{}\s]')
-END_STRING = re.compile(r'[()\134]')
-OCT_STRING = re.compile(r'[0-7]')
-ESC_STRING = { 'b':8, 't':9, 'n':10, 'f':12, 'r':13, '(':40, ')':41, '\\':92 }
 class PSBaseParser:
 
     """Most basic PostScript parser that performs only tokenization.
@@ -141,6 +131,8 @@ class PSBaseParser:
 
     def __init__(self, fp):
         self.fp = fp
+        self.is_eof = False
+        self.lex = None
         self.seek(0)
 
     def __repr__(self):
@@ -155,14 +147,6 @@ class PSBaseParser:
     def tell(self):
         return self.bufpos+self.charpos
 
-    def poll(self, pos=None, n=80):
-        pos0 = self.fp.tell()
-        if not pos:
-            pos = self.bufpos+self.charpos
-        self.fp.seek(pos)
-        print('poll(%d): %r' % (pos, self.fp.read(n)), file=sys.stderr)
-        self.fp.seek(pos0)
-
     def seek(self, pos):
         """Seeks the parser to the given position.
         """
@@ -173,25 +157,36 @@ class PSBaseParser:
         self.bufpos = pos
         self.buf = ''
         self.charpos = 0
-        # reset the status for nexttoken()
-        self._parse1 = self._parse_main
-        self._curtoken = ''
-        self._curtokenpos = 0
-        self._tokens = []
 
-    def fillbuf(self):
-        if self.charpos < len(self.buf):
+    def _readbuf(self, force):
+        if force:
+            # The bufsize thing below is there so that it's possible to grow the buffer to multiple
+            # bufsizes if there's a need for it (for a very weird lexer input for example)
+            bufsize = self.BUFSIZ + (len(self.buf) - self.charpos)
+            abspos = self.tell()
+            self.fp.seek(abspos)
+        else:
+            bufsize = self.BUFSIZ
+        self.bufpos = self.fp.tell()
+        data = self.fp.read(bufsize)
+        self.is_eof = len(data) < bufsize
+        self.charpos = 0
+        self.lex = None
+        return data
+    
+    def fillbuf(self, force=False):
+        # When force is true, it means that even if charpos < len(self.buf), we want the buffer
+        # to be filled. So what will happen is that we'll check our current pos according to charpos
+        # and then seek it and then fill the buf from there. That means that there can be some
+        # overlapping between the end of our old buf and our new buf.
+        if (not force) and (self.charpos < len(self.buf)):
             return
         # fetch next chunk.
-        self.bufpos = self.fp.tell()
-        read_bytes = self.fp.read(self.BUFSIZ)
+        read_bytes = self._readbuf(force)
         if not isinstance(read_bytes, bytes):
             raise Exception("Files read with PSParser must be opened in binary mode")
         self.rawbuf = read_bytes
         self.buf = read_bytes.decode('latin-1')
-        if not self.buf:
-            raise PSEOF('Unexpected EOF')
-        self.charpos = 0
 
     def nextline(self):
         """Fetches a next line that ends either with \\r or \\n.
@@ -246,229 +241,37 @@ class PSBaseParser:
                 yield s[n:]+buf
                 s = s[:n]
                 buf = ''
-
-    def _parse_main(self, s, i):
-        m = NONSPC.search(s, i)
-        if not m:
-            return len(s)
-        j = m.start(0)
-        c = s[j]
-        self._curtokenpos = self.bufpos+j
-        if c == '%':
-            self._curtoken = '%'
-            self._parse1 = self._parse_comment
-            return j+1
-        elif c == '/':
-            self._curtoken = ''
-            self._parse1 = self._parse_literal
-            return j+1
-        elif c in '-+' or c.isdigit():
-            self._curtoken = c
-            self._parse1 = self._parse_number
-            return j+1
-        elif c == '.':
-            self._curtoken = c
-            self._parse1 = self._parse_float
-            return j+1
-        elif c.isalpha():
-            self._curtoken = c
-            self._parse1 = self._parse_keyword
-            return j+1
-        elif c == '(':
-            self._curtoken = ''
-            self.paren = 1
-            self._parse1 = self._parse_string
-            return j+1
-        elif c == '<':
-            self._curtoken = ''
-            self._parse1 = self._parse_wopen
-            return j+1
-        elif c == '>':
-            self._curtoken = ''
-            self._parse1 = self._parse_wclose
-            return j+1
-        else:
-            self._add_token(KWD(c))
-            return j+1
-
-    def _add_token(self, obj):
-        self._tokens.append((self._curtokenpos, obj))
-
-    def _parse_comment(self, s, i):
-        m = EOL.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return (self._parse_comment, len(s))
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        self._parse1 = self._parse_main
-        # We ignore comments.
-        #self._tokens.append(self._curtoken)
-        return j
-
-    def _parse_literal(self, s, i):
-        m = END_LITERAL.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        c = s[j]
-        if c == '#':
-            self.hex = ''
-            self._parse1 = self._parse_literal_hex
-            return j+1
-        self._add_token(LIT(self._curtoken))
-        self._parse1 = self._parse_main
-        return j
-
-    def _parse_literal_hex(self, s, i):
-        c = s[i]
-        if HEX.match(c) and len(self.hex) < 2:
-            self.hex += c
-            return i+1
-        if self.hex:
-            self._curtoken += chr(int(self.hex, 16))
-        self._parse1 = self._parse_literal
-        return i
-
-    def _parse_number(self, s, i):
-        m = END_NUMBER.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        c = s[j]
-        if c == '.':
-            self._curtoken += c
-            self._parse1 = self._parse_float
-            return j+1
-        try:
-            self._add_token(int(self._curtoken))
-        except ValueError:
-            pass
-        self._parse1 = self._parse_main
-        return j
     
-    def _parse_float(self, s, i):
-        m = END_NUMBER.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        try:
-            self._add_token(float(self._curtoken))
-        except ValueError:
-            pass
-        self._parse1 = self._parse_main
-        return j
-
-    def _parse_keyword(self, s, i):
-        m = END_KEYWORD.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        if self._curtoken == 'true':
-            token = True
-        elif self._curtoken == 'false':
-            token = False
+    def _convert_token(self, token):
+        # converts `token` which comes from pslexer to a normal token.
+        if token.type in {'KEYWORD', 'OPERATOR'}:
+            return KWD(token.value)
+        elif token.type == 'LITERAL':
+            return LIT(token.value)
         else:
-            token = KWD(self._curtoken)
-        self._add_token(token)
-        self._parse1 = self._parse_main
-        return j
-
-    def _parse_string(self, s, i):
-        m = END_STRING.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        c = s[j]
-        if c == '\\':
-            self.oct = ''
-            self._parse1 = self._parse_string_1
-            return j+1
-        if c == '(':
-            self.paren += 1
-            self._curtoken += c
-            return j+1
-        if c == ')':
-            self.paren -= 1
-            if self.paren: # WTF, they said balanced parens need no special treatment.
-                self._curtoken += c
-                return j+1
-        if any(ord(c) > 0x7f for c in self._curtoken): # need to be a bytes token!
-            self._curtoken = self._curtoken.encode('latin-1')
-        self._add_token(self._curtoken)
-        self._parse1 = self._parse_main
-        return j+1
-
-    def _parse_string_1(self, s, i):
-        c = s[i]
-        if OCT_STRING.match(c) and len(self.oct) < 3:
-            self.oct += c
-            return i+1
-        if self.oct:
-            self._curtoken += chr(int(self.oct, 8))
-            self._parse1 = self._parse_string
-            return i
-        if c in ESC_STRING:
-            self._curtoken += chr(ESC_STRING[c])
-        self._parse1 = self._parse_string
-        return i+1
-
-    def _parse_wopen(self, s, i):
-        c = s[i]
-        if c == '<':
-            self._add_token(KEYWORD_DICT_BEGIN)
-            self._parse1 = self._parse_main
-            i += 1
-        else:
-            self._parse1 = self._parse_hexstring
-        return i
-
-    def _parse_wclose(self, s, i):
-        c = s[i]
-        if c == '>':
-            self._add_token(KEYWORD_DICT_END)
-            i += 1
-        self._parse1 = self._parse_main
-        return i
-
-    def _parse_hexstring(self, s, i):
-        m = END_HEX_STRING.search(s, i)
-        if not m:
-            self._curtoken += s[i:]
-            return len(s)
-        j = m.start(0)
-        self._curtoken += s[i:j]
-        cleaned = SPC.sub('', self._curtoken)
-        pairs = HEX_PAIR.findall(cleaned)
-        token_bytes = bytes([int(pair, 16) for pair in pairs])
-        try:
-            token = token_bytes.decode('ascii')
-        except UnicodeDecodeError:
-            # should be kept as bytes
-            token = token_bytes
-        self._add_token(token)
-        self._parse1 = self._parse_main
-        return j
-
+            return token.value
+    
     def nexttoken(self):
-        while not self._tokens:
-            self.fillbuf()
-            self.charpos = self._parse1(self.buf, self.charpos)
-        token = self._tokens.pop(0)
-        if 2 <= self.debug:
-            print('nexttoken: %r' % (token,), file=sys.stderr)
-        return token
-
+        self.fillbuf()
+        if self.lex is None:
+            self.lex = pslexer.lexer.clone()
+            self.lex.input(self.buf)
+        token = self.lex.token()
+        if self.lex.lexpos > len(self.buf):
+            # we read over our current buffer, even if the current token is valid, it might be
+            # incomplete. refill the buffer.
+            if self.is_eof:
+                raise PSEOF('Unexpected EOF')
+            self.fillbuf(force=True)
+            return self.nexttoken()
+        else:
+            assert token is not None
+            tokenpos = token.lexpos + self.bufpos
+            self.charpos = self.lex.lexpos
+            if 2 <= self.debug:
+                print('nexttoken: %r' % (token,), file=sys.stderr)
+            return (tokenpos, self._convert_token(token))
+    
 
 class PSStackParser(PSBaseParser):
 

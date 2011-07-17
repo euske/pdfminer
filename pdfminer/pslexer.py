@@ -10,10 +10,11 @@ tokens = (
 )
 
 delimiter = r'\(\)\<\>\[\]\{\}\/\%\s'
-delimiter_end = r'(?=[%s])' % delimiter
+delimiter_end = r'(?=[%s]|$)' % delimiter
 
 def t_COMMENT(t):
-    r'^%!.+\n'
+    # r'^%!.+\n'
+    r'%.*\n'
     pass
 
 RE_SPC = re.compile(r'\s')
@@ -30,8 +31,15 @@ def t_HEXSTRING(t):
         t.value = token_bytes
     return t
 
-t_INT = r'(\-|\+)?[0-9]+' + delimiter_end
-t_FLOAT = r'(\-|\+)?([0-9]+\.|[0-9]*\.[0-9]+|[0-9]+\.[0-9]*)((e|E)[0-9]+)?' + delimiter_end
+@lex.TOKEN(r'(\-|\+)?[0-9]+' + delimiter_end)
+def t_INT(t):
+    t.value = int(t.value)
+    return t
+
+@lex.TOKEN(r'(\-|\+)?([0-9]+\.|[0-9]*\.[0-9]+|[0-9]+\.[0-9]*)((e|E)[0-9]+)?' + delimiter_end)
+def t_FLOAT(t):
+    t.value = float(t.value)
+    return t
 
 RE_LITERAL_HEX = re.compile(r'#[0-9A-Fa-f]+')
 @lex.TOKEN(r'/.+?' + delimiter_end)
@@ -56,6 +64,7 @@ t_KEYWORD = r'.+?' + delimiter_end
 def t_instring(t):
     r'\('
     t.lexer.value_buffer = []
+    t.lexer.string_startpos = t.lexpos
     t.lexer.level = 1
     t.lexer.begin('instring')
 
@@ -70,26 +79,28 @@ def t_instring_rparen(t):
 
     if t.lexer.level == 0:
          t.value = ''.join(t.lexer.value_buffer)
+         if any(ord(c) > 0x7f for c in t.value):
+             t.value = t.value.encode('latin-1')
          t.type = "STRING"
+         t.lexpos = t.lexer.string_startpos
          t.lexer.begin('INITIAL')           
          return t
     else:
         t.lexer.value_buffer.append(')')
 
-def t_instring_octal(t):
-    r'\\[0-7]{1,3}'
-    # for some reason, there can be octal-encoded strings in there.
-    t.lexer.value_buffer.append(chr(int(t.value[1:], 8)))
-
-def t_instring_line_continuation(t):
-    r'\\\n'
-    # When we have a '\' char at the end of a line in a string, we ignore it.
-    pass
-
-def t_instring_therest(t):
-    r'[^()]'
-    # we don't care about this, we get the contents of the string when we hit the closing paren
-    t.lexer.value_buffer.append(t.value)
+RE_STRING_ESCAPE = re.compile(r'\\[btnfr()\\]')
+RE_STRING_OCTAL = re.compile(r'\\[0-7]{1,3}')
+RE_STRING_LINE_CONT = re.compile(r'\\\n')
+ESC_STRING = { 'b': '\b', 't': '\t', 'n': '\n', 'f': '\f', 'r': '\r', '(': '(', ')': ')', '\\': '\\' }
+def t_instring_contents(t):
+    r'[^()]+'
+    s = t.value
+    repl = lambda m: ESC_STRING[m.group(0)[1]]
+    s = RE_STRING_ESCAPE.sub(repl, s)
+    repl = lambda m: chr(int(m.group(0)[1:], 8))
+    s = RE_STRING_OCTAL.sub(repl, s)
+    s = RE_STRING_LINE_CONT.sub('', s)
+    t.lexer.value_buffer.append(s)
 
 t_instring_ignore = ''
 t_ignore = ' \t\r\n'
