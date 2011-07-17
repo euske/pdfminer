@@ -49,6 +49,9 @@ def get_objects(s):
         pass
     return r
 
+def withoutpos(tokens):
+    return [token for pos, token in tokens]
+
 def test_tokens():
     EXPECTED = [
         (5, KWD('begin')), (11, KWD('end')), (16, KWD('"')), (19, KWD('@')),
@@ -89,7 +92,19 @@ def test_byte_strings_are_parsed_as_bytes():
 (\xfe\xff)<feff>
 """
     tokens = get_tokens(TESTDATA)
-    print(repr(tokens))
     eq_(len(tokens), 2)
     eq_(tokens[0][1], b'\xfe\xff')
     eq_(tokens[1][1], b'\xfe\xff')
+
+def test_detect_escaped_parens_in_string():
+    # escaped parens in strings are correctly detected and not counted in the parens balancing thing.
+    s = br'(str1\(foo)(str2)'
+    tokens = get_tokens(s)
+    EXPECTED = ['str1(foo', 'str2']
+    eq_(withoutpos(tokens), EXPECTED)
+
+def test_true_false_keywords_translate_to_bool():
+    s = br'true false'
+    tokens = get_tokens(s)
+    EXPECTED = [True, False]
+    eq_(withoutpos(tokens), EXPECTED)

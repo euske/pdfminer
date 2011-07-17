@@ -245,32 +245,43 @@ class PSBaseParser:
     def _convert_token(self, token):
         # converts `token` which comes from pslexer to a normal token.
         if token.type in {'KEYWORD', 'OPERATOR'}:
-            return KWD(token.value)
+            if token.value == 'true':
+                return True
+            elif token.value == 'false':
+                return False
+            else:
+                return KWD(token.value)
         elif token.type == 'LITERAL':
             return LIT(token.value)
         else:
             return token.value
     
     def nexttoken(self):
-        self.fillbuf()
-        if self.lex is None:
-            self.lex = pslexer.lexer.clone()
-            self.lex.input(self.buf)
-        token = self.lex.token()
-        if self.lex.lexpos > len(self.buf):
-            # we read over our current buffer, even if the current token is valid, it might be
-            # incomplete. refill the buffer.
-            if self.is_eof:
-                raise PSEOF('Unexpected EOF')
-            self.fillbuf(force=True)
-            return self.nexttoken()
-        else:
+        def process_token(token):
             assert token is not None
             tokenpos = token.lexpos + self.bufpos
             self.charpos = self.lex.lexpos
             if 2 <= self.debug:
                 print('nexttoken: %r' % (token,), file=sys.stderr)
             return (tokenpos, self._convert_token(token))
+        
+        self.fillbuf()
+        if self.lex is None:
+            self.lex = pslexer.lexer.clone()
+            self.lex.input(self.buf)
+        token = self.lex.token()
+        if self.lex.lexpos >= len(self.buf):
+            # we read over our current buffer, even if the current token is valid, it might be
+            # incomplete. refill the buffer.
+            if self.is_eof:
+                if token is not None:
+                    return process_token(token)
+                else:
+                    raise PSEOF('Unexpected EOF')
+            self.fillbuf(force=True)
+            return self.nexttoken()
+        else:
+            return process_token(token)
     
 
 class PSStackParser(PSBaseParser):
