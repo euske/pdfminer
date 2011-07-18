@@ -367,7 +367,7 @@ class CMapParser(PSStackParser):
         if name == 'endbfchar':
             objs = [ obj for (_,obj) in self.popall() ]
             for (cid,code) in choplist(2, objs):
-                if isinstance(cid, str) and isinstance(code, str):
+                if isinstance(cid, str) and isinstance(code, (str, bytes)):
                     self.cmap.add_cid2unichr(nunpack(cid), code)
             return
 
