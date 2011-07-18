@@ -157,15 +157,15 @@ class FileUnicodeMap(UnicodeMap):
 
     def add_cid2unichr(self, cid, code):
         assert isinstance(cid, int)
+        if isinstance(code, str):
+            # Interpret the contents of the string as bytes, and decode it as if it was bytes
+            code = code.encode('latin-1')
         if isinstance(code, PSLiteral):
             # Interpret as an Adobe glyph name.
             self.cid2unichr[cid] = name2unicode(code.name)
         elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
             self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
-        elif isinstance(code, str):
-            # We sometimes get nullchars in there
-            self.cid2unichr[cid] = code.replace('\0', '')
         elif isinstance(code, int):
             self.cid2unichr[cid] = chr(code)
         else:
@@ -367,7 +367,7 @@ class CMapParser(PSStackParser):
         if name == 'endbfchar':
             objs = [ obj for (_,obj) in self.popall() ]
             for (cid,code) in choplist(2, objs):
-                if isinstance(cid, str) and isinstance(code, (str, bytes)):
+                if isinstance(cid, (str, bytes)) and isinstance(code, (str, bytes)):
                     self.cmap.add_cid2unichr(nunpack(cid), code)
             return
 
