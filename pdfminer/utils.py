@@ -142,6 +142,21 @@ def choplist(n, seq):
             yield tuple(r)
             r = []
 
+def trailiter(iterable, skipfirst=False):
+    """Yields (prev_element, element), starting with (None, first_element).
+    
+    If skipfirst is True, there will be no (None, item1) element and we'll start
+    directly with (item1, item2).
+    """
+    it = iter(iterable)
+    if skipfirst:
+        prev = next(it)
+    else:
+        prev = None
+    for item in it:
+        yield prev, item
+        prev = item
+
 # nunpack
 def nunpack(b, default=0):
     """Unpacks 1 to 4 byte integers (big endian)."""

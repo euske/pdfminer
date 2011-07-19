@@ -54,3 +54,10 @@ def test_nunpack():
         utils.nunpack(b'\x42\x42\x42\x42\x42')
     # strings are correctly converted to bytes
     eq_(utils.nunpack('\x42\xfc'), 0x42fc)
+
+def test_trailiter():
+    eq_(list(utils.trailiter([])), [])
+    eq_(list(utils.trailiter(['foo'])), [(None, 'foo')])
+    eq_(list(utils.trailiter(['foo', 'bar'])), [(None, 'foo'), ('foo', 'bar')])
+    eq_(list(utils.trailiter(['foo', 'bar'], skipfirst=True)), [('foo', 'bar')])
+    eq_(list(utils.trailiter([], skipfirst=True)), []) # no crash

@@ -1,6 +1,7 @@
-from .utils import INF, get_bound, uniq, fsplit, drange
-from .utils import bbox2str, matrix2str, apply_matrix_pt
+from itertools import combinations
 
+from .utils import (INF, get_bound, uniq, fsplit, drange, bbox2str, matrix2str, apply_matrix_pt,
+    trailiter)
 
 class IndexAssigner:
 
@@ -387,63 +388,61 @@ class LTLayoutContainer(LTContainer):
     def get_textlines(self, laparams, objs):
         obj0 = None
         line = None
-        for obj1 in objs:
-            if obj0 is not None:
-                k = 0
-                if (obj0.is_compatible(obj1) and obj0.is_voverlap(obj1) and 
-                    min(obj0.height, obj1.height) * laparams.line_overlap < obj0.voverlap(obj1) and
-                    obj0.hdistance(obj1) < max(obj0.width, obj1.width) * laparams.char_margin):
-                    # obj0 and obj1 is horizontally aligned:
-                    #
-                    #   +------+ - - -
-                    #   | obj0 | - - +------+   -
-                    #   |      |     | obj1 |   | (line_overlap)
-                    #   +------+ - - |      |   -
-                    #          - - - +------+
-                    #
-                    #          |<--->|
-                    #        (char_margin)
-                    k |= 1
-                if (laparams.detect_vertical and
-                    obj0.is_compatible(obj1) and obj0.is_hoverlap(obj1) and 
-                    min(obj0.width, obj1.width) * laparams.line_overlap < obj0.hoverlap(obj1) and
-                    obj0.vdistance(obj1) < max(obj0.height, obj1.height) * laparams.char_margin):
-                    # obj0 and obj1 is vertically aligned:
-                    #
-                    #   +------+
-                    #   | obj0 |
-                    #   |      |
-                    #   +------+ - - -
-                    #     |    |     | (char_margin)
-                    #     +------+ - -
-                    #     | obj1 |
-                    #     |      |
-                    #     +------+
-                    #
-                    #     |<-->|
-                    #   (line_overlap)
-                    k |= 2
-                if ( (k & 1 and isinstance(line, LTTextLineHorizontal)) or
-                     (k & 2 and isinstance(line, LTTextLineVertical)) ):
+        for obj0, obj1 in trailiter(objs, skipfirst=True):
+            k = 0
+            if (obj0.is_compatible(obj1) and obj0.is_voverlap(obj1) and 
+                min(obj0.height, obj1.height) * laparams.line_overlap < obj0.voverlap(obj1) and
+                obj0.hdistance(obj1) < max(obj0.width, obj1.width) * laparams.char_margin):
+                # obj0 and obj1 is horizontally aligned:
+                #
+                #   +------+ - - -
+                #   | obj0 | - - +------+   -
+                #   |      |     | obj1 |   | (line_overlap)
+                #   +------+ - - |      |   -
+                #          - - - +------+
+                #
+                #          |<--->|
+                #        (char_margin)
+                k |= 1
+            if (laparams.detect_vertical and
+                obj0.is_compatible(obj1) and obj0.is_hoverlap(obj1) and 
+                min(obj0.width, obj1.width) * laparams.line_overlap < obj0.hoverlap(obj1) and
+                obj0.vdistance(obj1) < max(obj0.height, obj1.height) * laparams.char_margin):
+                # obj0 and obj1 is vertically aligned:
+                #
+                #   +------+
+                #   | obj0 |
+                #   |      |
+                #   +------+ - - -
+                #     |    |     | (char_margin)
+                #     +------+ - -
+                #     | obj1 |
+                #     |      |
+                #     +------+
+                #
+                #     |<-->|
+                #   (line_overlap)
+                k |= 2
+            if ( (k & 1 and isinstance(line, LTTextLineHorizontal)) or
+                 (k & 2 and isinstance(line, LTTextLineVertical)) ):
+                line.add(obj1)
+            elif line is not None:
+                yield line
+                line = None
+            else:
+                if k == 2:
+                    line = LTTextLineVertical(laparams.word_margin)
+                    line.add(obj0)
                     line.add(obj1)
-                elif line is not None:
+                elif k == 1:
+                    line = LTTextLineHorizontal(laparams.word_margin)
+                    line.add(obj0)
+                    line.add(obj1)
+                else:
+                    line = LTTextLineHorizontal(laparams.word_margin)
+                    line.add(obj0)
                     yield line
                     line = None
-                else:
-                    if k == 2:
-                        line = LTTextLineVertical(laparams.word_margin)
-                        line.add(obj0)
-                        line.add(obj1)
-                    elif k == 1:
-                        line = LTTextLineHorizontal(laparams.word_margin)
-                        line.add(obj0)
-                        line.add(obj1)
-                    else:
-                        line = LTTextLineHorizontal(laparams.word_margin)
-                        line.add(obj0)
-                        yield line
-                        line = None
-            obj0 = obj1
         if line is None:
             line = LTTextLineHorizontal(laparams.word_margin)
             line.add(obj0)
@@ -503,11 +502,8 @@ class LTLayoutContainer(LTContainer):
             return objs.difference((obj1,obj2))
         # XXX this still takes O(n^2)  :(
         dists = []
-        for i in range(len(boxes)):
-            obj1 = boxes[i]
-            for j in range(i+1, len(boxes)):
-                obj2 = boxes[j]
-                dists.append((0, dist(obj1, obj2), obj1, obj2))
+        for obj1, obj2 in combinations(boxes, 2):
+            dists.append((0, dist(obj1, obj2), obj1, obj2))
         # we sort by dist and our tuple is (c,dist,obj1,obj2)
         sortkey = lambda tup: tup[1]
         dists.sort(key=sortkey)
@@ -517,17 +513,14 @@ class LTLayoutContainer(LTContainer):
             if c == 0 and isany(obj1, obj2):
                 dists.append((1,d,obj1,obj2))
                 continue
-            if (isinstance(obj1, LTTextBoxVertical) or
-                isinstance(obj1, LTTextGroupTBRL) or
-                isinstance(obj2, LTTextBoxVertical) or
-                isinstance(obj2, LTTextGroupTBRL)):
+            if (isinstance(obj1, (LTTextBoxVertical, LTTextGroupTBRL)) or
+                isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
                 group = LTTextGroupTBRL([obj1,obj2])
             else:
                 group = LTTextGroupLRTB([obj1,obj2])
             plane.remove(obj1)
             plane.remove(obj2)
-            dists = [ (c,d,o1,o2) for (c,d,o1,o2) in dists
-                      if o1 in plane and o2 in plane ]
+            dists = [(c,d,o1,o2) for (c,d,o1,o2) in dists if o1 in plane and o2 in plane]
             for other in plane:
                 dists.append((0, dist(group,other), group, other))
             dists.sort(key=sortkey)
