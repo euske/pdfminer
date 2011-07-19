@@ -20,7 +20,7 @@ class IndexAssigner:
 class LAParams:
 
     def __init__(self, line_overlap=0.5, char_margin=2.0, line_margin=0.5, word_margin=0.1,
-            boxes_flow=0.5, detect_vertical=False, all_texts=False):
+            boxes_flow=0.5, detect_vertical=False, all_texts=False, paragraph_indent=None):
         self.line_overlap = line_overlap
         self.char_margin = char_margin
         self.line_margin = line_margin
@@ -28,6 +28,10 @@ class LAParams:
         self.boxes_flow = boxes_flow
         self.detect_vertical = detect_vertical
         self.all_texts = all_texts
+        # If this setting is not None, horizontal text boxes will be split by paragraphs, using
+        # the indent of their first line for the split. The numerical argument is the treshold that
+        # the line's x-pos must reach to be considered "indented".
+        self.paragraph_indent = paragraph_indent
 
     def __repr__(self):
         return ('<LAParams: char_margin=%.1f, line_margin=%.1f, word_margin=%.1f all_texts=%r>' %
@@ -337,9 +341,27 @@ class LTTextBox(LTTextContainer):
 
 class LTTextBoxHorizontal(LTTextBox):
     
+    def __init__(self):
+        LTTextBox.__init__(self)
+        self._avg_lineheight = None
+    
+    def add(self, obj):
+        LTTextBox.add(self, obj)
+        self._avg_lineheight = None
+    
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
         self._sort_lines()
+    
+    def _pos_in_box(self, obj):
+        if self._avg_lineheight is None:
+            self._avg_lineheight = sum(o.height for o in self._objs) / len(self._objs)
+        x = obj.x0 - self.x0
+        y = self.y1 - obj.y1
+        # gridy is a y pos rounded using half the average line height. This way, we can be
+        # confident that lines that have almost the same Y-pos will have the same gridy
+        gridy = round(y / (self._avg_lineheight / 2))
+        return x, y, gridy
     
     def _sort_lines(self):
         # Sorting lines in our textbox is not so easy. It's possible that we get some lines that
@@ -347,18 +369,45 @@ class LTTextBoxHorizontal(LTTextBox):
         # simply sorting by Y-pos will be wrong. That's why we take the average line height to
         # "snap" our y-pos to some kind of grid. Then we sort by "snapped" ypos, using X pos as
         # a tie breaker.
-        avgheight = sum(o.height for o in self._objs) / len(self._objs)
         def sortkey(obj):
-            y = self.y1 - obj.y1
-            x = obj.x0 - self.x0
-            linenumber = round(y / avgheight)
-            return (linenumber, x)
+            x, y, gridy = self._pos_in_box(obj)
+            return (gridy, x)
         
         self._objs = sorted(self._objs, key=sortkey)
     
-
     def get_writing_mode(self):
         return 'lr-tb'
+    
+    def paragraphs(self, indent_treshold):
+        # Check if some lines in the box are indented and if yes, split our textbox in multiple
+        # paragraphs and return the result.
+        self._sort_lines()
+        prev_lines_xpos = []
+        paragraphs = []
+        current_paragraph = LTTextBoxHorizontal()
+        prevgridy = None
+        for obj in self._objs:
+            x, y, gridy = self._pos_in_box(obj)
+            if gridy != prevgridy:
+                if (x > indent_treshold) and current_paragraph:
+                    paragraphs.append(current_paragraph)
+                    current_paragraph = LTTextBoxHorizontal()
+                prev_lines_xpos.append(x)
+                prevgridy = gridy
+            current_paragraph.add(obj)
+        if current_paragraph:
+            paragraphs.append(current_paragraph)
+        # Now, it's possible that we have box like a title that has no paragraph at all but that the
+        # algo above would mistakenly see as one-paragraph-per line (a centered, multi-line title)
+        # we must thus check if most of our lines are "normal" lines (x < 1)
+        normal_line_count = len([x for x in prev_lines_xpos if x < 1])
+        if normal_line_count < len(prev_lines_xpos) / 2:
+            return [self]
+        if len(paragraphs) > 1:
+            return paragraphs
+        else:
+            return [self]
+    
 
 class LTTextBoxVertical(LTTextBox):
 
@@ -487,7 +536,12 @@ class LTLayoutContainer(LTContainer):
             box = boxes[line]
             if box in done: continue
             done.add(box)
-            yield box
+            if laparams.paragraph_indent:
+                paragraphs = box.paragraphs(laparams.paragraph_indent)
+                for p in paragraphs:
+                    yield p
+            else:
+                yield box
 
     def group_textboxes(self, laparams, boxes):
         def dist(obj1, obj2):

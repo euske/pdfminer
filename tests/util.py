@@ -25,7 +25,7 @@ class TestData:
         assert resultpath.check()
         return str(resultpath)
 
-def pages_from_pdf(path):
+def pages_from_pdf(path, **laparams):
     fp = open(path, 'rb')
     doc = PDFDocument(caching=True)
     parser = PDFParser(fp)
@@ -33,7 +33,7 @@ def pages_from_pdf(path):
     doc.set_parser(parser)
     doc.initialize()
     rsrcmgr = PDFResourceManager()
-    laparams = LAParams(all_texts=True, char_margin=1.7)
+    laparams = LAParams(all_texts=True, **laparams)
     device = PDFPageAggregator(rsrcmgr, laparams=laparams)
     interpreter = PDFPageInterpreter(rsrcmgr, device)
     result = []

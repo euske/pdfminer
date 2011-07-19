@@ -20,3 +20,22 @@ def test_slightly_higher_text():
     boxes = extract_textboxes(page)
     eq_(len(boxes), 1)
     assert boxes[0].get_text().startswith("This page has simple text with a\n*slightly* higher")
+
+def test_paragraph_indents():
+    # a textbox has a "paragraph" method that checks the indent of its lines and see if it's
+    # possible to split the box in multiple paragraphs.
+    path = testdata.filepath('paragraphs_indent.pdf')
+    page = pages_from_pdf(path, paragraph_indent=5)[0]
+    boxes = extract_textboxes(page)
+    eq_(len(boxes), 3)
+    assert boxes[0].get_text().startswith('First')
+    assert boxes[1].get_text().startswith('Second')
+    assert boxes[2].get_text().startswith('Third')
+
+def test_centered_text():
+    # In the case of a short piece of text with uneven line xpos, don't split each line into
+    # "paragraphs".
+    path = testdata.filepath('centered.pdf')
+    page = pages_from_pdf(path, paragraph_indent=5)[0]
+    boxes = extract_textboxes(page)
+    eq_(len(boxes), 1)
