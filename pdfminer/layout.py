@@ -339,7 +339,23 @@ class LTTextBoxHorizontal(LTTextBox):
     
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
-        self._objs = sorted(self._objs, key=lambda obj: -obj.y1)
+        self._sort_lines()
+    
+    def _sort_lines(self):
+        # Sorting lines in our textbox is not so easy. It's possible that we get some lines that
+        # are obviously the same, but one of them is slightly higher or lower. In these cases,
+        # simply sorting by Y-pos will be wrong. That's why we take the average line height to
+        # "snap" our y-pos to some kind of grid. Then we sort by "snapped" ypos, using X pos as
+        # a tie breaker.
+        avgheight = sum(o.height for o in self._objs) / len(self._objs)
+        def sortkey(obj):
+            y = self.y1 - obj.y1
+            x = obj.x0 - self.x0
+            linenumber = round(y / avgheight)
+            return (linenumber, x)
+        
+        self._objs = sorted(self._objs, key=sortkey)
+    
 
     def get_writing_mode(self):
         return 'lr-tb'
