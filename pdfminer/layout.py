@@ -505,7 +505,7 @@ class LTLayoutContainer(LTContainer):
         for obj1, obj2 in combinations(boxes, 2):
             dists.append((0, dist(obj1, obj2), obj1, obj2))
         # we sort by dist and our tuple is (c,dist,obj1,obj2)
-        sortkey = lambda tup: tup[1]
+        sortkey = lambda tup: tup[:2]
         dists.sort(key=sortkey)
         plane = Plane(boxes)
         while dists:
