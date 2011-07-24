@@ -290,21 +290,40 @@ class LTTextLineHorizontal(LTTextLine):
 
     def __init__(self, word_margin):
         LTTextLine.__init__(self, word_margin)
-        self._x1 = +INF
+        self._last_char = None
+        # for height average
+        self._charheight_sum = 0
+        self._charcount = 0
 
     def add(self, obj):
-        if isinstance(obj, LTChar) and self.word_margin:
+        assert isinstance(obj, LTChar)
+        # if we're at the beginning of the line, we consider ourselves 'inspace'
+        inspace = (self._last_char is None) or (self._last_char.get_text() == ' ') or (obj.get_text() == ' ')
+        if self.word_margin and not inspace:
             margin = self.word_margin * obj.width
-            if self._x1 < obj.x0-margin:
+            if self._last_char.x1 < obj.x0-margin:
                 LTContainer.add(self, LTAnon(' '))
-        self._x1 = obj.x1
+        self._last_char = obj
+        self._charheight_sum += obj.height
+        self._charcount += 1
         LTTextLine.add(self, obj)
 
     def find_neighbors(self, plane, ratio):
         h = ratio*self.height
         objs = plane.find((self.x0, self.y0-h, self.x1, self.y1+h))
-        return [ obj for obj in objs if isinstance(obj, LTTextLineHorizontal) ]
+        ACCEPTABLE_DIFF = 3
+        acceptable = lambda obj: isinstance(obj, LTTextLineHorizontal) and\
+            abs(obj.avg_charheight - self.avg_charheight) < ACCEPTABLE_DIFF
+        return [obj for obj in objs if acceptable(obj)]
     
+    @property
+    def avg_charheight(self):
+        if self._charcount:
+            return self._charheight_sum / self._charcount
+        else:
+            return 0
+    
+
 class LTTextLineVertical(LTTextLine):
 
     def __init__(self, word_margin):

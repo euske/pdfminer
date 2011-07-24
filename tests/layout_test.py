@@ -28,9 +28,9 @@ def test_paragraph_indents():
     page = pages_from_pdf(path, paragraph_indent=5)[0]
     boxes = extract_textboxes(page)
     eq_(len(boxes), 3)
-    assert boxes[0].get_text().startswith('First')
-    assert boxes[1].get_text().startswith('Second')
-    assert boxes[2].get_text().startswith('Third')
+    assert boxes[0].get_text().startswith("First")
+    assert boxes[1].get_text().startswith("Second")
+    assert boxes[2].get_text().startswith("Third")
 
 def test_centered_text():
     # In the case of a short piece of text with uneven line xpos, don't split each line into
@@ -39,3 +39,13 @@ def test_centered_text():
     page = pages_from_pdf(path, paragraph_indent=5)[0]
     boxes = extract_textboxes(page)
     eq_(len(boxes), 1)
+
+def test_big_letter_with_title():
+    # A line with a big first letter makes the whole line higher, which might make the layout
+    # grouping algorithm think that a title line preceding it goes with that line.
+    path = testdata.filepath('big_letter_and_title.pdf')
+    page = pages_from_pdf(path)[0]
+    boxes = extract_textboxes(page)
+    eq_(len(boxes), 2)
+    eq_(boxes[0].get_text(), "This is a title\n")
+    assert boxes[1].get_text().startswith("And this is a paragraph")
