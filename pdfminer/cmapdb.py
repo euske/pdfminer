@@ -54,9 +54,10 @@ class CMap:
     def decode(self, code):
         if self.debug:
             print('decode: %r, %r' % (self, code), file=sys.stderr)
+        if isinstance(code, str):
+            code = code.encode('latin-1')
         d = self.code2cid
         for c in code:
-            c = ord(c)
             if c in d:
                 d = d[c]
                 if isinstance(d, int):
