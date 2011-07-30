@@ -1,5 +1,7 @@
 import sys
 import re
+import logging
+
 from .utils import choplist
 
 STRICT = 0
@@ -137,8 +139,6 @@ class PSBaseParser:
     """
     BUFSIZ = 4096
 
-    debug = 0
-
     def __init__(self, fp):
         self.fp = fp
         self.seek(0)
@@ -166,8 +166,7 @@ class PSBaseParser:
     def seek(self, pos):
         """Seeks the parser to the given position.
         """
-        if 2 <= self.debug:
-            print('seek: %r' % pos, file=sys.stderr)
+        # logging.debug('seek: %r', pos)
         self.fp.seek(pos)
         # reset the status for nextline()
         self.bufpos = pos
@@ -219,8 +218,7 @@ class PSBaseParser:
             else:
                 linebuf += self.buf[self.charpos:]
                 self.charpos = len(self.buf)
-        if 2 <= self.debug:
-            print('nextline: %r' % ((linepos, linebuf),), file=sys.stderr)
+        # logging.debug('nextline: %r', (linepos, linebuf))
         return (linepos, linebuf)
 
     def revreadlines(self):
@@ -465,8 +463,7 @@ class PSBaseParser:
             self.fillbuf()
             self.charpos = self._parse1(self.buf, self.charpos)
         token = self._tokens.pop(0)
-        if 2 <= self.debug:
-            print('nexttoken: %r' % (token,), file=sys.stderr)
+        # logging.debug('nexttoken: %r', token)
         return token
 
 
@@ -500,23 +497,20 @@ class PSStackParser(PSBaseParser):
         return objs
     
     def add_results(self, *objs):
-        if 2 <= self.debug:
-            print('add_results: %r' % (objs,), file=sys.stderr)
+        # logging.debug('add_results: %r', objs)
         self.results.extend(objs)
 
     def start_type(self, pos, type):
         self.context.append((pos, self.curtype, self.curstack))
         (self.curtype, self.curstack) = (type, [])
-        if 2 <= self.debug:
-            print('start_type: pos=%r, type=%r' % (pos, type), file=sys.stderr)
+        # logging.debug('start_type: pos=%r, type=%r', pos, type)
     
     def end_type(self, type):
         if self.curtype != type:
             raise PSTypeError('Type mismatch: %r != %r' % (self.curtype, type))
         objs = [ obj for (_,obj) in self.curstack ]
         (pos, self.curtype, self.curstack) = self.context.pop()
-        if 2 <= self.debug:
-            print('end_type: pos=%r, type=%r, objs=%r' % (pos, type, objs), file=sys.stderr)
+        # logging.debug('end_type: pos=%r, type=%r, objs=%r', pos, type, objs)
         return (pos, objs)
 
     def do_keyword(self, pos, token):
@@ -567,15 +561,12 @@ class PSStackParser(PSBaseParser):
                 except PSTypeError:
                     if STRICT: raise
             else:
-                if 2 <= self.debug:
-                    print('do_keyword: pos=%r, token=%r, stack=%r' % \
-                          (pos, token, self.curstack), file=sys.stderr)
+                logging.debug('do_keyword: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
                 self.do_keyword(pos, token)
             if self.context:
                 continue
             else:
                 self.flush()
         obj = self.results.pop(0)
-        if 2 <= self.debug:
-            print('nextobject: %r' % (obj,), file=sys.stderr)
+        logging.debug('nextobject: %r', obj)
         return obj

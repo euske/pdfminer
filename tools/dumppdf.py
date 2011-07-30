@@ -10,6 +10,7 @@ import sys, re
 from pdfminer.psparser import PSKeyword, PSLiteral
 from pdfminer.pdfparser import PDFDocument, PDFParser, PDFNoOutlines
 from pdfminer.pdftypes import PDFStream, PDFObjRef, resolve1, stream_value
+from pdfminer.utils import set_debug_logging
 
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
@@ -41,6 +42,8 @@ def dumpxml(out, obj, codec=None):
         out.write('</list>')
         return
 
+    if isinstance(obj, bytes):
+        obj = obj.decode('latin-1')
     if isinstance(obj, str):
         out.write('<string size="%d">%s</string>' % (len(obj), e(obj)))
         return
@@ -105,7 +108,7 @@ def dumpallobjs(out, doc, codec=None):
 def dumpoutline(outfp, fname, objids, pagenos, password='',
                 dumpall=False, codec=None):
     doc = PDFDocument()
-    fp = file(fname, 'rb')
+    fp = open(fname, 'rb')
     parser = PDFParser(fp)
     parser.set_document(doc)
     doc.set_parser(parser)
@@ -153,7 +156,7 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
 def dumppdf(outfp, fname, objids, pagenos, password='',
             dumpall=False, codec=None):
     doc = PDFDocument()
-    fp = file(fname, 'rb')
+    fp = open(fname, 'rb')
     parser = PDFParser(fp)
     parser.set_document(doc)
     doc.set_parser(parser)
@@ -191,7 +194,6 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
-    debug = 0
     objids = []
     pagenos = set()
     codec = None
@@ -200,7 +202,7 @@ def main(argv):
     proc = dumppdf
     outfp = sys.stdout
     for (k, v) in opts:
-        if k == '-d': debug += 1
+        if k == '-d': set_debug_logging()
         elif k == '-i': objids.extend( int(x) for x in v.split(',') )
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-P': password = v
@@ -209,10 +211,7 @@ def main(argv):
         elif k == '-b': codec = 'binary'
         elif k == '-t': codec = 'text'
         elif k == '-T': proc = dumpoutline
-        elif k == '-o': outfp = file(v, 'wb')
-    #
-    PDFDocument.debug = debug
-    PDFParser.debug = debug
+        elif k == '-o': outfp = open(v, 'wb')
     #
     for fname in args:
         proc(outfp, fname, objids, pagenos, password=password,

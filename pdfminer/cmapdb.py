@@ -16,8 +16,10 @@ import os
 import os.path
 import gzip
 import pickle as pickle
-from . import cmap
 import struct
+import logging
+
+from . import cmap
 from .psparser import PSStackParser
 from .psparser import PSSyntaxError, PSEOF
 from .psparser import PSLiteral
@@ -30,9 +32,7 @@ class CMapError(Exception): pass
 
 
 class CMap:
-
-    debug = 0
-
+    
     def __init__(self, code2cid=None):
         self.code2cid = code2cid or {}
 
@@ -52,8 +52,7 @@ class CMap:
         copy(self.code2cid, cmap.code2cid)
 
     def decode(self, code):
-        if self.debug:
-            print('decode: %r, %r' % (self, code), file=sys.stderr)
+        logging.debug('decode: %r, %r', self, code)
         if isinstance(code, str):
             code = code.encode('latin-1')
         d = self.code2cid
@@ -98,15 +97,12 @@ class IdentityCMap:
             
 
 class UnicodeMap:
-
-    debug = 0
-
+    
     def __init__(self, cid2unichr=None):
         self.cid2unichr = cid2unichr or {}
 
     def get_unichr(self, cid):
-        if self.debug:
-            print('get_unichr: %r, %r' % (self, cid), file=sys.stderr)
+        logging.debug('get_unichr: %r, %r', self, cid)
         return self.cid2unichr[cid]
 
     def dump(self, out=sys.stdout):
@@ -203,7 +199,6 @@ class PyUnicodeMap(UnicodeMap):
 
 class CMapDB:
 
-    debug = 0
     _cmap_cache = {}
     _umap_cache = {}
     
@@ -212,8 +207,7 @@ class CMapDB:
     @classmethod
     def _load_data(klass, name):
         filename = '%s.pickle.gz' % name
-        if klass.debug:
-            print('loading:', name, file=sys.stderr)
+        logging.debug('loading: %s', name)
         default_path = os.environ.get('CMAP_PATH', '/usr/share/pdfminer/')
         for directory in (os.path.dirname(cmap.__file__), default_path):
             path = os.path.join(directory, filename)

@@ -234,6 +234,9 @@ def matrix2str(matrix):
     (a,b,c,d,e,f) = matrix
     return '[%.2f,%.2f,%.2f,%.2f, (%.2f,%.2f)]' % (a,b,c,d,e,f)
 
+def set_debug_logging():
+    import logging, sys
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
 
 class ObjIdRange:
 

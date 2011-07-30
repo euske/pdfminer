@@ -1,12 +1,10 @@
-import sys
 import io
+import logging
 
 class CorruptDataError(Exception):
     pass
 
 class LZWDecoder:
-
-    debug = 0
 
     def __init__(self, fp):
         self.fp = fp
@@ -83,9 +81,7 @@ class LZWDecoder:
                 # just ignore corrupt data and stop yielding there
                 break
             yield x
-            if self.debug:
-                print(('nbits=%d, code=%d, output=%r, table=%r' %
-                                     (self.nbits, code, x, self.table[258:])), file=sys.stderr)
+            logging.debug('nbits=%d, code=%d, output=%r, table=%r', self.nbits, code, x, self.table)
 
 # lzwdecode
 def lzwdecode(data):

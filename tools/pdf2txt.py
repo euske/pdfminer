@@ -3,12 +3,11 @@ import sys
 import io
 import getopt
 
-from pdfminer.pdfparser import PDFDocument, PDFParser
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter, process_pdf
-from pdfminer.pdfdevice import PDFDevice, TagExtractor
+from pdfminer.pdfinterp import PDFResourceManager, process_pdf
+from pdfminer.pdfdevice import TagExtractor
 from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
-from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
+from pdfminer.utils import set_debug_logging
 
 def main(argv):
     def usage():
@@ -21,8 +20,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
-    # debug option
-    debug = 0
+    debug = False
     # input option
     password = ''
     pagenos = set()
@@ -39,7 +37,7 @@ def main(argv):
     showpageno = True
     laparams = LAParams()
     for (k, v) in opts:
-        if k == '-d': debug += 1
+        if k == '-d': debug = True
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-m': maxpages = int(v)
         elif k == '-P': password = v
@@ -57,14 +55,9 @@ def main(argv):
         elif k == '-t': outtype = v
         elif k == '-c': codec = v
         elif k == '-s': scale = float(v)
-    #
-    PDFDocument.debug = debug
-    PDFParser.debug = debug
-    CMapDB.debug = debug
-    PDFResourceManager.debug = debug
-    PDFPageInterpreter.debug = debug
-    PDFDevice.debug = debug
-    #
+    
+    if debug:
+        set_debug_logging()
     rsrcmgr = PDFResourceManager(caching=caching)
     if not outtype:
         outtype = 'text'
@@ -87,7 +80,7 @@ def main(argv):
         device = XMLConverter(rsrcmgr, outfp, laparams=laparams, outdir=outdir)
     elif outtype == 'html':
         device = HTMLConverter(rsrcmgr, outfp, scale=scale, layoutmode=layoutmode,
-            laparams=laparams, outdir=outdir)
+            laparams=laparams, outdir=outdir, debug=debug)
     elif outtype == 'tag':
         device = TagExtractor(rsrcmgr, outfp)
     else:

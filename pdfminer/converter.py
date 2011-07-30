@@ -1,5 +1,7 @@
-import sys, os.path
-from .pdfdevice import PDFDevice, PDFTextDevice
+import os.path
+import logging
+
+from .pdfdevice import PDFTextDevice
 from .pdffont import PDFUnicodeNotDefined
 from .pdftypes import LITERALS_DCT_DECODE
 from .pdfcolor import LITERAL_DEVICE_GRAY, LITERAL_DEVICE_RGB
@@ -95,8 +97,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         return item.adv
 
     def handle_undefined_char(self, font, cid):
-        if self.debug:
-            print('undefined: %r, %r' % (font, cid), file=sys.stderr)
+        logging.debug('undefined: %r, %r', font, cid)
         return '(cid:%d)' % cid
 
     def receive_layout(self, ltpage):
@@ -205,7 +206,8 @@ class HTMLConverter(PDFConverter):
                  scale=1, fontscale=0.7, layoutmode='normal', showpageno=True,
                  pagemargin=50, outdir=None,
                  rect_colors={'curve':'black', 'page':'gray'},
-                 text_colors={'char':'black'}):
+                 text_colors={'char':'black'},
+                 debug=False):
         PDFConverter.__init__(self, rsrcmgr, outfp, pageno=pageno, laparams=laparams)
         self.scale = scale
         self.fontscale = fontscale
@@ -215,7 +217,7 @@ class HTMLConverter(PDFConverter):
         self.outdir = outdir
         self.rect_colors = rect_colors
         self.text_colors = text_colors
-        if self.debug:
+        if debug:
             self.rect_colors.update(self.RECT_COLORS)
             self.text_colors.update(self.TEXT_COLORS)
         self._yoffset = self.pagemargin

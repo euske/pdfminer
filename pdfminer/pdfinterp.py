@@ -1,6 +1,7 @@
-import sys
 import io
 import re
+import logging
+
 from .cmapdb import CMapDB, CMap
 from .psparser import PSTypeError, PSEOF
 from .psparser import PSKeyword, literal_name, keyword_name
@@ -101,15 +102,12 @@ class PDFGraphicState:
                  self.miterlimit, self.dash, self.intent, self.flatness))
 
 class PDFResourceManager:
-
     """Repository of shared resources.
     
     ResourceManager facilitates reuse of shared resources
     such as fonts and images so that large objects are not
     allocated multiple times.
     """
-    debug = 0
-
     def __init__(self, caching=True):
         self.caching = caching
         self._cached_fonts = {}
@@ -135,8 +133,7 @@ class PDFResourceManager:
         if objid and objid in self._cached_fonts:
             font = self._cached_fonts[objid]
         else:
-            if 2 <= self.debug:
-                print('get_font: create: objid=%r, spec=%r' % (objid, spec), file=sys.stderr)
+            # logging.debug('get_font: create: objid=%r, spec=%r', objid, spec)
             if STRICT:
                 if spec['Type'] is not LITERAL_FONT:
                     raise PDFFontError('Type is not /Font')
@@ -269,8 +266,6 @@ class PDFContentParser(PSStackParser):
 
 class PDFPageInterpreter:
 
-    debug = 0
-
     def __init__(self, rsrcmgr, device):
         self.rsrcmgr = rsrcmgr
         self.device = device
@@ -299,8 +294,7 @@ class PDFPageInterpreter:
             else:
                 return PREDEFINED_COLORSPACE[name]
         for (k,v) in dict_value(resources).items():
-            if 2 <= self.debug:
-                print('Resource: %r: %r' % (k,v), file=sys.stderr)
+            # logging.debug('Resource: %r: %r', k,v)
             if k == 'Font':
                 for (fontid,spec) in dict_value(v).items():
                     objid = None
@@ -637,8 +631,7 @@ class PDFPageInterpreter:
             if STRICT:
                 raise PDFInterpreterError('Undefined xobject id: %r' % xobjid)
             return
-        if 1 <= self.debug:
-            print('Processing xobj: %r' % xobj, file=sys.stderr)
+        logging.debug('Processing xobj: %r', xobj)
         subtype = xobj.get('Subtype')
         if subtype is LITERAL_FORM and 'BBox' in xobj:
             interpreter = self.dup()
@@ -660,8 +653,7 @@ class PDFPageInterpreter:
             pass
 
     def process_page(self, page):
-        if 1 <= self.debug:
-            print('Processing page: %r' % page, file=sys.stderr)
+        logging.debug('Processing page: %r', page)
         (x0,y0,x1,y1) = page.mediabox
         if page.rotate == 90:
             ctm = (0,-1,1,0, -y0,x1)
@@ -679,9 +671,7 @@ class PDFPageInterpreter:
     #   Render the content streams.
     #   This method may be called recursively.
     def render_contents(self, resources, streams, ctm=MATRIX_IDENTITY):
-        if 1 <= self.debug:
-            print(('render_contents: resources=%r, streams=%r, ctm=%r' %
-                             (resources, streams, ctm)), file=sys.stderr)
+        logging.debug('render_contents: resources=%r, streams=%r, ctm=%r', resources, streams, ctm)
         self.init_resources(resources)
         self.init_state(ctm)
         self.execute(list_value(streams))
@@ -705,13 +695,11 @@ class PDFPageInterpreter:
                     nargs = func.__code__.co_argcount-1
                     if nargs:
                         args = self.pop(nargs)
-                        if 2 <= self.debug:
-                            print('exec: %s %r' % (name, args), file=sys.stderr)
+                        # logging.debug('exec: %s %r', name, args)
                         if len(args) == nargs:
                             func(*args)
                     else:
-                        if 2 <= self.debug:
-                            print('exec: %s' % (name), file=sys.stderr)
+                        # logging.debug('exec: %s', name)
                         func()
                 else:
                     if STRICT:
