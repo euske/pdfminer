@@ -153,7 +153,7 @@ class PDFXRefStream(PDFBaseXRef):
         self.data = stream.get_data()
         self.entlen = self.fl1+self.fl2+self.fl3
         self.trailer = stream.attrs
-        if logging.getLogger().gteEffectiveLevel() <= logging.DEBUG:
+        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             logging.debug('xref stream: objid=%s, fields=%d,%d,%d',
                 ', '.join(map(repr, self.objid_ranges)), self.fl1, self.fl2, self.fl3)
 
