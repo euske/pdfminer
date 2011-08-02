@@ -1,5 +1,6 @@
 import sys
 import re
+
 from .utils import choplist
 from . import pslexer
 
@@ -113,134 +114,33 @@ def keyword_name(x):
 ##  About PSParser, bytes and strings and all that
 ##  
 ##  Most of the contents (well, maybe not in size, but in "parsing effort") of a PDF file is text,
-##  but in some cases, namely streams, there's binary data involved. Because of this, file pointers
-##  to the file to parse must be opened in binary mode. Conversion to text happen at a low level,
-##  in fillbuf() and revreadlines(), so we can treat the stuff we read as text pretty much
-##  transparently. We use errors='replace' during decoding because this data will not be interpreted
-##  by the 'normal parsing mechanism'. The stream parser reads directly to the file pointer, without
-##  going through the buffer, so we get binary data.
+##  but in some cases, namely streams, there's binary data involved. What we do is that we read the
+##  data as latin-1. When binary data is encountered, we have to re-encode it as latin-1 as well.
 
-EOL = re.compile(r'[\r\n]')
+##  About reading all data at once
+##  There used to be a buffering mechanism in place, but it made everything rather complicated and
+##  all this string buffering operations, especially with the ply lexer, ended up being rather slow.
+##  We read the whole thing in memory now. Sure, some PDFs are rather large, but computers today
+##  have lots of memory. At first, I wanted to use a mmap, but these are binary and making them work
+## with the ply lexer was very complicated. Maybe one day.
+
+EOL = re.compile(r'\r\n|\r|\n', re.MULTILINE)
 class PSBaseParser:
 
     """Most basic PostScript parser that performs only tokenization.
     """
-    BUFSIZ = 4096
-
     debug = 0
 
     def __init__(self, fp):
-        self.fp = fp
-        self.is_eof = False
-        self.lex = None
-        self.seek(0)
+        data = fp.read()
+        if isinstance(data, bytes):
+            data = data.decode('latin-1')
+        self.data = data
+        self.lex = pslexer.lexer.clone()
+        self.lex.input(data)
 
     def __repr__(self):
         return '<%s: %r, bufpos=%d>' % (self.__class__.__name__, self.fp, self.bufpos)
-
-    def flush(self):
-        pass
-
-    def close(self):
-        self.flush()
-
-    def tell(self):
-        return self.bufpos+self.charpos
-
-    def seek(self, pos):
-        """Seeks the parser to the given position.
-        """
-        if 2 <= self.debug:
-            print('seek: %r' % pos, file=sys.stderr)
-        self.fp.seek(pos)
-        # reset the status for nextline()
-        self.bufpos = pos
-        self.buf = ''
-        self.charpos = 0
-
-    def _readbuf(self, force):
-        if force:
-            # The bufsize thing below is there so that it's possible to grow the buffer to multiple
-            # bufsizes if there's a need for it (for a very weird lexer input for example)
-            bufsize = self.BUFSIZ + (len(self.buf) - self.charpos)
-            abspos = self.tell()
-            self.fp.seek(abspos)
-        else:
-            bufsize = self.BUFSIZ
-        self.bufpos = self.fp.tell()
-        data = self.fp.read(bufsize)
-        self.is_eof = len(data) < bufsize
-        self.charpos = 0
-        self.lex = None
-        return data
-    
-    def fillbuf(self, force=False):
-        # When force is true, it means that even if charpos < len(self.buf), we want the buffer
-        # to be filled. So what will happen is that we'll check our current pos according to charpos
-        # and then seek it and then fill the buf from there. That means that there can be some
-        # overlapping between the end of our old buf and our new buf.
-        if (not force) and (self.charpos < len(self.buf)):
-            return
-        # fetch next chunk.
-        read_bytes = self._readbuf(force)
-        if not isinstance(read_bytes, bytes):
-            raise Exception("Files read with PSParser must be opened in binary mode")
-        self.rawbuf = read_bytes
-        self.buf = read_bytes.decode('latin-1')
-
-    def nextline(self):
-        """Fetches a next line that ends either with \\r or \\n.
-        """
-        linebuf = ''
-        linepos = self.bufpos + self.charpos
-        eol = False
-        while 1:
-            self.fillbuf()
-            if eol:
-                c = self.buf[self.charpos]
-                # handle '\r\n'
-                if c == '\n':
-                    linebuf += c
-                    self.charpos += 1
-                break
-            m = EOL.search(self.buf, self.charpos)
-            if m:
-                linebuf += self.buf[self.charpos:m.end(0)]
-                self.charpos = m.end(0)
-                if linebuf[-1] == '\r':
-                    eol = True
-                else:
-                    break
-            else:
-                linebuf += self.buf[self.charpos:]
-                self.charpos = len(self.buf)
-        if 2 <= self.debug:
-            print('nextline: %r' % ((linepos, linebuf),), file=sys.stderr)
-        return (linepos, linebuf)
-
-    def revreadlines(self):
-        """Fetches a next line backword.
-
-        This is used to locate the trailers at the end of a file.
-        """
-        self.fp.seek(0, 2)
-        pos = self.fp.tell()
-        buf = ''
-        while 0 < pos:
-            prevpos = pos
-            pos = max(0, pos-self.BUFSIZ)
-            self.fp.seek(pos)
-            read_bytes = self.fp.read(prevpos-pos)
-            if not read_bytes: break
-            s = read_bytes.decode('latin-1')
-            while True:
-                n = max(s.rfind('\r'), s.rfind('\n'))
-                if n == -1:
-                    buf = s + buf
-                    break
-                yield s[n:]+buf
-                s = s[:n]
-                buf = ''
     
     def _convert_token(self, token):
         # converts `token` which comes from pslexer to a normal token.
@@ -256,32 +156,34 @@ class PSBaseParser:
         else:
             return token.value
     
+    def flush(self):
+        pass
+
+    def close(self):
+        self.flush()
+        del self.lex
+        del self.data
+    
+    def setpos(self, newpos):
+        self.lex.lexpos = newpos
+    
+    def nextline(self):
+        m = EOL.search(self.data, pos=self.lex.lexpos)
+        if m is None:
+            raise PSEOF('Unexpected EOF')
+        start = self.lex.lexpos
+        s = self.data[start:m.end()]
+        self.lex.lexpos = m.end()
+        return (start, s)
+    
     def nexttoken(self):
-        def process_token(token):
-            assert token is not None
-            tokenpos = token.lexpos + self.bufpos
-            self.charpos = self.lex.lexpos
-            if 2 <= self.debug:
-                print('nexttoken: %r' % (token,), file=sys.stderr)
-            return (tokenpos, self._convert_token(token))
-        
-        self.fillbuf()
-        if self.lex is None:
-            self.lex = pslexer.lexer.clone()
-            self.lex.input(self.buf)
         token = self.lex.token()
-        if self.lex.lexpos >= len(self.buf):
-            # we read over our current buffer, even if the current token is valid, it might be
-            # incomplete. refill the buffer.
-            if self.is_eof:
-                if token is not None:
-                    return process_token(token)
-                else:
-                    raise PSEOF('Unexpected EOF')
-            self.fillbuf(force=True)
-            return self.nexttoken()
-        else:
-            return process_token(token)
+        if token is None:
+            raise PSEOF('Unexpected EOF')
+        tokenpos = token.lexpos
+        if 2 <= self.debug:
+            print('nexttoken: %r' % (token,), file=sys.stderr)
+        return (tokenpos, self._convert_token(token))
     
 
 class PSStackParser(PSBaseParser):
@@ -296,8 +198,8 @@ class PSStackParser(PSBaseParser):
         self.curstack = []
         self.results = []
 
-    def seek(self, pos):
-        PSBaseParser.seek(self, pos)
+    def setpos(self, newpos):
+        PSBaseParser.setpos(self, newpos)
         self.reset()
 
     def push(self, *objs):
