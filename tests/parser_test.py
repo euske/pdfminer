@@ -115,3 +115,11 @@ def test_hexstring_without_delimiter():
     tokens = get_tokens(s)
     EXPECTED = ['\x00\x42', KWD('foo')]
     eq_(withoutpos(tokens), EXPECTED)
+
+def test_octal_string_over_byte_value():
+    # when we have what looks like an octal escape char with a value that's over 255, we don't parse
+    # it as octal because if we do we end up with an encoding error later.
+    s = b"(\\500)"
+    tokens = get_tokens(s)
+    EXPECTED = ['\\500']
+    eq_(withoutpos(tokens), EXPECTED)

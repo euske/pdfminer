@@ -107,13 +107,22 @@ RE_STRING_ESCAPE = re.compile(r'\\[btnfr\\]')
 RE_STRING_OCTAL = re.compile(r'\\[0-7]{1,3}')
 RE_STRING_LINE_CONT = re.compile(r'\\\n|\\\r|\\\r\n')
 ESC_STRING = { 'b': '\b', 't': '\t', 'n': '\n', 'f': '\f', 'r': '\r', '\\': '\\' }
+
+def repl_string_escape(m):
+    return ESC_STRING[m.group(0)[1]]
+
+def repl_string_octal(m):
+    i = int(m.group(0)[1:], 8)
+    if i < 0xff: # we never want to go above 256 because it's unencodable
+        return chr(i)
+    else:
+        return m.group(0)
+
 def t_instring_contents(t):
     r'[^()]+'
     s = t.value
-    repl = lambda m: ESC_STRING[m.group(0)[1]]
-    s = RE_STRING_ESCAPE.sub(repl, s)
-    repl = lambda m: chr(int(m.group(0)[1:], 8))
-    s = RE_STRING_OCTAL.sub(repl, s)
+    s = RE_STRING_ESCAPE.sub(repl_string_escape, s)
+    s = RE_STRING_OCTAL.sub(repl_string_octal, s)
     s = RE_STRING_LINE_CONT.sub('', s)
     t.lexer.value_buffer.append(s)
 
