@@ -177,47 +177,25 @@ class PDFResourceManager:
 class PDFContentParser(PSStackParser):
 
     def __init__(self, streams):
-        self.streams = streams
-        self.istream = 0
-        PSStackParser.__init__(self, None)
-
-    def fillfp(self):
-        if not self.fp:
-            if self.istream < len(self.streams):
-                strm = stream_value(self.streams[self.istream])
-                self.istream += 1
-            else:
-                raise PSEOF('Unexpected EOF, file truncated?')
-            data = strm.get_data()
+        fp = io.StringIO()
+        for stream in streams:
+            stream = stream_value(stream)
+            data = stream.get_data()
             if isinstance(data, bytes):
                 data = data.decode('latin-1')
-            self.fp = io.StringIO(data)
-
-    def seek(self, pos):
-        self.fillfp()
-        PSStackParser.seek(self, pos)
-
-    def fillbuf(self):
-        if self.charpos < len(self.buf):
-            return
-        while 1:
-            self.fillfp()
-            self.bufpos = self.fp.tell()
-            self.buf = self.fp.read(self.BUFSIZ)
-            if self.buf: break
-            self.fp = None
-        self.charpos = 0
+            fp.write(data)
+        fp.seek(0)
+        PSStackParser.__init__(self, fp)
 
     def get_inline_data(self, pos, target='EI'):
-        self.seek(pos)
+        currpos = pos
         i = 0
         data = ''
         while i <= len(target):
-            self.fillbuf()
             if i:
-                c = self.buf[self.charpos]
+                c = self.data[currpos]
                 data += c
-                self.charpos += 1
+                currpos += 1
                 if len(target) <= i and c.isspace():
                     i += 1
                 elif i < len(target) and c == target[i]:
@@ -225,15 +203,10 @@ class PDFContentParser(PSStackParser):
                 else:
                     i = 0
             else:
-                try:
-                    j = self.buf.index(target[0], self.charpos)
-                    #print 'found', (0, self.buf[j:j+10])
-                    data += self.buf[self.charpos:j+1]
-                    self.charpos = j+1
-                    i = 1
-                except ValueError:
-                    data += self.buf[self.charpos:]
-                    self.charpos = len(self.buf)
+                j = self.data.index(target[0], currpos)
+                data += self.data[currpos:j+1]
+                currpos = j+1
+                i = 1
         data = data[:-(len(target)+1)] # strip the last part
         data = re.sub(r'(\x0d\x0a|[\x0d\x0a])$', '', data)
         return (pos, data)

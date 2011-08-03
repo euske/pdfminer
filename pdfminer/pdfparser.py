@@ -57,7 +57,7 @@ class PDFXRef(PDFBaseXRef):
             if not line:
                 raise PDFNoValidXRef('Premature eof: %r' % parser)
             if line.startswith('trailer'):
-                parser.seek(pos)
+                parser.setpos(pos)
                 break
             f = line.strip().split(' ')
             if len(f) != 2:
@@ -94,15 +94,16 @@ class PDFXRef(PDFBaseXRef):
         self.trailer.update(dict_value(dic))
 
     PDFOBJ_CUE = re.compile(r'^(\d+)\s+(\d+)\s+obj\b')
-    def load_fallback(self, parser):
-        parser.seek(0)
+
+    def load_fallback(self, parser, debug=0):
+        parser.setpos(0)
         while 1:
             try:
                 (pos, line) = parser.nextline()
             except PSEOF:
                 break
             if line.startswith('trailer'):
-                parser.seek(pos)
+                parser.setpos(pos)
                 self.load_trailer(parser)
                 logging.debug('trailer: %r', self.get_trailer())
                 break
@@ -422,7 +423,7 @@ class PDFDocument:
                 if isinstance(obj, PDFStream):
                     obj.set_objid(objid, 0)
             else:
-                self._parser.seek(index)
+                self._parser.setpos(index)
                 (_,objid1) = self._parser.nexttoken() # objid
                 (_,genno) = self._parser.nexttoken() # genno
                 (_,kwd) = self._parser.nexttoken()
@@ -595,14 +596,14 @@ class PDFParser(PSStackParser):
             # stream object
             ((_,dic),) = self.pop(1)
             dic = dict_value(dic)
-            objlen = 0
-            if not self.fallback:
-                try:
-                    objlen = int_value(dic['Length'])
-                except KeyError:
-                    if STRICT:
-                        raise PDFSyntaxError('/Length is undefined: %r' % dic)
-            self.seek(pos)
+            try:
+                objlen = int_value(dic['Length'])
+            except KeyError:
+                if STRICT:
+                    raise PDFSyntaxError('/Length is undefined: %r' % dic)
+                else:
+                    objlen = 0
+            self.setpos(pos)
             try:
                 (_, line) = self.nextline()  # 'stream'
             except PSEOF:
@@ -610,23 +611,16 @@ class PDFParser(PSStackParser):
                     raise PDFSyntaxError('Unexpected EOF')
                 return
             pos += len(line)
-            self.fp.seek(pos)
-            data = self.fp.read(objlen)
-            self.seek(pos+objlen)
-            while True:
-                next_chunk = self.fp.read(self.BUFSIZ)
-                if not next_chunk:
-                    if STRICT:
-                        raise PDFSyntaxError('Unexpected EOF')
-                    break
-                if b'endstream' in next_chunk:
-                    i = next_chunk.index(b'endstream')
-                    objlen += i
-                    data += next_chunk[:i]
-                    break
-                objlen += len(next_chunk)
-                data += next_chunk
-            self.seek(pos+objlen)
+            endpos = pos + objlen
+            if 'endstream' not in self.data[endpos:endpos+len('endstream')+2]:
+                r = re.compile(r'(\r\n|\r|\n)endstream')
+                m = r.search(self.data, pos)
+                if m is None:
+                    raise PDFSyntaxError("stream with no endstream")
+                endpos = m.start()
+            data = self.data[pos:endpos].encode('latin-1')
+            self.setpos(endpos)
+            self.nexttoken() # consume 'endstream'
             # XXX limit objlen not to exceed object boundary
             # logging.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...', pos, objlen, dic, data[:10])
             obj = PDFStream(dic, data, self.doc.decipher)
@@ -639,23 +633,21 @@ class PDFParser(PSStackParser):
 
     def find_xref(self):
         """Internal function used to locate the first XRef."""
-        # search the last xref table by scanning the file backwards.
-        prev = None
-        for line in self.revreadlines():
-            line = line.strip()
-            # logging.debug('find_xref: %r', line)
-            if line == 'startxref': break
-            if line:
-                prev = line
-        else:
+        # the word 'startxref' followed by a newline followed by digits
+        re_startxref = re.compile(r'startxref\s*[\r\n]+\s*(\d+)', re.MULTILINE)
+        # try at the end, then try the whole file.
+        m = re_startxref.findall(self.data, len(self.data)-4096)
+        if not m:
+            m = re_startxref.findall(self.data)
+        if not m:
             raise PDFNoValidXRef('Unexpected EOF')
-        logging.debug('xref found: pos=%r', prev)
-        return int(prev)
-
+        logging.debug('xref found: pos=%r', m[-1])
+        return int(m[-1])
+    
     # read xref table
     def read_xref_from(self, start, xrefs):
         """Reads XRefs from the given location."""
-        self.seek(start)
+        self.setpos(start)
         self.reset()
         try:
             (pos, token) = self.nexttoken()
@@ -664,7 +656,7 @@ class PDFParser(PSStackParser):
         # logging.debug('read_xref_from: start=%d, token=%r', start, token)
         if isinstance(token, int):
             # XRefStream: PDF-1.5
-            self.seek(pos)
+            self.setpos(pos)
             self.reset()
             xref = PDFXRefStream()
             xref.load(self)
