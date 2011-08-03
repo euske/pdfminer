@@ -470,7 +470,8 @@ class LTLayoutContainer(LTContainer):
         self.groups = None
         
     def get_textlines(self, laparams, objs):
-        obj0 = None
+        assert objs
+        obj0 = objs[0]
         line = None
         for obj0, obj1 in trailiter(objs, skipfirst=True):
             k = 0
