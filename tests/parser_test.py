@@ -108,3 +108,10 @@ def test_true_false_keywords_translate_to_bool():
     tokens = get_tokens(s)
     EXPECTED = [True, False]
     eq_(withoutpos(tokens), EXPECTED)
+
+def test_hexstring_without_delimiter():
+    # hexstrings don't need to end with a delimiter
+    s = b"<0042>foo"
+    tokens = get_tokens(s)
+    EXPECTED = ['\x00\x42', KWD('foo')]
+    eq_(withoutpos(tokens), EXPECTED)

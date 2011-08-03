@@ -19,7 +19,7 @@ def t_COMMENT(t):
 
 RE_SPC = re.compile(r'\s')
 RE_HEX_PAIR = re.compile(r'[0-9a-fA-F]{2}|.')
-@lex.TOKEN(r'<[0-9A-Fa-f\s]*>' + delimiter_end)
+@lex.TOKEN(r'<[0-9A-Fa-f\s]*>')
 def t_HEXSTRING(t):
     cleaned = RE_SPC.sub('', t.value[1:-1])
     pairs = RE_HEX_PAIR.findall(cleaned)

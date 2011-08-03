@@ -649,12 +649,12 @@ class PDFParser(PSStackParser):
         # the word 'startxref' followed by a newline followed by digits
         re_startxref = re.compile(r'startxref\s*[\r\n]+\s*(\d+)', re.MULTILINE)
         # try at the end, then try the whole file.
-        m = re_startxref.search(self.data, len(self.data)-4096)
-        if m is None:
-            m = re_startxref.search(self.data)
-        if m is None:
+        m = re_startxref.findall(self.data, len(self.data)-4096)
+        if not m:
+            m = re_startxref.findall(self.data)
+        if not m:
             raise PDFNoValidXRef('Unexpected EOF')
-        return int(m.group(1))
+        return int(m[-1])
     
     # read xref table
     def read_xref_from(self, start, xrefs):
