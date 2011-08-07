@@ -556,7 +556,7 @@ class LTLayoutContainer(LTContainer):
             box = boxes[line]
             if box in done: continue
             done.add(box)
-            if laparams.paragraph_indent:
+            if laparams.paragraph_indent and isinstance(box, LTTextBoxHorizontal):
                 paragraphs = box.paragraphs(laparams.paragraph_indent)
                 for p in paragraphs:
                     yield p
