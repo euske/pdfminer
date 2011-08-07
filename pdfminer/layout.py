@@ -400,8 +400,11 @@ class LTTextBoxHorizontal(LTTextBox):
     def paragraphs(self, indent_treshold):
         # Check if some lines in the box are indented and if yes, split our textbox in multiple
         # paragraphs and return the result.
+        if len(self._objs) <= 5:
+            # to avoid falsely separating non-paragraphs (like titles for example), we only consider
+            # boxes of 6 lines or more.
+            return [self]
         self._sort_lines()
-        prev_lines_xpos = []
         paragraphs = []
         current_paragraph = LTTextBoxHorizontal()
         prevgridy = None
@@ -410,21 +413,14 @@ class LTTextBoxHorizontal(LTTextBox):
             x, y, gridy = self._pos_in_box(obj)
             if gridy != prevgridy:
                 isinsdented = x > indent_treshold
-                if isinsdented and not wasindented and current_paragraph:
+                if isinsdented and (not wasindented) and (len(current_paragraph) > 1):
                     paragraphs.append(current_paragraph)
                     current_paragraph = LTTextBoxHorizontal()
                 wasindented = isinsdented
-                prev_lines_xpos.append(x)
                 prevgridy = gridy
             current_paragraph.add(obj)
         if current_paragraph:
             paragraphs.append(current_paragraph)
-        # Now, it's possible that we have box like a title that has no paragraph at all but that the
-        # algo above would mistakenly see as one-paragraph-per line (a centered, multi-line title)
-        # we must thus check if most of our lines are "normal" lines (x < 1)
-        normal_line_count = len([x for x in prev_lines_xpos if x < 1])
-        if normal_line_count < len(prev_lines_xpos) / 2:
-            return [self]
         if len(paragraphs) > 1:
             return paragraphs
         else:
