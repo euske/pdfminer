@@ -405,12 +405,15 @@ class LTTextBoxHorizontal(LTTextBox):
         paragraphs = []
         current_paragraph = LTTextBoxHorizontal()
         prevgridy = None
+        wasindented = False
         for obj in self._objs:
             x, y, gridy = self._pos_in_box(obj)
             if gridy != prevgridy:
-                if (x > indent_treshold) and current_paragraph:
+                isinsdented = x > indent_treshold
+                if isinsdented and not wasindented and current_paragraph:
                     paragraphs.append(current_paragraph)
                     current_paragraph = LTTextBoxHorizontal()
+                wasindented = isinsdented
                 prev_lines_xpos.append(x)
                 prevgridy = gridy
             current_paragraph.add(obj)
@@ -471,7 +474,7 @@ class LTLayoutContainer(LTContainer):
         
     def get_textlines(self, laparams, objs):
         assert objs
-        obj0 = objs[0]
+        obj1 = objs[0]
         line = None
         for obj0, obj1 in trailiter(objs, skipfirst=True):
             k = 0
@@ -530,7 +533,7 @@ class LTLayoutContainer(LTContainer):
                     line = None
         if line is None:
             line = LTTextLineHorizontal(laparams.word_margin)
-            line.add(obj0)
+            line.add(obj1)
         yield line
 
     def get_textboxes(self, laparams, lines):

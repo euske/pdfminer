@@ -49,3 +49,16 @@ def test_big_letter_with_title():
     eq_(len(boxes), 2)
     eq_(boxes[0].get_text(), "This is a title\n")
     assert boxes[1].get_text().startswith("And this is a paragraph")
+
+def test_big_letter_spanning_multiple_lines():
+    # When we have a paragraph starting with a big letter that spans multiple lines, count it as
+    # a single paragraph. Previously, each line would be counted as a single paragraph.
+    # In the test file, it's even trickier than usual because the big letter coords doesn't make
+    # the big letter belong to the textbox (so we have an extra 'L' textbox, but we don't consider
+    # it a bug). The file was created with Pages and this kind of layout is kinda hard to make with
+    # it.
+    path = testdata.filepath('big_letter_spanning_lines.pdf')
+    page = pages_from_pdf(path, paragraph_indent=5)[0]
+    boxes = extract_textboxes(page)
+    eq_(len(boxes), 4) # 3 paragraph + the extra 'L'
+    
