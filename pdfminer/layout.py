@@ -20,7 +20,8 @@ class IndexAssigner:
 class LAParams:
 
     def __init__(self, line_overlap=0.5, char_margin=2.0, line_margin=0.5, word_margin=0.1,
-            boxes_flow=0.5, detect_vertical=False, all_texts=False, paragraph_indent=None):
+            boxes_flow=0.5, detect_vertical=False, all_texts=False, paragraph_indent=None,
+            heuristic_word_margin=False):
         self.line_overlap = line_overlap
         self.char_margin = char_margin
         self.line_margin = line_margin
@@ -32,6 +33,14 @@ class LAParams:
         # the indent of their first line for the split. The numerical argument is the treshold that
         # the line's x-pos must reach to be considered "indented".
         self.paragraph_indent = paragraph_indent
+        # In many cases, the whole word_margin mechanism is useless because space characters are
+        # already included in the text. In fact, it's even harmful because it sometimes causes
+        # spurious space characters to be inserted. when heuristic_word_margin is enabled, text
+        # lines already containing space characters will have their word margin multiplied by 3 to
+        # avoid this spurious space problem. We don't skip space insertion altogether because it's
+        # possible that a layout peculiarity causes a big space not to contain the space character
+        # itself, and we want to count those.
+        self.heuristic_word_margin = heuristic_word_margin
 
     def __repr__(self):
         return ('<LAParams: char_margin=%.1f, line_margin=%.1f, word_margin=%.1f all_texts=%r>' %
@@ -270,44 +279,56 @@ class LTTextContainer(LTExpandableContainer, LTText):
 
 class LTTextLine(LTTextContainer):
 
-    def __init__(self, word_margin):
-        LTTextContainer.__init__(self)
-        self.word_margin = word_margin
-
     def __repr__(self):
-        return ('<%s %s %r>' %
-                (self.__class__.__name__, bbox2str(self.bbox),
-                 self.get_text()))
-
+        return ('<%s %s %r>' % (self.__class__.__name__, bbox2str(self.bbox), self.get_text()))
+    
+    def _insert_anon_spaces(self, word_margin):
+        raise NotImplementedError()
+    
+    def add(self, obj):
+        assert isinstance(obj, LTChar)
+        LTTextContainer.add(self, obj)
+    
     def analyze(self, laparams):
         LTTextContainer.analyze(self, laparams)
+        word_margin = laparams.word_margin
+        if laparams.heuristic_word_margin and any(obj.get_text() == ' ' for obj in self._objs):
+            word_margin *= 3
+        self._insert_anon_spaces(word_margin)
         LTContainer.add(self, LTAnon('\n'))
 
     def find_neighbors(self, plane, ratio):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 class LTTextLineHorizontal(LTTextLine):
 
-    def __init__(self, word_margin):
-        LTTextLine.__init__(self, word_margin)
+    def __init__(self):
+        LTTextLine.__init__(self)
         self._last_char = None
         # for height average
         self._charheight_sum = 0
         self._charcount = 0
 
+    def _insert_anon_spaces(self, word_margin):
+        if not word_margin:
+            return
+        insertpos = []
+        for i, (prev, obj) in enumerate(trailiter(self._objs, skipfirst=True)):
+            if prev.get_text() == ' ' or obj.get_text() == ' ':
+                continue
+            margin = word_margin * obj.width
+            if prev.x1 < obj.x0-margin:
+                insertpos.append(i+1) # +1 because our index is one behind because of trailiter
+        # we invert insertpos so that inserting a char in the beginning doesn't affect the rest of
+        # insertions.
+        for pos in reversed(insertpos):
+            self._objs.insert(pos, LTAnon(' '))
+    
     def add(self, obj):
-        assert isinstance(obj, LTChar)
-        # if we're at the beginning of the line, we consider ourselves 'inspace'
-        inspace = (self._last_char is None) or (self._last_char.get_text() == ' ') or (obj.get_text() == ' ')
-        if self.word_margin and not inspace:
-            margin = self.word_margin * obj.width
-            if self._last_char.x1 < obj.x0-margin:
-                LTContainer.add(self, LTAnon(' '))
-        self._last_char = obj
+        LTTextLine.add(self, obj)
         self._charheight_sum += obj.height
         self._charcount += 1
-        LTTextLine.add(self, obj)
-
+    
     def find_neighbors(self, plane, ratio):
         h = ratio*self.height
         objs = plane.find((self.x0, self.y0-h, self.x1, self.y1+h))
@@ -326,18 +347,17 @@ class LTTextLineHorizontal(LTTextLine):
 
 class LTTextLineVertical(LTTextLine):
 
-    def __init__(self, word_margin):
-        LTTextLine.__init__(self, word_margin)
-        self._y0 = -INF
-
-    def add(self, obj):
-        if isinstance(obj, LTChar) and self.word_margin:
-            margin = self.word_margin * obj.height
-            if obj.y1+margin < self._y0:
-                LTContainer.add(self, LTAnon(' '))
-        self._y0 = obj.y0
-        LTTextLine.add(self, obj)
-        
+    def _insert_anon_spaces(self, word_margin):
+        if not word_margin:
+            return
+        insertpos = []
+        for i, (prev, obj) in enumerate(trailiter(self._objs, skipfirst=True)):
+            margin = word_margin * obj.height
+            if obj.y1+margin < prev.y0:
+                insertpos.append(i+1)
+        for pos in reversed(insertpos):
+            self._objs.insert(pos, LTAnon(' '))
+    
     def find_neighbors(self, plane, ratio):
         w = ratio*self.width
         objs = plane.find((self.x0-w, self.y0, self.x1+w, self.y1))
@@ -515,20 +535,20 @@ class LTLayoutContainer(LTContainer):
                 line = None
             else:
                 if k == 2:
-                    line = LTTextLineVertical(laparams.word_margin)
+                    line = LTTextLineVertical()
                     line.add(obj0)
                     line.add(obj1)
                 elif k == 1:
-                    line = LTTextLineHorizontal(laparams.word_margin)
+                    line = LTTextLineHorizontal()
                     line.add(obj0)
                     line.add(obj1)
                 else:
-                    line = LTTextLineHorizontal(laparams.word_margin)
+                    line = LTTextLineHorizontal()
                     line.add(obj0)
                     yield line
                     line = None
         if line is None:
-            line = LTTextLineHorizontal(laparams.word_margin)
+            line = LTTextLineHorizontal()
             line.add(obj1)
         yield line
 
