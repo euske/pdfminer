@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from functools import partial
 import zlib
 from .lzw import lzwdecode
@@ -80,6 +78,8 @@ def decipher_all(decipher, objid, genno, x):
     """Recursively deciphers the given object.
     """
     if isinstance(x, str):
+        x = x.encode('latin-1')
+    if isinstance(x, bytes):
         return decipher(objid, genno, x)
     if isinstance(x, list):
         x = [ decipher_all(decipher, objid, genno, v) for v in x ]
