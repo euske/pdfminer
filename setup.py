@@ -21,6 +21,10 @@ PDF parser that can be used for other purposes instead of text analysis.''',
     maintainer='Virgil Dupras',
     maintainer_email='hsoft@hardcoded.net',
     url='http://bitbucket.org/hsoft/pdfminer3k',
+    install_requires=[
+        'pytest>=2.0',
+        'ply>=3.4',
+    ],
     packages=[
     'pdfminer',
     'pdfminer.cmap',

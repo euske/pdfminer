@@ -1,0 +1,10 @@
+Changes
+=======
+
+Version 1.2.0 -- 2011/08/09
+---------------------------
+
+* There wasn't a changelog until now. Starting it.
+* Removed the old Postscript lexer and replaced it by a PLY-based one.
+* Added a couple of heuristic layout features.
+* Fixed a couple of crashes on opening PDFs.
