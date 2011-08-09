@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from distutils.core import setup
+from setuptools import setup
 from pdfminer import __version__
 
 setup(

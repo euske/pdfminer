@@ -1,6 +1,6 @@
-include Makefile
 include *.txt
 include *.py
+include CHANGES
 graft cmaprsrc
 graft docs
 graft pdfminer
