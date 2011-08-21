@@ -36,7 +36,7 @@ class LAParams:
         # In many cases, the whole word_margin mechanism is useless because space characters are
         # already included in the text. In fact, it's even harmful because it sometimes causes
         # spurious space characters to be inserted. when heuristic_word_margin is enabled, text
-        # lines already containing space characters will have their word margin multiplied by 3 to
+        # lines already containing space characters will have their word margin multiplied by 5 to
         # avoid this spurious space problem. We don't skip space insertion altogether because it's
         # possible that a layout peculiarity causes a big space not to contain the space character
         # itself, and we want to count those.
@@ -293,8 +293,9 @@ class LTTextLine(LTTextContainer):
         LTTextContainer.analyze(self, laparams)
         word_margin = laparams.word_margin
         if laparams.heuristic_word_margin and any(obj.get_text() == ' ' for obj in self._objs):
-            word_margin *= 3
-        self._insert_anon_spaces(word_margin)
+            word_margin *= 5
+        if word_margin:
+            self._insert_anon_spaces(word_margin)
         LTContainer.add(self, LTAnon('\n'))
 
     def find_neighbors(self, plane, ratio):
@@ -307,8 +308,6 @@ class LTTextLineHorizontal(LTTextLine):
         self._chars_by_height = None
 
     def _insert_anon_spaces(self, word_margin):
-        if not word_margin:
-            return
         insertpos = []
         for i, (prev, obj) in enumerate(trailiter(self._objs, skipfirst=True)):
             if prev.get_text() == ' ' or obj.get_text() == ' ':
@@ -347,8 +346,6 @@ class LTTextLineHorizontal(LTTextLine):
 class LTTextLineVertical(LTTextLine):
 
     def _insert_anon_spaces(self, word_margin):
-        if not word_margin:
-            return
         insertpos = []
         for i, (prev, obj) in enumerate(trailiter(self._objs, skipfirst=True)):
             margin = word_margin * obj.height
