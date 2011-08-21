@@ -327,9 +327,12 @@ class LTTextLineHorizontal(LTTextLine):
     def find_neighbors(self, plane, ratio):
         h = ratio*self.height
         objs = plane.find((self.x0, self.y0-h, self.x1, self.y1+h))
-        ACCEPTABLE_DIFF = 1
+        # We use line_margin (ratio) as the threshold for line-height diff, which is somewhat
+        # wrong, but in effect, the two number pretty much always go together. Well, future will
+        # tell.
+        max_height_diff = ratio
         acceptable = lambda obj: isinstance(obj, LTTextLineHorizontal) and\
-            abs(obj.median_charheight - self.median_charheight) < ACCEPTABLE_DIFF
+            abs(obj.median_charheight - self.median_charheight) < max_height_diff
         return [obj for obj in objs if acceptable(obj)]
     
     @property
