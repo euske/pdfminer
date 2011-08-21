@@ -589,11 +589,16 @@ class PDFPageInterpreter:
     def do_ID(self): # never called
         pass
     def do_EI(self, obj):
-        if 'W' in obj and 'H' in obj:
-            iobjid = str(id(obj))
-            self.device.begin_figure(iobjid, (0,0,1,1), MATRIX_IDENTITY)
-            self.device.render_image(iobjid, obj)
-            self.device.end_figure(iobjid)
+        try:
+            if 'W' in obj and 'H' in obj:
+                iobjid = str(id(obj))
+                self.device.begin_figure(iobjid, (0,0,1,1), MATRIX_IDENTITY)
+                self.device.render_image(iobjid, obj)
+                self.device.end_figure(iobjid)
+        except TypeError:
+            # Sometimes, 'obj' is a PSLiteral. I'm not sure why, but I'm guessing it's because it's
+            # malformed or something. We can just ignore the thing.
+            logging.warning("Malformed inline image")
 
     # invoke an XObject
     def do_Do(self, xobjid):
