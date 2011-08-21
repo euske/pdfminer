@@ -304,10 +304,7 @@ class LTTextLineHorizontal(LTTextLine):
 
     def __init__(self):
         LTTextLine.__init__(self)
-        self._last_char = None
-        # for height average
-        self._charheight_sum = 0
-        self._charcount = 0
+        self._chars_by_height = None
 
     def _insert_anon_spaces(self, word_margin):
         if not word_margin:
@@ -326,21 +323,23 @@ class LTTextLineHorizontal(LTTextLine):
     
     def add(self, obj):
         LTTextLine.add(self, obj)
-        self._charheight_sum += obj.height
-        self._charcount += 1
+        self._chars_by_height = None
     
     def find_neighbors(self, plane, ratio):
         h = ratio*self.height
         objs = plane.find((self.x0, self.y0-h, self.x1, self.y1+h))
-        ACCEPTABLE_DIFF = 3
+        ACCEPTABLE_DIFF = 1
         acceptable = lambda obj: isinstance(obj, LTTextLineHorizontal) and\
-            abs(obj.avg_charheight - self.avg_charheight) < ACCEPTABLE_DIFF
+            abs(obj.median_charheight - self.median_charheight) < ACCEPTABLE_DIFF
         return [obj for obj in objs if acceptable(obj)]
     
     @property
-    def avg_charheight(self):
-        if self._charcount:
-            return self._charheight_sum / self._charcount
+    def median_charheight(self):
+        if not self._chars_by_height:
+            chars = [o for o in self._objs if isinstance(o, LTChar)]
+            self._chars_by_height = sorted(chars, key=lambda c: c.height)
+        if self._chars_by_height:
+            return self._chars_by_height[len(self._chars_by_height) // 2].height
         else:
             return 0
     
