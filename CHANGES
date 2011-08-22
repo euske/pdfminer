@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 1.2.1 -- 2011/08/22
+---------------------------
+
+* Fixed a crash on corrupted inline images.
+* Tweaked layout detection algo.
+
 Version 1.2.0 -- 2011/08/09
 ---------------------------
 
