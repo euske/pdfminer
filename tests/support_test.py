@@ -28,6 +28,11 @@ def test_lzwdecode_garbage():
     # yet.
     eq_(lzw.lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01\xff\xff'), b'\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42')
 
+def test_lzwdecode_invalid():
+    # Sometimes, the data is simply invalid, which leads us to try to read the character table when
+    # there's none. Just return nothing.
+    eq_(lzw.lzwdecode(b'\x80\x80\r\n'), b'')
+
 def test_RijndaelDecryptor():
     key = bytes.fromhex('00010203050607080a0b0c0d0f101112')
     ciphertext = bytes.fromhex('d8f532538289ef7d06b506a4fd5be9c9')

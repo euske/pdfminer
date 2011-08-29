@@ -49,7 +49,11 @@ class LZWDecoder:
         elif code == 257:
             pass
         elif not self.prevbuf:
-            x = self.prevbuf = self.table[code]
+            try:
+                x = self.prevbuf = self.table[code]
+            except (TypeError, IndexError):
+                # TypeError: table is None
+                raise CorruptDataError()
         else:
             if code < len(self.table):
                 x = self.table[code]
