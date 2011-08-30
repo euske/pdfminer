@@ -297,7 +297,15 @@ class LTTextLine(LTTextContainer):
         if word_margin:
             self._insert_anon_spaces(word_margin)
         LTContainer.add(self, LTAnon('\n'))
-
+    
+    def is_empty(self):
+        # We consider a text line with no text (only whitespace) to be empty, and thus ignored
+        # for textbox grouping so that we don't falsely consider a textbox a bunch of lines with
+        # an empty line in the middle.
+        if LTTextContainer.is_empty(self):
+            return True
+        return not self.get_text().strip()
+    
     def find_neighbors(self, plane, ratio):
         raise NotImplementedError()
 
