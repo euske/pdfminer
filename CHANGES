@@ -1,6 +1,13 @@
 Changes
 =======
 
+Version 1.2.2 -- 2011/08/30
+---------------------------
+
+* Fixed crash on corrupt LZW data.
+* Ignore lines with no text for textlines grouping.
+* Don't crash on invalid dictionary constructs when parsing postscript.
+
 Version 1.2.1 -- 2011/08/22
 ---------------------------
 
