@@ -88,7 +88,11 @@ class IdentityCMap:
     def decode(self, code):
         if isinstance(code, str):
             code = code.encode('latin-1')
-        n = len(code)/2
+        if len(code) % 2 != 0:
+            # Something's wrong, but we have to at least prevent a crash by removing the last char
+            logging.warning("The code %r has an uneven length, trimming last byte.", code)
+            code = code[:-1]
+        n = len(code)//2
         if n:
             return struct.unpack('>%dH' % n, code)
         else:
