@@ -137,9 +137,6 @@ class PSBaseParser:
         self.lex = pslexer.lexer.clone()
         self.lex.input(data)
 
-    def __repr__(self):
-        return '<%s: %r, bufpos=%d>' % (self.__class__.__name__, self.fp, self.bufpos)
-    
     def _convert_token(self, token):
         # converts `token` which comes from pslexer to a normal token.
         if token.type in {'KEYWORD', 'OPERATOR'}:
