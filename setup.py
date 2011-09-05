@@ -2,11 +2,7 @@
 from setuptools import setup
 from pdfminer import __version__
 
-setup(
-    name='pdfminer3k',
-    version=__version__,
-    description='PDF parser and analyzer',
-    long_description='''pdfminer3k is a Python 3 port of pdfminer.
+DESC = """pdfminer3k is a Python 3 port of pdfminer.
 PDFMiner is a tool for extracting information from PDF documents.
 Unlike other PDF-related tools, it focuses entirely on getting 
 and analyzing text data. PDFMiner allows to obtain
@@ -14,7 +10,15 @@ the exact location of texts in a page, as well as
 other information such as fonts or lines.
 It includes a PDF converter that can transform PDF files
 into other text formats (such as HTML). It has an extensible
-PDF parser that can be used for other purposes instead of text analysis.''',
+PDF parser that can be used for other purposes instead of text analysis."""
+
+DESC_AND_CHANGES = DESC + '\n\n' + open('CHANGES', 'rt').read()
+
+setup(
+    name='pdfminer3k',
+    version=__version__,
+    description='PDF parser and analyzer',
+    long_description=DESC_AND_CHANGES,
     license='MIT/X',
     author='Yusuke Shinyama',
     author_email='yusuke at cs dot nyu dot edu',

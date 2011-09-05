@@ -1,6 +1,12 @@
 Changes
 =======
 
+Version 1.2.3 -- 2011/09/05
+---------------------------
+
+* Fixed a crash on uneven cmap codes.
+* Fixed a meta-crash caused by bad PSParser repr.
+
 Version 1.2.2 -- 2011/08/30
 ---------------------------
 
