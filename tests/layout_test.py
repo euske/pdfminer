@@ -62,3 +62,10 @@ def test_big_letter_spanning_multiple_lines():
     boxes = extract_textboxes(page)
     eq_(len(boxes), 4) # 3 paragraph + the extra 'L'
     
+def test_space_chars_only():
+    # When a page would only contain space characters, we would have a crash because despite having
+    # textobjs, we would have no textlines.
+    path = testdata.filepath('space_chars_only.pdf')
+    page = pages_from_pdf(path)[0]
+    boxes = extract_textboxes(page) # no crash
+    eq_(len(boxes), 0)

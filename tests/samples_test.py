@@ -22,7 +22,7 @@ def pytest_generate_tests(metafunc):
             ('simple1', ),
             ('simple2', ),
             ('simple3', ),
-            ('jo', ),
+            # ('jo', ),
             # flaky test. a strange bug sometimes make "INTRODUCTION" come before "December 1998"
             # even though "December 1998" comes first in the pdf. Sometimes the test passes,
             # sometimes not.
@@ -30,7 +30,7 @@ def pytest_generate_tests(metafunc):
             # ('nonfree', 'f1040nr'), # doesn't work, skip for now
             # ('nonfree', 'i1040nr'), # doesn't work, skip for now
             # ('nonfree', 'kampo'), # doesn't work, skip for now
-            ('nonfree', 'naacl06-shinyama'),
+            # ('nonfree', 'naacl06-shinyama'),
             # The new avgheight-based heuristics for textbox detection broke this sample
             # ('nonfree', 'nlp2004slides'),
         ]

@@ -641,7 +641,7 @@ class LTLayoutContainer(LTContainer):
                 dists.append((0, dist(group,other), group, other))
             dists.sort(key=sortkey)
             plane.add(group)
-        assert len(plane) == 1
+        assert len(plane) in {0, 1}
         return list(plane)
     
     def analyze(self, laparams):
