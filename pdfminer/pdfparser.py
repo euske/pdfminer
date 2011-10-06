@@ -272,7 +272,58 @@ class PDFDocument:
         self._parser = None
         self._cached_objs = {}
         self._parsed_objs = {}
-
+    
+    def _parse_next_object(self, parser):
+        # This is a bit awkward and I suspect that it could be a lot more elegant, but it would
+        # require refactoring the parsing process and I don't want to do that yet.
+        stack = []
+        _, token = parser.nexttoken()
+        while token is not self.KEYWORD_OBJ:
+            stack.append(token)
+            _, token = parser.nexttoken()
+        objid = stack[-2]
+        genno = stack[-1]
+        _, obj = parser.nextobject()
+        return objid, genno, obj
+    
+    def _parse_objstream(self, stream):
+        # ObjStm have a special organization. First, the param "N" tells how many objs we have in
+        # there. Then, they start with a list of (objids, genno) pairs, and then the actual objects
+        # come in.
+        parser = PDFStreamParser(stream.get_data())
+        parser.set_document(self)
+        objcount = stream['N']
+        objids = []
+        for i in range(objcount):
+            _, objid = parser.nextobject()
+            _, genno = parser.nextobject()
+            objids.append(objid)
+        # Now we should be at the point where we read objects
+        for objid in objids:
+            _, obj = parser.nextobject()
+            self._cached_objs[objid] = obj
+    
+    def _parse_whole(self, parser):
+        while True:
+            try:
+                objid, genno, obj = self._parse_next_object(parser)
+                self._cached_objs[objid] = obj
+                if isinstance(obj, PDFStream) and obj.get('Type') is LITERAL_OBJSTM:
+                    obj.set_objid(objid, genno)
+                    self._parse_objstream(obj)
+            except PSEOF:
+                break
+    
+    def _parse_everything(self):
+        # Sometimes, we have malformed xref, but we still want to manage to read the PDF. In cases
+        # like these, the last resort is to read all objects at once so that our object reference
+        # can finally be resolved. This is slower than the normal method, so ony use this when the
+        # xref tables are corrupt/wrong/whatever.
+        parser = self._parser
+        parser.setpos(0)
+        parser.reset()
+        self._parse_whole(parser)
+    
     def set_parser(self, parser):
         "Set the document to use a given PDFParser object."
         if self._parser:
@@ -407,8 +458,8 @@ class PDFDocument:
                     parser.set_document(self)
                     objs = []
                     try:
-                        while 1:
-                            (_,obj) = parser.nextobject()
+                        while True:
+                            _, obj = parser.nextobject()
                             objs.append(obj)
                     except PSEOF:
                         pass
@@ -477,6 +528,8 @@ class PDFDocument:
                 yield (objid, tree)
         if 'Pages' not in self.catalog:
             return
+        if self.catalog['Pages'].resolve() is None:
+            self._parse_everything() # We don't have a choice
         for (pageid,tree) in search(self.catalog['Pages'], self.catalog):
             yield PDFPage(self, pageid, tree)
 
