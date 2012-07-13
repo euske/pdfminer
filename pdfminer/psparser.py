@@ -4,7 +4,7 @@ import logging
 from .utils import choplist
 from . import pslexer
 
-STRICT = 0
+STRICT = False
 
 
 ##  PS Exceptions
@@ -15,6 +15,11 @@ class PSSyntaxError(PSException): pass
 class PSTypeError(PSException): pass
 class PSValueError(PSException): pass
 
+def handle_error(exctype, msg):
+    if STRICT:
+        raise exctype(msg)
+    else:
+        logging.warning(msg)
 
 ##  Basic PostScript Types
 ##
@@ -96,18 +101,14 @@ KEYWORD_DICT_END = KWD('>>')
 
 def literal_name(x):
     if not isinstance(x, PSLiteral):
-        if STRICT:
-            raise PSTypeError('Literal required: %r' % x)
-        else:
-            return str(x)
+        handle_error(PSTypeError, 'Literal required: %r' % x)
+        return str(x)
     return x.name
 
 def keyword_name(x):
     if not isinstance(x, PSKeyword):
-        if STRICT:
-            raise PSTypeError('Keyword required: %r' % x)
-        else:
-            return str(x)
+        handle_error(PSTypeError, 'Keyword required: %r' % x)
+        return str(x)
     return x.name
 
 
@@ -160,12 +161,14 @@ class PSBaseParser:
         del self.data
     
     def setpos(self, newpos):
+        if newpos >= self.lex.lexlen:
+            raise PSEOF()
         self.lex.lexpos = newpos
     
     def nextline(self):
         m = EOL.search(self.data, pos=self.lex.lexpos)
         if m is None:
-            raise PSEOF('Unexpected EOF')
+            raise PSEOF()
         start = self.lex.lexpos
         s = self.data[start:m.end()]
         self.lex.lexpos = m.end()
@@ -174,7 +177,7 @@ class PSBaseParser:
     def nexttoken(self):
         token = self.lex.token()
         if token is None:
-            raise PSEOF('Unexpected EOF')
+            raise PSEOF()
         tokenpos = token.lexpos
         return (tokenpos, self._convert_token(token))
     
@@ -247,8 +250,8 @@ class PSStackParser(PSBaseParser):
                 # end array
                 try:
                     self.push(self.end_type('a'))
-                except PSTypeError:
-                    if STRICT: raise
+                except PSTypeError as e:
+                    handle_error(type(e), str(e))
             elif token == KEYWORD_DICT_BEGIN:
                 # begin dictionary
                 self.start_type(pos, 'd')
@@ -257,16 +260,12 @@ class PSStackParser(PSBaseParser):
                 try:
                     (pos, objs) = self.end_type('d')
                     if len(objs) % 2 != 0:
-                        msg = 'Invalid dictionary construct: %r' % objs
-                        if STRICT:
-                            raise PSSyntaxError(msg)
-                        else:
-                            logging.warning(msg)
+                        handle_error(PSSyntaxError, 'Invalid dictionary construct: %r' % objs)
                     # construct a Python dictionary.
                     d = dict( (literal_name(k), v) for (k,v) in choplist(2, objs) if v is not None )
                     self.push((pos, d))
-                except PSTypeError:
-                    if STRICT: raise
+                except PSTypeError as e:
+                    handle_error(type(e), str(e))
             elif token == KEYWORD_PROC_BEGIN:
                 # begin proc
                 self.start_type(pos, 'p')
@@ -274,8 +273,8 @@ class PSStackParser(PSBaseParser):
                 # end proc
                 try:
                     self.push(self.end_type('p'))
-                except PSTypeError:
-                    if STRICT: raise
+                except PSTypeError as e:
+                    handle_error(type(e), str(e))
             else:
                 logging.debug('do_keyword: pos=%r, token=%r, stack=%r', pos, token, self.curstack)
                 self.do_keyword(pos, token)

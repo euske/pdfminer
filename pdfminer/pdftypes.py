@@ -4,7 +4,7 @@ from .lzw import lzwdecode
 from .ascii85 import ascii85decode, asciihexdecode
 from .runlength import rldecode
 from .psparser import PSException, PSObject
-from .psparser import LIT, STRICT
+from .psparser import LIT, handle_error
 from .utils import apply_png_predictor
 
 LITERAL_CRYPT = LIT('Crypt')
@@ -35,8 +35,7 @@ class PDFObjRef(PDFObject):
 
     def __init__(self, doc, objid, _):
         if objid == 0:
-            if STRICT:
-                raise PDFValueError('PDF object id cannot be 0.')
+            handle_error(PDFValueError, 'PDF object id cannot be 0.')
         self.doc = doc
         self.objid = objid
         #self.genno = genno  # Never used.
@@ -92,8 +91,7 @@ def decipher_all(decipher, objid, genno, x):
 def typecheck_value(x, type):
     x = resolve1(x)
     if not isinstance(x, type):
-        if STRICT:
-            raise PDFTypeError('Wrong type: %r required: %r' % (x, type))
+        handle_error(PDFTypeError, 'Wrong type: %r required: %r' % (x, type))
         default_type = type[0] if isinstance(type, tuple) else type
         return default_type()
     return x
@@ -108,8 +106,7 @@ dict_value = partial(typecheck_value, type=dict)
 def stream_value(x):
     x = resolve1(x)
     if not isinstance(x, PDFStream):
-        if STRICT:
-            raise PDFTypeError('PDFStream required: %r' % x)
+        handle_error(PDFTypeError, 'PDFStream required: %r' % x)
         return PDFStream({}, b'')
     return x
 
@@ -175,8 +172,7 @@ class PDFStream(PDFObject):
                 try:
                     data = zlib.decompress(data)
                 except zlib.error as e:
-                    if STRICT:
-                        raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
+                    handle_error(PDFException, 'Invalid zlib bytes: %r, %r' % (e, data))
                     data = b''
             elif f in LITERALS_LZW_DECODE:
                 data = lzwdecode(data)

@@ -6,7 +6,7 @@ from .cmapdb import CMapDB, CMap
 from .psparser import PSTypeError, PSEOF
 from .psparser import PSKeyword, literal_name, keyword_name
 from .psparser import PSStackParser
-from .psparser import LIT, KWD, STRICT
+from .psparser import LIT, KWD, handle_error
 from .pdftypes import (PDFException, PDFStream, PDFObjRef, resolve1, list_value, dict_value,
     stream_value)
 from .pdffont import PDFFontError, PDFType1Font, PDFTrueTypeFont, PDFType3Font, PDFCIDFont
@@ -134,15 +134,13 @@ class PDFResourceManager:
             font = self._cached_fonts[objid]
         else:
             # logging.debug('get_font: create: objid=%r, spec=%r', objid, spec)
-            if STRICT:
-                if spec['Type'] is not LITERAL_FONT:
-                    raise PDFFontError('Type is not /Font')
+            if spec['Type'] is not LITERAL_FONT:
+                handle_error(PDFFontError, 'Type is not /Font')
             # Create a Font object.
             if 'Subtype' in spec:
                 subtype = literal_name(spec['Subtype'])
             else:
-                if STRICT:
-                    raise PDFFontError('Font Subtype is not specified.')
+                handle_error(PDFFontError, 'Font Subtype is not specified.')
                 subtype = 'Type1'
             if subtype in ('Type1', 'MMType1'):
                 # Type1 Font
@@ -166,8 +164,7 @@ class PDFResourceManager:
                         subspec[k] = resolve1(spec[k])
                 font = self.get_font(None, subspec)
             else:
-                if STRICT:
-                    raise PDFFontError('Invalid Font spec: %r' % spec)
+                handle_error(PDFFontError, 'Invalid Font spec: %r' % spec)
                 font = PDFType1Font(self, spec) # this is so wrong!
             if objid and self.caching:
                 self._cached_fonts[objid] = font
@@ -231,8 +228,8 @@ class PDFContentParser(PSStackParser):
                 obj = PDFStream(d, data)
                 self.push((pos, obj))
                 self.push((pos, self.KEYWORD_EI))
-            except PSTypeError:
-                if STRICT: raise
+            except PSTypeError as e:
+                handle_error(type(e), str(e))
         else:
             self.push((pos, token))
 
@@ -463,16 +460,14 @@ class PDFPageInterpreter:
         if self.scs:
             n = self.scs.ncomponents
         else:
-            if STRICT:
-                raise PDFInterpreterError('No colorspace specified!')
+            handle_error(PDFInterpreterError, 'No colorspace specified!')
             n = 1
         self.pop(n)
     def do_scn(self):
         if self.ncs:
             n = self.ncs.ncomponents
         else:
-            if STRICT:
-                raise PDFInterpreterError('No colorspace specified!')
+            handle_error(PDFInterpreterError, 'No colorspace specified!')
             n = 1
         self.pop(n)
     def do_SC(self):
@@ -528,8 +523,7 @@ class PDFPageInterpreter:
             self.textstate.font = self.fontmap[literal_name(fontid)]
         except KeyError:
             raise
-            if STRICT:
-                raise PDFInterpreterError('Undefined Font id: %r' % fontid)
+            handle_error(PDFInterpreterError, 'Undefined Font id: %r' % fontid)
             return
         self.textstate.fontsize = fontsize
     # setrendering
@@ -566,8 +560,7 @@ class PDFPageInterpreter:
     def do_TJ(self, seq):
         #print >>sys.stderr, 'TJ(%r): %r' % (seq,self.textstate)
         if self.textstate.font is None:
-            if STRICT:
-                raise PDFInterpreterError('No font specified!')
+            handle_error(PDFInterpreterError, 'No font specified!')
             return
         self.device.render_string(self.textstate, seq)
     # show
@@ -606,8 +599,7 @@ class PDFPageInterpreter:
         try:
             xobj = stream_value(self.xobjmap[xobjid])
         except KeyError:
-            if STRICT:
-                raise PDFInterpreterError('Undefined xobject id: %r' % xobjid)
+            handle_error(PDFInterpreterError, 'Undefined xobject id: %r' % xobjid)
             return
         logging.debug('Processing xobj: %r', xobj)
         subtype = xobj.get('Subtype')
@@ -680,8 +672,7 @@ class PDFPageInterpreter:
                         # logging.debug('exec: %s', name)
                         func()
                 else:
-                    if STRICT:
-                        raise PDFInterpreterError('Unknown operator: %r' % name)
+                    handle_error(PDFInterpreterError, 'Unknown operator: %r' % name)
             else:
                 self.push(obj)
 

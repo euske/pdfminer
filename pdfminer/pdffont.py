@@ -7,7 +7,7 @@ from .cmapdb import CMapDB, CMapParser, FileUnicodeMap, CMap
 from .encodingdb import EncodingDB, name2unicode
 from .psparser import PSStackParser
 from .psparser import PSEOF
-from .psparser import LIT, KWD, STRICT
+from .psparser import LIT, KWD, handle_error
 from .psparser import PSLiteral, literal_name
 from .pdftypes import (PDFException, resolve1, int_value, num_value, list_value, dict_value,
     stream_value)
@@ -525,8 +525,7 @@ class PDFType1Font(PDFSimpleFont):
         try:
             self.basefont = literal_name(spec['BaseFont'])
         except KeyError:
-            if STRICT:
-                raise PDFFontError('BaseFont is missing')
+            handle_error(PDFFontError, 'BaseFont is missing')
             self.basefont = 'unknown'
         try:
             (descriptor, widths) = FontMetricsDB.get_metrics(self.basefont)
@@ -580,8 +579,7 @@ class PDFCIDFont(PDFFont):
         try:
             self.basefont = literal_name(spec['BaseFont'])
         except KeyError:
-            if STRICT:
-                raise PDFFontError('BaseFont is missing')
+            handle_error(PDFFontError, 'BaseFont is missing')
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
         self.cidcoding = '%s-%s' % (self.cidsysteminfo.get('Registry', 'unknown'),
@@ -589,20 +587,17 @@ class PDFCIDFont(PDFFont):
         try:
             name = literal_name(spec['Encoding'])
         except KeyError:
-            if STRICT:
-                raise PDFFontError('Encoding is unspecified')
+            handle_error(PDFFontError, 'Encoding is unspecified')
             name = 'unknown'
         try:
             self.cmap = CMapDB.get_cmap(name)
         except CMapDB.CMapNotFound as e:
-            if STRICT:
-                raise PDFFontError(e)
+            handle_error(PDFFontError, str(e))
             self.cmap = CMap()
         try:
             descriptor = dict_value(spec['FontDescriptor'])
         except KeyError:
-            if STRICT:
-                raise PDFFontError('FontDescriptor is missing')
+            handle_error(PDFFontError, 'FontDescriptor is missing')
             descriptor = {}
         ttf = None
         if 'FontFile2' in descriptor:

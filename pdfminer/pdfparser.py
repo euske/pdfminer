@@ -4,7 +4,7 @@ import struct
 import hashlib as md5
 import logging
 
-from .psparser import PSStackParser, PSSyntaxError, PSEOF, literal_name, LIT, KWD, STRICT
+from .psparser import PSStackParser, PSSyntaxError, PSEOF, literal_name, LIT, KWD, handle_error
 from .pdftypes import (PDFException, PDFTypeError, PDFNotImplementedError, PDFStream, PDFObjRef,
     resolve1, decipher_all, int_value, str_value, list_value, dict_value, stream_value)
 from .arcfour import Arcfour
@@ -349,8 +349,7 @@ class PDFDocument:
         else:
             raise PDFSyntaxError('No /Root object! - Is this really a PDF?')
         if self.catalog.get('Type') is not LITERAL_CATALOG:
-            if STRICT:
-                raise PDFSyntaxError('Catalog not found!')
+            handle_error(PDFSyntaxError, 'Catalog not found!')
 
     # initialize(password='')
     #   Perform the initialization with a given password.
@@ -436,20 +435,17 @@ class PDFDocument:
                 except KeyError:
                     pass
             else:
-                if STRICT:
-                    raise PDFSyntaxError('Cannot locate objid=%r' % objid)
+                handle_error(PDFSyntaxError, 'Cannot locate objid=%r' % objid)
                 # return null for a nonexistent reference.
                 return None
             if strmid:
                 stream = stream_value(self.getobj(strmid))
                 if stream.get('Type') is not LITERAL_OBJSTM:
-                    if STRICT:
-                        raise PDFSyntaxError('Not a stream object: %r' % stream)
+                    handle_error(PDFSyntaxError, 'Not a stream object: %r' % stream)
                 try:
                     n = stream['N']
                 except KeyError:
-                    if STRICT:
-                        raise PDFSyntaxError('N is not defined: %r' % stream)
+                    handle_error(PDFSyntaxError, 'N is not defined: %r' % stream)
                     n = 0
                 if strmid in self._parsed_objs:
                     objs = self._parsed_objs[strmid]
@@ -474,7 +470,11 @@ class PDFDocument:
                 if isinstance(obj, PDFStream):
                     obj.set_objid(objid, 0)
             else:
-                self._parser.setpos(index)
+                try:
+                    self._parser.setpos(index)
+                except PSEOF:
+                    handle_error(PSEOF, 'Parser index out of bounds')
+                    return None
                 (_,objid1) = self._parser.nexttoken() # objid
                 (_,genno) = self._parser.nexttoken() # genno
                 (_,kwd) = self._parser.nexttoken()
@@ -652,16 +652,13 @@ class PDFParser(PSStackParser):
             try:
                 objlen = int_value(dic['Length'])
             except KeyError:
-                if STRICT:
-                    raise PDFSyntaxError('/Length is undefined: %r' % dic)
-                else:
-                    objlen = 0
+                handle_error(PDFSyntaxError, '/Length is undefined: %r' % dic)
+                objlen = 0
             self.setpos(pos)
             try:
                 (_, line) = self.nextline()  # 'stream'
             except PSEOF:
-                if STRICT:
-                    raise PDFSyntaxError('Unexpected EOF')
+                handle_error(PDFSyntaxError, 'Unexpected EOF')
                 return
             pos += len(line)
             endpos = pos + objlen
