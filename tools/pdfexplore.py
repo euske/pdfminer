@@ -1,6 +1,7 @@
 import cmd, sys
 from argparse import ArgumentParser
 
+from pdfminer.pdftypes import PDFObjRef
 from pdfminer.psparser import PSEOF
 from pdfminer.pdfparser import PDFDocument, PDFParser
 
@@ -39,6 +40,25 @@ class PDFExploreCmd(cmd.Cmd):
         self.parser.set_document(self.doc)
         self.doc.set_parser(self.parser)
         self.doc.initialize()
+    
+    def _cached_objects(self):
+        return sorted(list(self.doc._cached_objs.items()) + list(self.doc._parsed_objs.items()))
+    
+    def _get_refs(self):
+        result = []
+        def search(obj, objid):
+            if isinstance(obj, PDFObjRef):
+                result.append((objid, obj))
+            elif isinstance(obj, dict):
+                for value in obj.values():
+                    search(value, objid)
+            elif isinstance(obj, list):
+                for value in obj:
+                    search(value, objid)
+        objs = self._cached_objects()
+        for objid, obj in objs:
+            search(obj, objid)
+        return result
     
     def precmd(self, line):
         if self.debug and line.strip() not in {'debug', 'quit', 'q'}:
@@ -116,6 +136,19 @@ class PDFExploreCmd(cmd.Cmd):
         self.current_obj = (objid, genno, obj)
         self.do_st('')
     
+    @intarg()
+    def do_sobj(self, arg):
+        "Select object with ID X. The object has to have been read already."
+        if arg in self.doc._cached_objs:
+            obj = self.doc._cached_objs[arg]
+        elif arg in self.doc._parsed_objs:
+            obj = self.doc._parsed_objs[arg]
+        else:
+            print("Object hasn't been read yet.")
+            return
+        self.current_obj = (arg, 0, obj)
+        self.do_st('')
+    
     def do_dbgobj(self, arg):
         "Enter in debug mode with current obj as 'obj' in the local scope."
         if not self.current_obj:
@@ -128,15 +161,38 @@ class PDFExploreCmd(cmd.Cmd):
         "Read all objects in the document."
         self.doc._parse_everything()
         print("Read %d objects:" % len(self.doc._cached_objs))
-        objids = sorted(list(self.doc._cached_objs.keys()) + list(self.doc._parsed_objs.keys()))
-        print(repr(objids))
+        self.do_whatisread('')
     
     def do_dumpdata(self, arg):
         "For each read stream, print out the decoded data it contains."
-        objs = list(self.doc._cached_objs.values()) + list(self.doc._parsed_objs.values())
-        for obj in objs:
+        objs = self._cached_objects()
+        for objid, obj in objs:
+            print("Dumping obj id: %d" % objid)
+            print(repr(obj))
             if hasattr(obj, 'get_data'):
                 print(repr(obj.get_data()))
+    
+    def do_whatisread(self, arg):
+        "Prints a list of all read object ids."
+        objs = self._cached_objects()
+        print(repr([objid for objid, obj in objs]))
+    
+    def do_refs(self, arg):
+        "Look in all read objects and find all objects that reference to our current object."
+        if not self.current_obj:
+            print("No current obj.")
+            return
+        
+        target_id, _, _ = self.current_obj
+        result = [parent_id for parent_id, ref in self._get_refs() if ref.objid == target_id]
+        print(repr(result))
+    
+    def do_deadrefs(self, arg):
+        "Print (dead_id, host_id) for all dead references in the document."
+        objs = self._cached_objects()
+        objids = {objid for objid, obj in objs}
+        result = [(ref.objid, parent_id) for parent_id, ref in self._get_refs() if ref.objid not in objids]
+        print(repr(result))
     
     def do_quit(self, arg):
         "Quit PDFExplore"
