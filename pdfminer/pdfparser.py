@@ -247,7 +247,6 @@ class PDFPage:
 
 
 class PDFDocument:
-
     """PDFDocument object represents a PDF document.
 
     Since a PDF file can be very big, normally it is not loaded at
@@ -261,6 +260,8 @@ class PDFDocument:
       obj = doc.getobj(objid)
     
     """
+    
+    KEYWORD_OBJ = KWD('obj')
 
     def __init__(self, caching=True):
         self.caching = caching
@@ -418,8 +419,15 @@ class PDFDocument:
         hash = md5.md5(key)
         key = hash.digest()[:min(len(key),16)]
         return Arcfour(key).process(data)
-
-    KEYWORD_OBJ = KWD('obj')
+    
+    def readobj(self):
+        """Read the next object at current position.
+        
+        The object doesn't have to start exactly where we are. We'll read the first
+        object that comes to us.
+        """
+        return self._parse_next_object(self._parser)
+    
     def getobj(self, objid):
         if not self.xrefs:
             raise PDFException('PDFDocument is not initialized')

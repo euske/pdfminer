@@ -30,6 +30,8 @@ class PDFExploreCmd(cmd.Cmd):
     
     def __init__(self, pdf_path):
         cmd.Cmd.__init__(self)
+        self.debug = False
+        self.current_obj = None
         self.pdf_path = pdf_path
         self.fp = open(pdf_path, 'rb')
         self.parser = PDFParser(self.fp)
@@ -38,10 +40,27 @@ class PDFExploreCmd(cmd.Cmd):
         self.doc.set_parser(self.parser)
         self.doc.initialize()
     
+    def precmd(self, line):
+        if self.debug and line.strip() not in {'debug', 'quit', 'q'}:
+            import pdb; pdb.set_trace()
+        return line
+    
+    def do_debug(self, arg):
+        "Toggles debug mode (perform actions in the debugger)."
+        self.debug = not self.debug
+        fmt = "Debug mode %s"
+        mode = "ON" if self.debug else "OFF"
+        print(fmt % mode)
+    
     def do_status(self, arg):
         "Print current status, positions, etc.."
         print("Lexer pos: %d" % self.parser.lex.lexpos)
         print("File Length: %d" % self.parser.lex.lexlen)
+        if self.current_obj:
+            (objid, _, obj) = self.current_obj
+        else:
+            objid, obj = -1, "None"
+        print("Current Object: %d %s" % (objid, obj))
     do_st = do_status
     
     def do_xref(self, arg):
@@ -90,6 +109,34 @@ class PDFExploreCmd(cmd.Cmd):
         pos = self.parser.lex.lexpos
         self.do_rtok(arg)
         self.do_setpos(pos)
+    
+    def do_robj(self, arg):
+        "Read the next object and sets it as the 'current' object."
+        objid, genno, obj = self.doc.readobj()
+        self.current_obj = (objid, genno, obj)
+        self.do_st('')
+    
+    def do_dbgobj(self, arg):
+        "Enter in debug mode with current obj as 'obj' in the local scope."
+        if not self.current_obj:
+            print("No current obj.")
+            return
+        objid, genno, obj = self.current_obj
+        import pdb; pdb.set_trace()
+    
+    def do_readall(self, arg):
+        "Read all objects in the document."
+        self.doc._parse_everything()
+        print("Read %d objects:" % len(self.doc._cached_objs))
+        objids = sorted(list(self.doc._cached_objs.keys()) + list(self.doc._parsed_objs.keys()))
+        print(repr(objids))
+    
+    def do_dumpdata(self, arg):
+        "For each read stream, print out the decoded data it contains."
+        objs = list(self.doc._cached_objs.values()) + list(self.doc._parsed_objs.values())
+        for obj in objs:
+            if hasattr(obj, 'get_data'):
+                print(repr(obj.get_data()))
     
     def do_quit(self, arg):
         "Quit PDFExplore"
