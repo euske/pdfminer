@@ -15,8 +15,8 @@ class PSSyntaxError(PSException): pass
 class PSTypeError(PSException): pass
 class PSValueError(PSException): pass
 
-def handle_error(exctype, msg):
-    if STRICT:
+def handle_error(exctype, msg, strict=STRICT):
+    if strict:
         raise exctype(msg)
     else:
         logging.warning(msg)

@@ -328,6 +328,88 @@ class PDFDocument:
         self._parse_whole(parser)
         self._parsed_everything = True
     
+    def _getobj(self, objid):
+        if not self.xrefs:
+            raise PDFException('PDFDocument is not initialized')
+        # logging.debug('getobj: objid=%r', objid)
+        if objid in self._cached_objs:
+            genno = 0
+            obj = self._cached_objs[objid]
+        else:
+            strmid, index = self.find_obj_ref(objid)
+            if index is None:
+                handle_error(PDFSyntaxError, 'Cannot locate objid=%r' % objid)
+                # return null for a nonexistent reference.
+                return None
+            if strmid:
+                stream = self.getobj(strmid)
+                if stream is None:
+                    return None
+                stream = stream_value(stream)
+                if stream.get('Type') is not LITERAL_OBJSTM:
+                    handle_error(PDFSyntaxError, 'Not a stream object: %r' % stream)
+                try:
+                    n = stream['N']
+                except KeyError:
+                    handle_error(PDFSyntaxError, 'N is not defined: %r' % stream)
+                    n = 0
+                if strmid in self._parsed_objs:
+                    objs = self._parsed_objs[strmid]
+                else:
+                    parser = PDFStreamParser(stream.get_data())
+                    parser.set_document(self)
+                    objs = []
+                    try:
+                        while True:
+                            _, obj = parser.nextobject()
+                            objs.append(obj)
+                    except PSEOF:
+                        pass
+                    if self.caching:
+                        self._parsed_objs[strmid] = objs
+                genno = 0
+                i = n*2+index
+                try:
+                    obj = objs[i]
+                except IndexError:
+                    raise PDFSyntaxError('Invalid object number: objid=%r' % (objid))
+                if isinstance(obj, PDFStream):
+                    obj.set_objid(objid, 0)
+            else:
+                try:
+                    self._parser.setpos(index)
+                except PSEOF:
+                    handle_error(PSEOF, 'Parser index out of bounds')
+                    return None
+                (_,objid1) = self._parser.nexttoken() # objid
+                (_,genno) = self._parser.nexttoken() # genno
+                (_,kwd) = self._parser.nexttoken()
+                # #### hack around malformed pdf files
+                #assert objid1 == objid, (objid, objid1)
+                if objid1 != objid:
+                    x = []
+                    while kwd is not self.KEYWORD_OBJ:
+                        (_,kwd) = self._parser.nexttoken()
+                        x.append(kwd)
+                    if x:
+                        objid1 = x[-2]
+                        genno = x[-1]
+                # #### end hack around malformed pdf files
+                if kwd is not self.KEYWORD_OBJ:
+                    raise PDFSyntaxError('Invalid object spec: offset=%r' % index)
+                try:
+                    (_,obj) = self._parser.nextobject()
+                    if isinstance(obj, PDFStream):
+                        obj.set_objid(objid, genno)
+                except PSEOF:
+                    return None
+            # logging.debug('register: objid=%r: %r', objid, obj)
+            if self.caching:
+                self._cached_objs[objid] = obj
+        if self.decipher:
+            obj = decipher_all(self.decipher, objid, genno, obj)
+        return obj
+    
     def set_parser(self, parser):
         "Set the document to use a given PDFParser object."
         if self._parser:
@@ -443,98 +525,29 @@ class PDFDocument:
             return None, None
     
     def getobj(self, objid):
-        if not self.xrefs:
-            raise PDFException('PDFDocument is not initialized')
-        # logging.debug('getobj: objid=%r', objid)
-        if objid in self._cached_objs:
-            genno = 0
-            obj = self._cached_objs[objid]
-        else:
-            strmid, index = self.find_obj_ref(objid)
-            if index is None:
-                handle_error(PDFSyntaxError, 'Cannot locate objid=%r' % objid)
-                # return null for a nonexistent reference.
-                return None
-            if strmid:
-                stream = self.getobj(strmid)
-                if stream is None:
-                    return None
-                stream = stream_value(stream)
-                if stream.get('Type') is not LITERAL_OBJSTM:
-                    handle_error(PDFSyntaxError, 'Not a stream object: %r' % stream)
-                try:
-                    n = stream['N']
-                except KeyError:
-                    handle_error(PDFSyntaxError, 'N is not defined: %r' % stream)
-                    n = 0
-                if strmid in self._parsed_objs:
-                    objs = self._parsed_objs[strmid]
-                else:
-                    parser = PDFStreamParser(stream.get_data())
-                    parser.set_document(self)
-                    objs = []
-                    try:
-                        while True:
-                            _, obj = parser.nextobject()
-                            objs.append(obj)
-                    except PSEOF:
-                        pass
-                    if self.caching:
-                        self._parsed_objs[strmid] = objs
-                genno = 0
-                i = n*2+index
-                try:
-                    obj = objs[i]
-                except IndexError:
-                    raise PDFSyntaxError('Invalid object number: objid=%r' % (objid))
-                if isinstance(obj, PDFStream):
-                    obj.set_objid(objid, 0)
-            else:
-                try:
-                    self._parser.setpos(index)
-                except PSEOF:
-                    handle_error(PSEOF, 'Parser index out of bounds')
-                    return None
-                (_,objid1) = self._parser.nexttoken() # objid
-                (_,genno) = self._parser.nexttoken() # genno
-                (_,kwd) = self._parser.nexttoken()
-                # #### hack around malformed pdf files
-                #assert objid1 == objid, (objid, objid1)
-                if objid1 != objid:
-                    x = []
-                    while kwd is not self.KEYWORD_OBJ:
-                        (_,kwd) = self._parser.nexttoken()
-                        x.append(kwd)
-                    if x:
-                        objid1 = x[-2]
-                        genno = x[-1]
-                # #### end hack around malformed pdf files
-                if kwd is not self.KEYWORD_OBJ:
-                    raise PDFSyntaxError('Invalid object spec: offset=%r' % index)
-                try:
-                    (_,obj) = self._parser.nextobject()
-                    if isinstance(obj, PDFStream):
-                        obj.set_objid(objid, genno)
-                except PSEOF:
-                    return None
-            # logging.debug('register: objid=%r: %r', objid, obj)
-            if self.caching:
-                self._cached_objs[objid] = obj
-        if self.decipher:
-            obj = decipher_all(self.decipher, objid, genno, obj)
-        return obj
-
-    INHERITABLE_ATTRS = set(['Resources', 'MediaBox', 'CropBox', 'Rotate'])
+        result = self._getobj(objid)
+        if result is None:
+            try:
+                self._parse_everything()
+                result = self._getobj(objid)
+            except PDFAlreadyParsed:
+                result = None
+        return result
+    
+    INHERITABLE_ATTRS = {'Resources', 'MediaBox', 'CropBox', 'Rotate'}
     def get_pages(self):
         if not self.xrefs:
             raise PDFException('PDFDocument is not initialized')
         def search(obj, parent):
-            if isinstance(obj, int):
-                objid = obj
-                tree = dict_value(self.getobj(objid)).copy()
-            else:
-                objid = obj.objid
-                tree = dict_value(obj).copy()
+            try:
+                if isinstance(obj, int):
+                    objid = obj
+                    tree = dict_value(self.getobj(objid), strict=True).copy()
+                else:
+                    objid = obj.objid
+                    tree = dict_value(obj, strict=True).copy()
+            except PDFTypeError:
+                return
             for (k,v) in parent.items():
                 if k in self.INHERITABLE_ATTRS and k not in tree:
                     tree[k] = v
@@ -548,8 +561,6 @@ class PDFDocument:
                 yield (objid, tree)
         if 'Pages' not in self.catalog:
             return
-        if self.catalog['Pages'].resolve() is None:
-            self._parse_everything() # We don't have a choice
         for (pageid,tree) in search(self.catalog['Pages'], self.catalog):
             yield PDFPage(self, pageid, tree)
 

@@ -253,6 +253,8 @@ class PDFPageInterpreter:
         if not resources:
             return
         def get_colorspace(spec):
+            if spec is None:
+                return PREDEFINED_COLORSPACE['DeviceRGB']
             if isinstance(spec, list):
                 name = literal_name(spec[0])
             else:
@@ -271,7 +273,8 @@ class PDFPageInterpreter:
                     if isinstance(spec, PDFObjRef):
                         objid = spec.objid
                     spec = dict_value(spec)
-                    self.fontmap[fontid] = self.rsrcmgr.get_font(objid, spec)
+                    if spec:
+                        self.fontmap[fontid] = self.rsrcmgr.get_font(objid, spec)
             elif k == 'ColorSpace':
                 for (csid,spec) in dict_value(v).items():
                     self.csmap[csid] = get_colorspace(resolve1(spec))
@@ -522,7 +525,6 @@ class PDFPageInterpreter:
         try:
             self.textstate.font = self.fontmap[literal_name(fontid)]
         except KeyError:
-            raise
             handle_error(PDFInterpreterError, 'Undefined Font id: %r' % fontid)
             return
         self.textstate.fontsize = fontsize

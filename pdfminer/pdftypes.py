@@ -3,7 +3,7 @@ import zlib
 from .lzw import lzwdecode
 from .ascii85 import ascii85decode, asciihexdecode
 from .runlength import rldecode
-from .psparser import PSException, PSObject
+from .psparser import PSException, PSObject, STRICT
 from .psparser import LIT, handle_error
 from .utils import apply_png_predictor
 
@@ -88,10 +88,10 @@ def decipher_all(decipher, objid, genno, x):
     return x
 
 # Type cheking
-def typecheck_value(x, type):
+def typecheck_value(x, type, strict=STRICT):
     x = resolve1(x)
     if not isinstance(x, type):
-        handle_error(PDFTypeError, 'Wrong type: %r required: %r' % (x, type))
+        handle_error(PDFTypeError, 'Wrong type: %r required: %r' % (x, type), strict=strict)
         default_type = type[0] if isinstance(type, tuple) else type
         return default_type()
     return x
