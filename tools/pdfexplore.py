@@ -139,15 +139,22 @@ class PDFExploreCmd(cmd.Cmd):
     @intarg()
     def do_sobj(self, arg):
         "Select object with ID X. The object has to have been read already."
+        obj = None
         if arg in self.doc._cached_objs:
             obj = self.doc._cached_objs[arg]
         elif arg in self.doc._parsed_objs:
             obj = self.doc._parsed_objs[arg]
         else:
             print("Object hasn't been read yet.")
-            return
-        self.current_obj = (arg, 0, obj)
-        self.do_st('')
+            strmid, index = self.doc.find_obj_ref(arg)
+            if index is not None:
+                print("However, our object id is in a xref")
+                if strmid:
+                    print("Stream ID: %d" % strmid)
+                print("Position: %d" % index)
+        if obj is not None:
+            self.current_obj = (arg, 0, obj)
+            self.do_st('')
     
     def do_dbgobj(self, arg):
         "Enter in debug mode with current obj as 'obj' in the local scope."

@@ -8,9 +8,7 @@ from .psparser import PSStackParser, PSSyntaxError, PSEOF, literal_name, LIT, KW
 from .pdftypes import (PDFException, PDFTypeError, PDFNotImplementedError, PDFStream, PDFObjRef,
     resolve1, decipher_all, int_value, str_value, list_value, dict_value, stream_value)
 from .arcfour import Arcfour
-from .utils import choplist, nunpack
-from .utils import decode_text, ObjIdRange
-
+from .utils import choplist, nunpack, decode_text, ObjIdRange
 
 ##  Exceptions
 ##
@@ -18,6 +16,7 @@ class PDFSyntaxError(PDFException): pass
 class PDFNoValidXRef(PDFSyntaxError): pass
 class PDFNoOutlines(PDFException): pass
 class PDFDestinationNotFound(PDFException): pass
+class PDFAlreadyParsed(PDFException): pass
 class PDFEncryptionError(PDFException): pass
 class PDFPasswordIncorrect(PDFEncryptionError): pass
 
@@ -273,6 +272,7 @@ class PDFDocument:
         self._parser = None
         self._cached_objs = {}
         self._parsed_objs = {}
+        self._parsed_everything = False
     
     def _parse_next_object(self, parser):
         # This is a bit awkward and I suspect that it could be a lot more elegant, but it would
@@ -320,10 +320,13 @@ class PDFDocument:
         # like these, the last resort is to read all objects at once so that our object reference
         # can finally be resolved. This is slower than the normal method, so ony use this when the
         # xref tables are corrupt/wrong/whatever.
+        if self._parsed_everything:
+            raise PDFAlreadyParsed()
         parser = self._parser
         parser.setpos(0)
         parser.reset()
         self._parse_whole(parser)
+        self._parsed_everything = True
     
     def set_parser(self, parser):
         "Set the document to use a given PDFParser object."
@@ -428,6 +431,17 @@ class PDFDocument:
         """
         return self._parse_next_object(self._parser)
     
+    def find_obj_ref(self, objid):
+        for xref in self.xrefs:
+            try:
+                strmid, index = xref.get_pos(objid)
+                return strmid, index
+            except KeyError:
+                pass
+        else:
+            # return null for a nonexistent reference.
+            return None, None
+    
     def getobj(self, objid):
         if not self.xrefs:
             raise PDFException('PDFDocument is not initialized')
@@ -436,18 +450,16 @@ class PDFDocument:
             genno = 0
             obj = self._cached_objs[objid]
         else:
-            for xref in self.xrefs:
-                try:
-                    (strmid, index) = xref.get_pos(objid)
-                    break
-                except KeyError:
-                    pass
-            else:
+            strmid, index = self.find_obj_ref(objid)
+            if index is None:
                 handle_error(PDFSyntaxError, 'Cannot locate objid=%r' % objid)
                 # return null for a nonexistent reference.
                 return None
             if strmid:
-                stream = stream_value(self.getobj(strmid))
+                stream = self.getobj(strmid)
+                if stream is None:
+                    return None
+                stream = stream_value(stream)
                 if stream.get('Type') is not LITERAL_OBJSTM:
                     handle_error(PDFSyntaxError, 'Not a stream object: %r' % stream)
                 try:
