@@ -167,6 +167,11 @@ class PDFStream(PDFObject):
             self.rawdata = None
             return
         for f in filters:
+            # Yeah, we can have references to an object containing a literal.
+            f = resolve1(f)
+            if f is None:
+                # Oops, broken reference. use FlateDecode since it's the most popular.
+                f = LIT('FlateDecode')
             if f in LITERALS_FLATE_DECODE:
                 # will get errors if the document is encrypted.
                 try:
@@ -182,6 +187,10 @@ class PDFStream(PDFObject):
                 data = asciihexdecode(data)
             elif f in LITERALS_RUNLENGTH_DECODE:
                 data = rldecode(data)
+            elif f in LITERALS_DCT_DECODE:
+                # /DCTDecode is essentially a jpeg image. There's nothing to "decode" per se, simply
+                # use the data as jpeg data.
+                pass
             elif f in LITERALS_CCITTFAX_DECODE:
                 #data = ccittfaxdecode(data)
                 raise PDFNotImplementedError('Unsupported filter: %r' % f)
