@@ -1,5 +1,4 @@
 from itertools import combinations
-from collections import defaultdict
 
 from .utils import (INF, get_bound, uniq, fsplit, drange, bbox2str, matrix2str, apply_matrix_pt,
     trailiter)
@@ -618,28 +617,17 @@ class LTLayoutContainer(LTContainer):
             objs = set(plane.find((x0,y0,x1,y1)))
             return objs.difference((obj1,obj2))
         # XXX this still takes O(n^2)  :(
-        # `dists` used to be a list. It was converted to the defaultdict below. It's a bit faster,
-        # but it's still O(n^2).
-        dists = defaultdict(list)
+        dists = []
         for obj1, obj2 in combinations(boxes, 2):
-            dists[obj1].append((0, dist(obj1, obj2), obj2))
-        # we sort by dist
-        sortkey = lambda tup: tup[:1]
-        for subdists in dists.values():
-            subdists.sort(key=sortkey)
+            dists.append((0, dist(obj1, obj2), obj1, obj2))
+        # we sort by dist and our tuple is (c,dist,obj1,obj2)
+        sortkey = lambda tup: tup[:2]
+        dists.sort(key=sortkey)
         plane = Plane(boxes)
-        while True:
-            for key, subdists in list(dists.items()):
-                if not subdists:
-                    del dists[key]
-            if not dists:
-                break
-            obj1, subdists = min(dists.items(), key=lambda x: x[1][0][1])
-            c, d, obj2 = subdists.pop(0)
-            if obj1 not in plane or obj2 not in plane:
-                continue
+        while dists:
+            (c,d,obj1,obj2) = dists.pop(0)
             if c == 0 and isany(obj1, obj2):
-                subdists.append((1, d, obj2))
+                dists.append((1,d,obj1,obj2))
                 continue
             if (isinstance(obj1, (LTTextBoxVertical, LTTextGroupTBRL)) or
                 isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
@@ -648,13 +636,10 @@ class LTLayoutContainer(LTContainer):
                 group = LTTextGroupLRTB([obj1,obj2])
             plane.remove(obj1)
             plane.remove(obj2)
-            del dists[obj1]
-            if obj2 in dists:
-                del dists[obj2]
-            subdists = dists[group]
+            dists = [(c,d,o1,o2) for (c,d,o1,o2) in dists if o1 in plane and o2 in plane]
             for other in plane:
-                subdists.append((0, dist(group, other), other))
-            subdists.sort(key=sortkey)
+                dists.append((0, dist(group,other), group, other))
+            dists.sort(key=sortkey)
             plane.add(group)
         assert len(plane) in {0, 1}
         return list(plane)
