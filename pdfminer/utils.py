@@ -105,7 +105,7 @@ def fsplit(pred, objs):
 # drange
 def drange(v0, v1, d):
     """Returns a discrete range."""
-    assert v0 < v1
+    assert v0 <= v1
     return xrange(int(v0)/d, int(v1+d)/d)
 
 # get_bound
@@ -243,8 +243,8 @@ class Plane(object):
     def _getrange(self, (x0,y0,x1,y1)):
         x0 = max(self.x0, x0)
         y0 = max(self.y0, y0)
-        x1 = min(self.x1, x1)
-        y1 = min(self.y1, y1)
+        x1 = min(self.x1, max(x0, x1))
+        y1 = min(self.y1, max(x0, y1))
         for y in drange(y0, y1, self.gridsize):
             for x in drange(x0, x1, self.gridsize):
                 yield (x,y)
