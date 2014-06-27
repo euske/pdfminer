@@ -120,7 +120,11 @@ class PDFPage(object):
         doc = PDFDocument(parser, password=password, caching=caching)
         # Check if the document allows text extraction. If not, abort.
         if check_extractable and not doc.is_extractable:
-            raise PDFTextExtractionNotAllowed('Text extraction is not allowed: %r' % fp)
+            msg = 'Text extraction is not allowed on file %r.\n' % fp
+            msg += 'Document may be encrypted or have DRM protection.\n'
+            msg += 'Either provide a password or consider decrypting with\n'
+            msg += 'a tool like qpdf http://sergey.marechek.com/blog/2012/04/29/184/\n'
+            raise PDFTextExtractionNotAllowed(msg)
         # Process each page contained in the document.
         for (pageno, page) in enumerate(klass.create_pages(doc)):
             if pagenos and (pageno not in pagenos):
