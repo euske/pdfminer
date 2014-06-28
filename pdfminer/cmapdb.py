@@ -43,23 +43,21 @@ class CMapBase(object):
 
     def __init__(self, **kwargs):
         self.attrs = kwargs.copy()
-        return
 
     def is_vertical(self):
         return self.attrs.get('WMode', 0) != 0
 
     def set_attr(self, k, v):
         self.attrs[k] = v
-        return
 
     def add_code2cid(self, code, cid):
-        return
+        pass
 
     def add_cid2unichr(self, cid, code):
-        return
+        pass
 
     def use_cmap(self, cmap):
-        return
+        pass
 
 
 ##  CMap
@@ -69,7 +67,6 @@ class CMap(CMapBase):
     def __init__(self, **kwargs):
         CMapBase.__init__(self, **kwargs)
         self.code2cid = {}
-        return
 
     def __repr__(self):
         return '<CMap: %s>' % self.attrs.get('CMapName')
@@ -86,7 +83,6 @@ class CMap(CMapBase):
                 else:
                     dst[k] = v
         copy(self.code2cid, cmap.code2cid)
-        return
 
     def decode(self, code):
         if self.debug:
@@ -101,7 +97,6 @@ class CMap(CMapBase):
                     d = self.code2cid
             else:
                 d = self.code2cid
-        return
 
     def dump(self, out=sys.stdout, code2cid=None, code=None):
         if code2cid is None:
@@ -113,7 +108,6 @@ class CMap(CMapBase):
                 out.write('code %r = cid %d\n' % (c, v))
             else:
                 self.dump(out=out, code2cid=v, code=c)
-        return
 
 
 ##  IdentityCMap
@@ -135,7 +129,6 @@ class UnicodeMap(CMapBase):
     def __init__(self, **kwargs):
         CMapBase.__init__(self, **kwargs)
         self.cid2unichr = {}
-        return
 
     def __repr__(self):
         return '<UnicodeMap: %s>' % self.attrs.get('CMapName')
@@ -148,7 +141,6 @@ class UnicodeMap(CMapBase):
     def dump(self, out=sys.stdout):
         for (k, v) in sorted(self.cid2unichr.iteritems()):
             out.write('cid %d = unicode %r\n' % (k, v))
-        return
 
 
 ##  FileCMap
@@ -168,7 +160,6 @@ class FileCMap(CMap):
                 d = t
         c = ord(code[-1])
         d[c] = cid
-        return
 
 
 ##  FileUnicodeMap
@@ -187,7 +178,6 @@ class FileUnicodeMap(UnicodeMap):
             self.cid2unichr[cid] = unichr(code)
         else:
             raise TypeError(code)
-        return
 
 
 ##  PyCMap
@@ -199,7 +189,6 @@ class PyCMap(CMap):
         self.code2cid = module.CODE2CID
         if module.IS_VERTICAL:
             self.attrs['WMode'] = 1
-        return
 
 
 ##  PyUnicodeMap
@@ -213,7 +202,6 @@ class PyUnicodeMap(UnicodeMap):
             self.attrs['WMode'] = 1
         else:
             self.cid2unichr = module.CID2UNICHR_H
-        return
 
 
 ##  CMapDB
@@ -277,14 +265,12 @@ class CMapParser(PSStackParser):
         self.cmap = cmap
         # some ToUnicode maps don't have "begincmap" keyword.
         self._in_cmap = True
-        return
 
     def run(self):
         try:
             self.nextobject()
         except PSEOF:
             pass
-        return
 
     def do_keyword(self, pos, token):
         name = token.name
@@ -400,7 +386,6 @@ class CMapParser(PSStackParser):
             return
 
         self.push((pos, token))
-        return
 
 
 # test
@@ -413,7 +398,6 @@ def main(argv):
         CMapParser(cmap, fp).run()
         fp.close()
         cmap.dump()
-    return
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

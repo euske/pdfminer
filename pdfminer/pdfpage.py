@@ -66,7 +66,6 @@ class PDFPage(object):
         if not isinstance(contents, list):
             contents = [contents]
         self.contents = contents
-        return
 
     def __repr__(self):
         return '<PDFPage: Resources=%r, MediaBox=%r>' % (self.resources, self.mediabox)
@@ -108,7 +107,6 @@ class PDFPage(object):
                             yield klass(document, objid, obj)
                     except PDFObjectNotFound:
                         pass
-        return
 
     @classmethod
     def get_pages(klass, fp,
@@ -128,4 +126,3 @@ class PDFPage(object):
             yield page
             if maxpages and maxpages <= pageno+1:
                 break
-        return

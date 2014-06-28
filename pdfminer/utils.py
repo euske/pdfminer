@@ -100,7 +100,6 @@ def uniq(objs):
             continue
         done.add(obj)
         yield obj
-    return
 
 
 # csort
@@ -162,7 +161,6 @@ def choplist(n, seq):
         if len(r) == n:
             yield tuple(r)
             r = []
-    return
 
 
 # nunpack
@@ -260,7 +258,6 @@ class Plane(object):
         self._grid = {}
         self.gridsize = gridsize
         (self.x0, self.y0, self.x1, self.y1) = bbox
-        return
 
     def __repr__(self):
         return ('<Plane objs=%r>' % list(self))
@@ -285,13 +282,11 @@ class Plane(object):
         for y in drange(y0, y1, self.gridsize):
             for x in drange(x0, x1, self.gridsize):
                 yield (x, y)
-        return
 
     # extend(objs)
     def extend(self, objs):
         for obj in objs:
             self.add(obj)
-        return
 
     # add(obj): place an object.
     def add(self, obj):
@@ -304,7 +299,6 @@ class Plane(object):
             r.append(obj)
         self._seq.append(obj)
         self._objs.add(obj)
-        return
 
     # remove(obj): displace an object.
     def remove(self, obj):
@@ -314,7 +308,6 @@ class Plane(object):
             except (KeyError, ValueError):
                 pass
         self._objs.remove(obj)
-        return
 
     # find(): finds objects that are in a certain area.
     def find(self, bbox):
@@ -331,4 +324,3 @@ class Plane(object):
                     obj.y1 <= y0 or y1 <= obj.y0):
                     continue
                 yield obj
-        return

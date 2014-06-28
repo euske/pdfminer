@@ -111,6 +111,5 @@ def main(argv):
         fp.close()
     device.close()
     outfp.close()
-    return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

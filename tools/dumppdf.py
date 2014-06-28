@@ -88,7 +88,6 @@ def dumptrailers(out, doc):
         out.write('<trailer>\n')
         dumpxml(out, xref.trailer)
         out.write('\n</trailer>\n\n')
-    return
 
 # dumpallobjs
 def dumpallobjs(out, doc, codec=None):
@@ -108,7 +107,6 @@ def dumpallobjs(out, doc, codec=None):
                 print >>sys.stderr, 'not found: %r' % e
     dumptrailers(out, doc)
     out.write('</pdf>')
-    return
 
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password='',
@@ -155,7 +153,6 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
         pass
     parser.close()
     fp.close()
-    return
 
 # extractembedded
 LITERAL_FILESPEC = LIT('Filespec')
@@ -181,7 +178,6 @@ def extractembedded(outfp, fname, objids, pagenos, password='',
         out = file(path, 'wb')
         out.write(fileobj.get_data())
         out.close()
-        return
 
     fp = file(fname, 'rb')
     parser = PDFParser(fp)
@@ -191,7 +187,6 @@ def extractembedded(outfp, fname, objids, pagenos, password='',
             obj = doc.getobj(objid)
             if isinstance(obj, dict) and obj.get('Type') is LITERAL_FILESPEC:
                 extract1(obj)
-    return
 
 # dumppdf
 def dumppdf(outfp, fname, objids, pagenos, password='',
@@ -219,7 +214,6 @@ def dumppdf(outfp, fname, objids, pagenos, password='',
     fp.close()
     if codec not in ('raw','binary'):
         outfp.write('\n')
-    return
 
 
 # main
@@ -263,6 +257,5 @@ def main(argv):
     for fname in args:
         proc(outfp, fname, objids, pagenos, password=password,
              dumpall=dumpall, codec=codec, extractdir=extractdir)
-    return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

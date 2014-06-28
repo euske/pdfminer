@@ -49,12 +49,10 @@ class BMPWriter(object):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         self.pos0 = self.fp.tell()
         self.pos1 = self.pos0 + self.datasize
-        return
 
     def write_line(self, y, data):
         self.fp.seek(self.pos1 - (y+1)*self.linesize)
         self.fp.write(data)
-        return
 
 
 ##  ImageWriter
@@ -65,7 +63,6 @@ class ImageWriter(object):
         self.outdir = outdir
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
-        return
 
     def export_image(self, image):
         stream = image.stream

@@ -29,7 +29,6 @@ class Arcfour(object):
             (s[i], s[j]) = (s[j], s[i])
         self.s = s
         (self.i, self.j) = (0, 0)
-        return
 
     def process(self, data):
         (i, j) = (self.i, self.j)
@@ -43,7 +42,7 @@ class Arcfour(object):
             r += chr(ord(c) ^ k)
         (self.i, self.j) = (i, j)
         return r
-    
+
     encrypt = decrypt = process
 
 new = Arcfour
