@@ -24,6 +24,5 @@ def prof_main(argv):
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
         stats.print_stats(1000)
-    return
 
 if __name__ == '__main__': sys.exit(prof_main(sys.argv))

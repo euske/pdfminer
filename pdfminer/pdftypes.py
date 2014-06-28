@@ -57,7 +57,6 @@ class PDFObjRef(PDFObject):
         self.doc = doc
         self.objid = objid
         #self.genno = genno  # Never used.
-        return
 
     def __repr__(self):
         return '<PDFObjRef:%d>' % (self.objid)
@@ -186,12 +185,10 @@ class PDFStream(PDFObject):
         self.data = None
         self.objid = None
         self.genno = None
-        return
 
     def set_objid(self, objid, genno):
         self.objid = objid
         self.genno = genno
-        return
 
     def __repr__(self):
         if self.data is None:
@@ -280,7 +277,6 @@ class PDFStream(PDFObject):
                     raise PDFNotImplementedError('Unsupported predictor: %r' % pred)
         self.data = data
         self.rawdata = None
-        return
 
     def get_data(self):
         if self.data is None:

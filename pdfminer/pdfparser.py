@@ -43,12 +43,10 @@ class PDFParser(PSStackParser):
         PSStackParser.__init__(self, fp)
         self.doc = None
         self.fallback = False
-        return
 
     def set_document(self, doc):
         """Associates the parser with a PDFDocument object."""
         self.doc = doc
-        return
 
     KEYWORD_R = KWD('R')
     KEYWORD_NULL = KWD('null')
@@ -130,8 +128,6 @@ class PDFParser(PSStackParser):
             # others
             self.push((pos, token))
 
-        return
-
 
 ##  PDFStreamParser
 ##
@@ -147,11 +143,9 @@ class PDFStreamParser(PDFParser):
 
     def __init__(self, data):
         PDFParser.__init__(self, BytesIO(data))
-        return
 
     def flush(self):
         self.add_results(*self.popall())
-        return
 
     KEYWORD_OBJ = KWD('obj')
     def do_keyword(self, pos, token):
@@ -173,4 +167,3 @@ class PDFStreamParser(PDFParser):
             return
         # others
         self.push((pos, token))
-        return

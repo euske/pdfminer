@@ -57,7 +57,6 @@ class PSLiteral(PSObject):
 
     def __init__(self, name):
         self.name = name
-        return
 
     def __repr__(self):
         return '/%s' % self.name
@@ -79,7 +78,6 @@ class PSKeyword(PSObject):
 
     def __init__(self, name):
         self.name = name
-        return
 
     def __repr__(self):
         return self.name
@@ -97,7 +95,6 @@ class PSSymbolTable(object):
     def __init__(self, klass):
         self.dict = {}
         self.klass = klass
-        return
 
     def intern(self, name):
         if name in self.dict:
@@ -164,17 +161,15 @@ class PSBaseParser(object):
     def __init__(self, fp):
         self.fp = fp
         self.seek(0)
-        return
 
     def __repr__(self):
         return '<%s: %r, bufpos=%d>' % (self.__class__.__name__, self.fp, self.bufpos)
 
     def flush(self):
-        return
+        pass
 
     def close(self):
         self.flush()
-        return
 
     def tell(self):
         return self.bufpos+self.charpos
@@ -186,7 +181,6 @@ class PSBaseParser(object):
         self.fp.seek(pos)
         logging.info('poll(%d): %r' % (pos, self.fp.read(n)))
         self.fp.seek(pos0)
-        return
 
     def seek(self, pos):
         """Seeks the parser to the given position.
@@ -203,7 +197,6 @@ class PSBaseParser(object):
         self._curtoken = ''
         self._curtokenpos = 0
         self._tokens = []
-        return
 
     def fillbuf(self):
         if self.charpos < len(self.buf):
@@ -214,7 +207,6 @@ class PSBaseParser(object):
         if not self.buf:
             raise PSEOF('Unexpected EOF')
         self.charpos = 0
-        return
 
     def nextline(self):
         """Fetches a next line that ends either with \\r or \\n.
@@ -269,7 +261,6 @@ class PSBaseParser(object):
                 yield s[n:]+buf
                 s = s[:n]
                 buf = ''
-        return
 
     def _parse_main(self, s, i):
         m = NONSPC.search(s, i)
@@ -317,7 +308,6 @@ class PSBaseParser(object):
 
     def _add_token(self, obj):
         self._tokens.append((self._curtokenpos, obj))
-        return
 
     def _parse_comment(self, s, i):
         m = EOL.search(s, i)
@@ -494,23 +484,19 @@ class PSStackParser(PSBaseParser):
     def __init__(self, fp):
         PSBaseParser.__init__(self, fp)
         self.reset()
-        return
 
     def reset(self):
         self.context = []
         self.curtype = None
         self.curstack = []
         self.results = []
-        return
 
     def seek(self, pos):
         PSBaseParser.seek(self, pos)
         self.reset()
-        return
 
     def push(self, *objs):
         self.curstack.extend(objs)
-        return
 
     def pop(self, n):
         objs = self.curstack[-n:]
@@ -526,14 +512,12 @@ class PSStackParser(PSBaseParser):
         if self.debug:
             logging.debug('add_results: %r' % objs)
         self.results.extend(objs)
-        return
 
     def start_type(self, pos, type):
         self.context.append((pos, self.curtype, self.curstack))
         (self.curtype, self.curstack) = (type, [])
         if self.debug:
             logging.debug('start_type: pos=%r, type=%r' % (pos, type))
-        return
 
     def end_type(self, type):
         if self.curtype != type:
@@ -545,7 +529,7 @@ class PSStackParser(PSBaseParser):
         return (pos, objs)
 
     def do_keyword(self, pos, token):
-        return
+        pass
 
     def nextobject(self):
         """Yields a list of objects.
@@ -696,13 +680,11 @@ func/a/b{(c)do*}def
         tokens = self.get_tokens(self.TESTDATA)
         print (tokens)
         self.assertEqual(tokens, self.TOKENS)
-        return
 
     def test_2(self):
         objs = self.get_objects(self.TESTDATA)
         print (objs)
         self.assertEqual(objs, self.OBJS)
-        return
 
 if __name__ == '__main__':
     unittest.main()

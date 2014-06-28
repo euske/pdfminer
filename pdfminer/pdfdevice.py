@@ -14,47 +14,45 @@ class PDFDevice(object):
     def __init__(self, rsrcmgr):
         self.rsrcmgr = rsrcmgr
         self.ctm = None
-        return
 
     def __repr__(self):
         return '<PDFDevice>'
 
     def close(self):
-        return
+        pass
 
     def set_ctm(self, ctm):
         self.ctm = ctm
-        return
 
     def begin_tag(self, tag, props=None):
-        return
+        pass
 
     def end_tag(self):
-        return
+        pass
 
     def do_tag(self, tag, props=None):
-        return
+        pass
 
     def begin_page(self, page, ctm):
-        return
+        pass
 
     def end_page(self, page):
-        return
+        pass
 
     def begin_figure(self, name, bbox, matrix):
-        return
+        pass
 
     def end_figure(self, name):
-        return
+        pass
 
     def paint_path(self, graphicstate, stroke, fill, evenodd, path):
-        return
+        pass
 
     def render_image(self, name, stream):
-        return
+        pass
 
     def render_string(self, textstate, seq):
-        return
+        pass
 
 
 ##  PDFTextDevice
@@ -80,7 +78,6 @@ class PDFTextDevice(PDFDevice):
             textstate.linematrix = self.render_string_horizontal(
                 seq, matrix, textstate.linematrix, font, fontsize,
                 scaling, charspace, wordspace, rise, dxscale)
-        return
 
     def render_string_horizontal(self, seq, matrix, pos,
                                  font, fontsize, scaling, charspace, wordspace, rise, dxscale):
@@ -134,7 +131,6 @@ class TagExtractor(PDFDevice):
         self.codec = codec
         self.pageno = 0
         self._stack = []
-        return
 
     def render_string(self, textstate, seq):
         font = textstate.font
@@ -150,17 +146,14 @@ class TagExtractor(PDFDevice):
                 except PDFUnicodeNotDefined:
                     pass
         self.outfp.write(enc(text, self.codec))
-        return
 
     def begin_page(self, page, ctm):
         self.outfp.write('<page id="%s" bbox="%s" rotate="%d">' %
                          (self.pageno, bbox2str(page.mediabox), page.rotate))
-        return
 
     def end_page(self, page):
         self.outfp.write('</page>\n')
         self.pageno += 1
-        return
 
     def begin_tag(self, tag, props=None):
         s = ''
@@ -169,15 +162,12 @@ class TagExtractor(PDFDevice):
                         in sorted(props.iteritems()))
         self.outfp.write('<%s%s>' % (enc(tag.name), s))
         self._stack.append(tag)
-        return
 
     def end_tag(self):
         assert self._stack
         tag = self._stack.pop(-1)
         self.outfp.write('</%s>' % enc(tag.name))
-        return
 
     def do_tag(self, tag, props=None):
         self.begin_tag(tag, props)
         self._stack.pop(-1)
-        return

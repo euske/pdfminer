@@ -101,7 +101,6 @@ class Type1FontHeaderParser(PSStackParser):
     def __init__(self, data):
         PSStackParser.__init__(self, data)
         self._cid2unicode = {}
-        return
 
     def get_encoding(self):
         while 1:
@@ -121,7 +120,6 @@ class Type1FontHeaderParser(PSStackParser):
             if (isinstance(key, int) and
                 isinstance(value, PSLiteral)):
                 self.add_results((key, literal_name(value)))
-        return
 
 
 NIBBLES = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'e-', None, '-')
@@ -268,7 +266,6 @@ class CFFFont(object):
                 self.offsets.append(nunpack(self.fp.read(offsize)))
             self.base = self.fp.tell()-1
             self.fp.seek(self.base+self.offsets[-1])
-            return
 
         def __repr__(self):
             return '<INDEX: size=%d>' % len(self)
@@ -361,7 +358,6 @@ class CFFFont(object):
         #print self.code2gid
         #print self.name2gid
         #assert 0
-        return
 
     def getstr(self, sid):
         if sid < len(self.STANDARD_STRINGS):
@@ -385,7 +381,6 @@ class TrueTypeFont(object):
         for _ in xrange(ntables):
             (name, tsum, offset, length) = struct.unpack('>4sLLL', fp.read(16))
             self.tables[name] = (offset, length)
-        return
 
     def create_unicode_map(self):
         if 'cmap' not in self.tables:
@@ -480,7 +475,6 @@ class PDFFont(object):
         self.leading = num_value(descriptor.get('Leading', 0))
         self.bbox = list_value(descriptor.get('FontBBox', (0, 0, 0, 0)))
         self.hscale = self.vscale = .001
-        return
 
     def __repr__(self):
         return '<PDFFont>'
@@ -551,7 +545,6 @@ class PDFSimpleFont(PDFFont):
             self.unicode_map = FileUnicodeMap()
             CMapParser(self.unicode_map, BytesIO(strm.get_data())).run()
         PDFFont.__init__(self, descriptor, widths)
-        return
 
     def to_unichr(self, cid):
         if self.unicode_map:
@@ -591,7 +584,6 @@ class PDFType1Font(PDFSimpleFont):
             data = self.fontfile.get_data()[:length1]
             parser = Type1FontHeaderParser(BytesIO(data))
             self.cid2unicode = parser.get_encoding()
-        return
 
     def __repr__(self):
         return '<PDFType1Font: basefont=%r>' % self.basefont
@@ -621,7 +613,6 @@ class PDFType3Font(PDFSimpleFont):
         self.matrix = tuple(list_value(spec.get('FontMatrix')))
         (_, self.descent, _, self.ascent) = self.bbox
         (self.hscale, self.vscale) = apply_matrix_norm(self.matrix, (1, 1))
-        return
 
     def __repr__(self):
         return '<PDFType3Font>'
@@ -696,7 +687,6 @@ class PDFCIDFont(PDFFont):
             widths = get_widths(list_value(spec.get('W', [])))
             default_width = spec.get('DW', 1000)
         PDFFont.__init__(self, descriptor, widths, default_width=default_width)
-        return
 
     def __repr__(self):
         return '<PDFCIDFont: basefont=%r, cidcoding=%r>' % (self.basefont, self.cidcoding)
@@ -731,7 +721,6 @@ def main(argv):
         font = CFFFont(fname, fp)
         print (font)
         fp.close()
-    return
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

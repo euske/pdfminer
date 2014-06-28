@@ -85,7 +85,6 @@ class PDFXRef(PDFBaseXRef):
     def __init__(self):
         self.offsets = {}
         self.trailer = {}
-        return
 
     def __repr__(self):
         return '<PDFXRef: offsets=%r>' % (self.offsets.keys())
@@ -124,7 +123,6 @@ class PDFXRef(PDFBaseXRef):
                 self.offsets[objid] = (None, long(pos), int(genno))
         logging.info('xref objects: %r' % self.offsets)
         self.load_trailer(parser)
-        return
 
     KEYWORD_TRAILER = KWD('trailer')
 
@@ -139,7 +137,6 @@ class PDFXRef(PDFBaseXRef):
                 raise PDFNoValidXRef('Unexpected EOF - file corrupted')
             (_, dic) = x[0]
         self.trailer.update(dict_value(dic))
-        return
 
     def get_trailer(self):
         return self.trailer
@@ -205,7 +202,6 @@ class PDFXRefFallback(PDFXRef):
                 for index in xrange(n):
                     objid1 = objs[index*2]
                     self.offsets[objid1] = (objid, index, 0)
-        return
 
 
 ##  PDFXRefStream
@@ -217,7 +213,6 @@ class PDFXRefStream(PDFBaseXRef):
         self.entlen = None
         self.fl1 = self.fl2 = self.fl3 = None
         self.ranges = []
-        return
 
     def __repr__(self):
         return '<PDFXRefStream: ranges=%r>' % (self.ranges)
@@ -241,7 +236,6 @@ class PDFXRefStream(PDFBaseXRef):
         logging.info('xref stream: objid=%s, fields=%d,%d,%d' %
                      (', '.join(map(repr, self.ranges)),
                       self.fl1, self.fl2, self.fl3))
-        return
 
     def get_trailer(self):
         return self.trailer
@@ -254,7 +248,6 @@ class PDFXRefStream(PDFBaseXRef):
                 f1 = nunpack(ent[:self.fl1], 1)
                 if f1 == 1 or f1 == 2:
                     yield start+i
-        return
 
     def get_pos(self, objid):
         index = 0
@@ -564,7 +557,6 @@ class PDFDocument(object):
         if self.catalog.get('Type') is not LITERAL_CATALOG:
             if STRICT:
                 raise PDFSyntaxError('Catalog not found!')
-        return
 
     # _initialize_password(password='')
     #   Perform the initialization with a given password.
@@ -582,7 +574,6 @@ class PDFDocument(object):
         self.is_modifiable = handler.is_modifiable()
         self.is_extractable = handler.is_extractable()
         self._parser.fallback = False # need to read streams with exact length
-        return
 
     def _getobj_objstm(self, stream, index, objid):
         if stream.objid in self._parsed_objs:
@@ -689,7 +680,6 @@ class PDFDocument(object):
             if 'Next' in entry:
                 for x in search(entry['Next'], level):
                     yield x
-            return
         return search(self.catalog['Outlines'], 0)
 
     def lookup_name(self, cat, key):
@@ -780,4 +770,3 @@ class PDFDocument(object):
             # find previous xref
             pos = int_value(trailer['Prev'])
             self.read_xref_from(parser, pos, xrefs)
-        return

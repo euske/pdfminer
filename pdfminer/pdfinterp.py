@@ -66,7 +66,6 @@ class PDFTextState(object):
         self.reset()
         # self.matrix is set
         # self.linematrix is set
-        return
 
     def __repr__(self):
         return ('<PDFTextState: font=%r, fontsize=%r, charspace=%r, wordspace=%r, '
@@ -93,7 +92,6 @@ class PDFTextState(object):
     def reset(self):
         self.matrix = MATRIX_IDENTITY
         self.linematrix = (0, 0)
-        return
 
 
 ##  PDFGraphicState
@@ -108,7 +106,6 @@ class PDFGraphicState(object):
         self.dash = None
         self.intent = None
         self.flatness = None
-        return
 
     def copy(self):
         obj = PDFGraphicState()
@@ -142,7 +139,6 @@ class PDFResourceManager(object):
     def __init__(self, caching=True):
         self.caching = caching
         self._cached_fonts = {}
-        return
 
     def get_procset(self, procs):
         for proc in procs:
@@ -153,7 +149,6 @@ class PDFResourceManager(object):
             else:
                 #raise PDFResourceError('ProcSet %r is not supported.' % proc)
                 pass
-        return
 
     def get_cmap(self, cmapname, strict=False):
         try:
@@ -216,7 +211,6 @@ class PDFContentParser(PSStackParser):
         self.streams = streams
         self.istream = 0
         PSStackParser.__init__(self, None)
-        return
 
     def fillfp(self):
         if not self.fp:
@@ -226,12 +220,10 @@ class PDFContentParser(PSStackParser):
             else:
                 raise PSEOF('Unexpected EOF, file truncated?')
             self.fp = BytesIO(strm.get_data())
-        return
 
     def seek(self, pos):
         self.fillfp()
         PSStackParser.seek(self, pos)
-        return
 
     def fillbuf(self):
         if self.charpos < len(self.buf):
@@ -244,7 +236,6 @@ class PDFContentParser(PSStackParser):
                 break
             self.fp = None
         self.charpos = 0
-        return
 
     def get_inline_data(self, pos, target='EI'):
         self.seek(pos)
@@ -278,7 +269,6 @@ class PDFContentParser(PSStackParser):
 
     def flush(self):
         self.add_results(*self.popall())
-        return
 
     KEYWORD_BI = KWD('BI')
     KEYWORD_ID = KWD('ID')
@@ -303,7 +293,6 @@ class PDFContentParser(PSStackParser):
                     raise
         else:
             self.push((pos, token))
-        return
 
 
 ##  Interpreter
@@ -315,7 +304,6 @@ class PDFPageInterpreter(object):
     def __init__(self, rsrcmgr, device):
         self.rsrcmgr = rsrcmgr
         self.device = device
-        return
 
     def dup(self):
         return self.__class__(self.rsrcmgr, self.device)
@@ -359,7 +347,6 @@ class PDFPageInterpreter(object):
             elif k == 'XObject':
                 for (xobjid, xobjstrm) in dict_value(v).iteritems():
                     self.xobjmap[xobjid] = xobjstrm
-        return
 
     # init_state(ctm)
     #   Initialize the text and graphic states for rendering a page.
@@ -377,11 +364,9 @@ class PDFPageInterpreter(object):
         self.scs = self.ncs = None
         if self.csmap:
             self.scs = self.ncs = self.csmap.values()[0]
-        return
 
     def push(self, obj):
         self.argstack.append(obj)
-        return
 
     def pop(self, n):
         if n == 0:
@@ -396,94 +381,77 @@ class PDFPageInterpreter(object):
     def set_current_state(self, state):
         (self.ctm, self.textstate, self.graphicstate) = state
         self.device.set_ctm(self.ctm)
-        return
 
     # gsave
     def do_q(self):
         self.gstack.append(self.get_current_state())
-        return
 
     # grestore
     def do_Q(self):
         if self.gstack:
             self.set_current_state(self.gstack.pop())
-        return
 
     # concat-matrix
     def do_cm(self, a1, b1, c1, d1, e1, f1):
         self.ctm = mult_matrix((a1, b1, c1, d1, e1, f1), self.ctm)
         self.device.set_ctm(self.ctm)
-        return
 
     # setlinewidth
     def do_w(self, linewidth):
         self.graphicstate.linewidth = linewidth
-        return
 
     # setlinecap
     def do_J(self, linecap):
         self.graphicstate.linecap = linecap
-        return
 
     # setlinejoin
     def do_j(self, linejoin):
         self.graphicstate.linejoin = linejoin
-        return
 
     # setmiterlimit
     def do_M(self, miterlimit):
         self.graphicstate.miterlimit = miterlimit
-        return
 
     # setdash
     def do_d(self, dash, phase):
         self.graphicstate.dash = (dash, phase)
-        return
 
     # setintent
     def do_ri(self, intent):
         self.graphicstate.intent = intent
-        return
 
     # setflatness
     def do_i(self, flatness):
         self.graphicstate.flatness = flatness
-        return
 
     # load-gstate
     def do_gs(self, name):
         #XXX
-        return
+        pass
 
     # moveto
     def do_m(self, x, y):
         self.curpath.append(('m', x, y))
-        return
 
     # lineto
     def do_l(self, x, y):
         self.curpath.append(('l', x, y))
-        return
 
     # curveto
     def do_c(self, x1, y1, x2, y2, x3, y3):
         self.curpath.append(('c', x1, y1, x2, y2, x3, y3))
-        return
 
     # urveto
     def do_v(self, x2, y2, x3, y3):
         self.curpath.append(('v', x2, y2, x3, y3))
-        return
 
     # rveto
     def do_y(self, x1, y1, x3, y3):
         self.curpath.append(('y', x1, y1, x3, y3))
-        return
 
     # closepath
     def do_h(self):
         self.curpath.append(('h',))
-        return
 
     # rectangle
     def do_re(self, x, y, w, h):
@@ -492,25 +460,21 @@ class PDFPageInterpreter(object):
         self.curpath.append(('l', x+w, y+h))
         self.curpath.append(('l', x, y+h))
         self.curpath.append(('h',))
-        return
 
     # stroke
     def do_S(self):
         self.device.paint_path(self.graphicstate, True, False, False, self.curpath)
         self.curpath = []
-        return
 
     # close-and-stroke
     def do_s(self):
         self.do_h()
         self.do_S()
-        return
 
     # fill
     def do_f(self):
         self.device.paint_path(self.graphicstate, False, True, False, self.curpath)
         self.curpath = []
-        return
     # fill (obsolete)
     do_F = do_f
 
@@ -518,44 +482,38 @@ class PDFPageInterpreter(object):
     def do_f_a(self):
         self.device.paint_path(self.graphicstate, False, True, True, self.curpath)
         self.curpath = []
-        return
 
     # fill-and-stroke
     def do_B(self):
         self.device.paint_path(self.graphicstate, True, True, False, self.curpath)
         self.curpath = []
-        return
 
     # fill-and-stroke-even-odd
     def do_B_a(self):
         self.device.paint_path(self.graphicstate, True, True, True, self.curpath)
         self.curpath = []
-        return
 
     # close-fill-and-stroke
     def do_b(self):
         self.do_h()
         self.do_B()
-        return
 
     # close-fill-and-stroke-even-odd
     def do_b_a(self):
         self.do_h()
         self.do_B_a()
-        return
 
     # close-only
     def do_n(self):
         self.curpath = []
-        return
 
     # clip
     def do_W(self):
-        return
+        pass
 
     # clip-even-odd
     def do_W_a(self):
-        return
+        pass
 
     # setcolorspace-stroking
     def do_CS(self, name):
@@ -564,7 +522,6 @@ class PDFPageInterpreter(object):
         except KeyError:
             if STRICT:
                 raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
-        return
 
     # setcolorspace-non-strokine
     def do_cs(self, name):
@@ -573,37 +530,36 @@ class PDFPageInterpreter(object):
         except KeyError:
             if STRICT:
                 raise PDFInterpreterError('Undefined ColorSpace: %r' % name)
-        return
 
     # setgray-stroking
     def do_G(self, gray):
         #self.do_CS(LITERAL_DEVICE_GRAY)
-        return
+        pass
 
     # setgray-non-stroking
     def do_g(self, gray):
         #self.do_cs(LITERAL_DEVICE_GRAY)
-        return
+        pass
 
     # setrgb-stroking
     def do_RG(self, r, g, b):
         #self.do_CS(LITERAL_DEVICE_RGB)
-        return
+        pass
 
     # setrgb-non-stroking
     def do_rg(self, r, g, b):
         #self.do_cs(LITERAL_DEVICE_RGB)
-        return
+        pass
 
     # setcmyk-stroking
     def do_K(self, c, m, y, k):
         #self.do_CS(LITERAL_DEVICE_CMYK)
-        return
+        pass
 
     # setcmyk-non-stroking
     def do_k(self, c, m, y, k):
         #self.do_cs(LITERAL_DEVICE_CMYK)
-        return
+        pass
 
     # setcolor
     def do_SCN(self):
@@ -614,7 +570,6 @@ class PDFPageInterpreter(object):
                 raise PDFInterpreterError('No colorspace specified!')
             n = 1
         self.pop(n)
-        return
 
     def do_scn(self):
         if self.ncs:
@@ -624,77 +579,64 @@ class PDFPageInterpreter(object):
                 raise PDFInterpreterError('No colorspace specified!')
             n = 1
         self.pop(n)
-        return
 
     def do_SC(self):
         self.do_SCN()
-        return
 
     def do_sc(self):
         self.do_scn()
-        return
 
     # sharing-name
     def do_sh(self, name):
-        return
+        pass
 
     # begin-text
     def do_BT(self):
         self.textstate.reset()
-        return
 
     # end-text
     def do_ET(self):
-        return
+        pass
 
     # begin-compat
     def do_BX(self):
-        return
+        pass
 
     # end-compat
     def do_EX(self):
-        return
+        pass
 
     # marked content operators
     def do_MP(self, tag):
         self.device.do_tag(tag)
-        return
 
     def do_DP(self, tag, props):
         self.device.do_tag(tag, props)
-        return
 
     def do_BMC(self, tag):
         self.device.begin_tag(tag)
-        return
 
     def do_BDC(self, tag, props):
         self.device.begin_tag(tag, props)
-        return
 
     def do_EMC(self):
         self.device.end_tag()
-        return
 
     # setcharspace
     def do_Tc(self, space):
         self.textstate.charspace = space
-        return
 
     # setwordspace
     def do_Tw(self, space):
         self.textstate.wordspace = space
-        return
 
     # textscale
     def do_Tz(self, scale):
         self.textstate.scaling = scale
-        return
 
     # setleading
     def do_TL(self, leading):
         self.textstate.leading = -leading
-        return
 
     # selectfont
     def do_Tf(self, fontid, fontsize):
@@ -705,17 +647,14 @@ class PDFPageInterpreter(object):
                 raise PDFInterpreterError('Undefined Font id: %r' % fontid)
             self.textstate.font = self.rsrcmgr.get_font(None, {})
         self.textstate.fontsize = fontsize
-        return
 
     # setrendering
     def do_Tr(self, render):
         self.textstate.render = render
-        return
 
     # settextrise
     def do_Ts(self, rise):
         self.textstate.rise = rise
-        return
 
     # text-move
     def do_Td(self, tx, ty):
@@ -723,7 +662,6 @@ class PDFPageInterpreter(object):
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.linematrix = (0, 0)
         #print >>sys.stderr, 'Td(%r,%r): %r' % (tx, ty, self.textstate)
-        return
 
     # text-move
     def do_TD(self, tx, ty):
@@ -732,20 +670,17 @@ class PDFPageInterpreter(object):
         self.textstate.leading = ty
         self.textstate.linematrix = (0, 0)
         #print >>sys.stderr, 'TD(%r,%r): %r' % (tx, ty, self.textstate)
-        return
 
     # textmatrix
     def do_Tm(self, a, b, c, d, e, f):
         self.textstate.matrix = (a, b, c, d, e, f)
         self.textstate.linematrix = (0, 0)
-        return
 
     # nextline
     def do_T_a(self):
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, self.textstate.leading*c+e, self.textstate.leading*d+f)
         self.textstate.linematrix = (0, 0)
-        return
 
     # show-pos
     def do_TJ(self, seq):
@@ -755,32 +690,28 @@ class PDFPageInterpreter(object):
                 raise PDFInterpreterError('No font specified!')
             return
         self.device.render_string(self.textstate, seq)
-        return
 
     # show
     def do_Tj(self, s):
         self.do_TJ([s])
-        return
 
     # quote
     def do__q(self, s):
         self.do_T_a()
         self.do_TJ([s])
-        return
 
     # doublequote
     def do__w(self, aw, ac, s):
         self.do_Tw(aw)
         self.do_Tc(ac)
         self.do_TJ([s])
-        return
 
     # inline image
     def do_BI(self):  # never called
-        return
+        pass
 
     def do_ID(self):  # never called
-        return
+        pass
 
     def do_EI(self, obj):
         if 'W' in obj and 'H' in obj:
@@ -788,7 +719,6 @@ class PDFPageInterpreter(object):
             self.device.begin_figure(iobjid, (0, 0, 1, 1), MATRIX_IDENTITY)
             self.device.render_image(iobjid, obj)
             self.device.end_figure(iobjid)
-        return
 
     # invoke an XObject
     def do_Do(self, xobjid):
@@ -819,7 +749,6 @@ class PDFPageInterpreter(object):
         else:
             # unsupported xobject type.
             pass
-        return
 
     def process_page(self, page):
         logging.info('Processing page: %r' % page)
@@ -835,7 +764,6 @@ class PDFPageInterpreter(object):
         self.device.begin_page(page, ctm)
         self.render_contents(page.resources, page.contents, ctm=ctm)
         self.device.end_page(page)
-        return
 
     # render_contents(resources, streams, ctm)
     #   Render the content streams.
@@ -846,7 +774,6 @@ class PDFPageInterpreter(object):
         self.init_resources(resources)
         self.init_state(ctm)
         self.execute(list_value(streams))
-        return
 
     def execute(self, streams):
         try:
@@ -880,4 +807,3 @@ class PDFPageInterpreter(object):
                         raise PDFInterpreterError('Unknown operator: %r' % name)
             else:
                 self.push(obj)
-        return
