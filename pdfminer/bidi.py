@@ -79,11 +79,12 @@ def reorder_text_line(objs, bidi_level, add_directional_marks,
             t = u"".join(obj_text)
             del obj_text[:]
             if old_iobj is None:
-                obj = annotation_factory(t)
+                if t:
+                    objs_in_logical_order.append(annotation_factory(t))
             else:
                 obj = objs[old_iobj]
                 set_text_function(obj, t)
-            objs_in_logical_order.append(obj)
+                objs_in_logical_order.append(obj)
             if new_iobj is not None:
                 oids.remove(new_iobj)  # raises KeyError in case of an error
         if char is not None:
