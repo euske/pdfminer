@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""
+This module has a single entry point: lzwdecode(data)
+"""
+
 from io import BytesIO
 
 
@@ -6,10 +9,13 @@ class CorruptDataError(Exception):
     pass
 
 
-##  LZWDecoder
-##
 class LZWDecoder(object):
+    """
+    Implements the LZW decoder.
 
+    See https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch.
+
+    """
     def __init__(self, fp):
         self.fp = fp
         self.buff = 0
@@ -92,15 +98,9 @@ class LZWDecoder(object):
         return
 
 
-# lzwdecode
 def lzwdecode(data):
     """
-    >>> lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01')
-    '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
+    returns LZW decoded data
     """
     fp = BytesIO(data)
     return b''.join(LZWDecoder(fp).run())
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

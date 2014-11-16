@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """ Python implementation of Arcfour encryption algorithm.
 
 This code is in the public domain.
@@ -7,19 +5,10 @@ This code is in the public domain.
 """
 
 
-##  Arcfour
-##
 class Arcfour(object):
-
     """
-    >>> Arcfour(b'Key').process(b'Plaintext').encode('hex')
-    'bbf316e8d940af0ad3'
-    >>> Arcfour(b'Wiki').process(b'pedia').encode('hex')
-    '1021bf0420'
-    >>> Arcfour(b'Secret').process(b'Attack at dawn').encode('hex')
-    '45a01f645fc35b383552544b9bf5'
+    Arcfour encryption algorithm (see https://en.wikipedia.org/wiki/RC4).
     """
-
     def __init__(self, key):
         s = range(256)
         j = 0
@@ -45,10 +34,3 @@ class Arcfour(object):
         return r
     
     encrypt = decrypt = process
-
-new = Arcfour
-
-# test
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

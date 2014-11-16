@@ -1,20 +1,16 @@
-#!/usr/bin/env python
 import struct
 import os
 import os.path
 from io import BytesIO
+
 from .pdftypes import LITERALS_DCT_DECODE
-from .pdfcolor import LITERAL_DEVICE_GRAY
-from .pdfcolor import LITERAL_DEVICE_RGB
-from .pdfcolor import LITERAL_DEVICE_CMYK
+from .pdfcolor import LITERAL_DEVICE_GRAY, LITERAL_DEVICE_RGB, LITERAL_DEVICE_CMYK
 
 
 def align32(x):
     return ((x+3)//4)*4
 
 
-##  BMPWriter
-##
 class BMPWriter(object):
 
     def __init__(self, fp, bits, width, height):
@@ -33,9 +29,11 @@ class BMPWriter(object):
         self.linesize = align32((self.width*self.bits+7)//8)
         self.datasize = self.linesize * self.height
         headersize = 14+40+ncols*4
-        info = struct.pack('<IiiHHIIIIII', 40, self.width, self.height, 1, self.bits, 0, self.datasize, 0, 0, ncols, 0)
+        info = struct.pack('<IiiHHIIIIII', 40, self.width, self.height, 1,
+                           self.bits, 0, self.datasize, 0, 0, ncols, 0)
         assert len(info) == 40, len(info)
-        header = struct.pack('<ccIHHI', b'B', b'M', headersize+self.datasize, 0, 0, headersize)
+        header = struct.pack('<ccIHHI', b'B', b'M', headersize+self.datasize, 0,
+                             0, headersize)
         assert len(header) == 14, len(header)
         self.fp.write(header)
         self.fp.write(info)
@@ -49,23 +47,18 @@ class BMPWriter(object):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         self.pos0 = self.fp.tell()
         self.pos1 = self.pos0 + self.datasize
-        return
 
     def write_line(self, y, data):
         self.fp.seek(self.pos1 - (y+1)*self.linesize)
         self.fp.write(data)
-        return
 
 
-##  ImageWriter
-##
 class ImageWriter(object):
 
     def __init__(self, outdir):
         self.outdir = outdir
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
-        return
 
     def export_image(self, image):
         stream = image.stream
@@ -74,7 +67,8 @@ class ImageWriter(object):
         if len(filters) == 1 and filters[0][0] in LITERALS_DCT_DECODE:
             ext = '.jpg'
         elif (image.bits == 1 or
-              image.bits == 8 and image.colorspace in (LITERAL_DEVICE_RGB, LITERAL_DEVICE_GRAY)):
+              image.bits == 8 and image.colorspace in (LITERAL_DEVICE_RGB,
+                                                       LITERAL_DEVICE_GRAY)):
             ext = '.%dx%d.bmp' % (width, height)
         else:
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
@@ -105,7 +99,7 @@ class ImageWriter(object):
             bmp = BMPWriter(fp, 24, width, height)
             data = stream.get_data()
             i = 0
-            width = width*3
+            width *= 3
             for y in xrange(height):
                 bmp.write_line(y, data[i:i+width])
                 i += width

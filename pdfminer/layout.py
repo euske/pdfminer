@@ -1,22 +1,11 @@
-#!/usr/bin/env python
-from .utils import INF
-from .utils import Plane
-from .utils import get_bound
-from .utils import uniq
-from .utils import csort
-from .utils import fsplit
-from .utils import bbox2str
-from .utils import matrix2str
-from .utils import apply_matrix_pt
+from .utils import INF, Plane, get_bound, uniq, csort, fsplit, bbox2str, \
+    matrix2str, apply_matrix_pt
 
 
-##  IndexAssigner
-##
 class IndexAssigner(object):
 
     def __init__(self, index=0):
         self.index = index
-        return
 
     def run(self, obj):
         if isinstance(obj, LTTextBox):
@@ -25,11 +14,8 @@ class IndexAssigner(object):
         elif isinstance(obj, LTTextGroup):
             for x in obj:
                 self.run(x)
-        return
 
 
-##  LAParams
-##
 class LAParams(object):
 
     def __init__(self,
@@ -54,17 +40,13 @@ class LAParams(object):
                 (self.char_margin, self.line_margin, self.word_margin, self.all_texts))
 
 
-##  LTItem
-##
 class LTItem(object):
 
     def analyze(self, laparams):
         """Perform the layout analysis."""
-        return
+        pass
 
 
-##  LTText
-##
 class LTText(object):
 
     def __repr__(self):
@@ -75,14 +57,11 @@ class LTText(object):
         raise NotImplementedError
 
 
-##  LTComponent
-##
 class LTComponent(LTItem):
 
     def __init__(self, bbox):
         LTItem.__init__(self)
         self.set_bbox(bbox)
-        return
 
     def __repr__(self):
         return ('<%s %s>' %
@@ -91,10 +70,13 @@ class LTComponent(LTItem):
     # Disable comparison.
     def __lt__(self, _):
         raise ValueError
+
     def __le__(self, _):
         raise ValueError
+
     def __gt__(self, _):
         raise ValueError
+
     def __ge__(self, _):
         raise ValueError
 
@@ -107,7 +89,6 @@ class LTComponent(LTItem):
         self.width = x1-x0
         self.height = y1-y0
         self.bbox = bbox
-        return
 
     def is_empty(self):
         return self.width <= 0 or self.height <= 0
@@ -149,41 +130,30 @@ class LTComponent(LTItem):
             return 0
 
 
-##  LTCurve
-##
 class LTCurve(LTComponent):
 
     def __init__(self, linewidth, pts):
         LTComponent.__init__(self, get_bound(pts))
         self.pts = pts
         self.linewidth = linewidth
-        return
 
     def get_pts(self):
         return ','.join('%.3f,%.3f' % p for p in self.pts)
 
 
-##  LTLine
-##
 class LTLine(LTCurve):
 
     def __init__(self, linewidth, p0, p1):
         LTCurve.__init__(self, linewidth, [p0, p1])
-        return
 
 
-##  LTRect
-##
 class LTRect(LTCurve):
 
     def __init__(self, linewidth, bbox):
         (x0, y0, x1, y1) = bbox
         LTCurve.__init__(self, linewidth, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-        return
 
 
-##  LTImage
-##
 class LTImage(LTComponent):
 
     def __init__(self, name, stream, bbox):
@@ -197,7 +167,6 @@ class LTImage(LTComponent):
         self.colorspace = stream.get_any(('CS', 'ColorSpace'))
         if not isinstance(self.colorspace, list):
             self.colorspace = [self.colorspace]
-        return
 
     def __repr__(self):
         return ('<%s(%s) %s %r>' %
@@ -205,20 +174,15 @@ class LTImage(LTComponent):
                  bbox2str(self.bbox), self.srcsize))
 
 
-##  LTAnno
-##
 class LTAnno(LTItem, LTText):
 
     def __init__(self, text):
         self._text = text
-        return
 
     def get_text(self):
         return self._text
 
 
-##  LTChar
-##
 class LTChar(LTComponent, LTText):
 
     def __init__(self, matrix, font, fontsize, scaling, rise,
@@ -262,7 +226,6 @@ class LTChar(LTComponent, LTText):
             self.size = self.width
         else:
             self.size = self.height
-        return
 
     def __repr__(self):
         return ('<%s %s matrix=%s font=%r adv=%s text=%r>' %
@@ -278,8 +241,6 @@ class LTChar(LTComponent, LTText):
         return True
 
 
-##  LTContainer
-##
 class LTContainer(LTComponent):
 
     def __init__(self, bbox):
@@ -308,8 +269,6 @@ class LTContainer(LTComponent):
         return
 
 
-##  LTExpandableContainer
-##
 class LTExpandableContainer(LTContainer):
 
     def __init__(self):
@@ -323,8 +282,6 @@ class LTExpandableContainer(LTContainer):
         return
 
 
-##  LTTextContainer
-##
 class LTTextContainer(LTExpandableContainer, LTText):
 
     def __init__(self):
@@ -336,8 +293,6 @@ class LTTextContainer(LTExpandableContainer, LTText):
         return ''.join(obj.get_text() for obj in self if isinstance(obj, LTText))
 
 
-##  LTTextLine
-##
 class LTTextLine(LTTextContainer):
 
     def __init__(self, word_margin):
@@ -411,17 +366,13 @@ class LTTextLineVertical(LTTextLine):
                      abs(obj.y1-self.y1) < d))]
 
 
-##  LTTextBox
-##
-##  A set of text objects that are grouped within
-##  a certain rectangular area.
-##
 class LTTextBox(LTTextContainer):
-
+    """
+    A set of text objects that are grouped within a certain rectangular area.
+    """
     def __init__(self):
         LTTextContainer.__init__(self)
         self.index = -1
-        return
 
     def __repr__(self):
         return ('<%s(%s) %s %r>' %
@@ -434,7 +385,6 @@ class LTTextBoxHorizontal(LTTextBox):
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
         self._objs = csort(self._objs, key=lambda obj: -obj.y1)
-        return
 
     def get_writing_mode(self):
         return 'lr-tb'
@@ -445,20 +395,16 @@ class LTTextBoxVertical(LTTextBox):
     def analyze(self, laparams):
         LTTextBox.analyze(self, laparams)
         self._objs = csort(self._objs, key=lambda obj: -obj.x1)
-        return
 
     def get_writing_mode(self):
         return 'tb-rl'
 
 
-##  LTTextGroup
-##
 class LTTextGroup(LTTextContainer):
 
     def __init__(self, objs):
         LTTextContainer.__init__(self)
         self.extend(objs)
-        return
 
 
 class LTTextGroupLRTB(LTTextGroup):
@@ -467,9 +413,8 @@ class LTTextGroupLRTB(LTTextGroup):
         LTTextGroup.analyze(self, laparams)
         # reorder the objects from top-left to bottom-right.
         self._objs = csort(self._objs, key=lambda obj:
-                           (1-laparams.boxes_flow)*(obj.x0) -
-                           (1+laparams.boxes_flow)*(obj.y0+obj.y1))
-        return
+                           (1-laparams.boxes_flow)*obj.x0 -
+                           (1+laparams.boxes_flow)*(obj.y0 + obj.y1))
 
 
 class LTTextGroupTBRL(LTTextGroup):
@@ -478,19 +423,15 @@ class LTTextGroupTBRL(LTTextGroup):
         LTTextGroup.analyze(self, laparams)
         # reorder the objects from top-right to bottom-left.
         self._objs = csort(self._objs, key=lambda obj:
-                           -(1+laparams.boxes_flow)*(obj.x0+obj.x1)
-                           - (1-laparams.boxes_flow)*(obj.y1))
-        return
+                           - (1+laparams.boxes_flow)*(obj.x0 + obj.x1)
+                           - (1-laparams.boxes_flow)*obj.y1)
 
 
-##  LTLayoutContainer
-##
 class LTLayoutContainer(LTContainer):
 
     def __init__(self, bbox):
         LTContainer.__init__(self, bbox)
         self.groups = None
-        return
 
     # group_objects: group text object to textlines.
     def group_objects(self, laparams, objs):
@@ -538,7 +479,7 @@ class LTLayoutContainer(LTContainer):
                            max(obj0.height, obj1.height) * laparams.char_margin))
                 
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
-                    (valign and isinstance(line, LTTextLineVertical))):
+                        (valign and isinstance(line, LTTextLineVertical))):
                     line.add(obj1)
                 elif line is not None:
                     yield line
@@ -562,7 +503,6 @@ class LTLayoutContainer(LTContainer):
             line = LTTextLineHorizontal(laparams.word_margin)
             line.add(obj0)
         yield line
-        return
 
     # group_textlines: group neighboring lines to textboxes.
     def group_textlines(self, laparams, lines):
@@ -571,7 +511,8 @@ class LTLayoutContainer(LTContainer):
         boxes = {}
         for line in lines:
             neighbors = line.find_neighbors(plane, laparams.line_margin)
-            if line not in neighbors: continue
+            if line not in neighbors:
+                continue
             members = []
             for obj1 in neighbors:
                 members.append(obj1)
@@ -586,14 +527,14 @@ class LTLayoutContainer(LTContainer):
                 boxes[obj] = box
         done = set()
         for line in lines:
-            if line not in boxes: continue
+            if line not in boxes:
+                continue
             box = boxes[line]
             if box in done:
                 continue
             done.add(box)
             if not box.is_empty():
                 yield box
-        return
 
     # group_textboxes: group textboxes hierarchically.
     def group_textboxes(self, laparams, boxes):
@@ -628,9 +569,9 @@ class LTLayoutContainer(LTContainer):
             return objs.difference((obj1, obj2))
 
         def key_obj(t):
-            (c,d,_,_) = t
-            return (c,d)
-        
+            c, d, _, _ = t
+            return c, d
+
         # XXX this still takes O(n^2)  :(
         dists = []
         for i in xrange(len(boxes)):
@@ -648,14 +589,14 @@ class LTLayoutContainer(LTContainer):
                 dists.append((1, d, obj1, obj2))
                 continue
             if (isinstance(obj1, (LTTextBoxVertical, LTTextGroupTBRL)) or
-                isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
+                    isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
                 group = LTTextGroupTBRL([obj1, obj2])
             else:
                 group = LTTextGroupLRTB([obj1, obj2])
             plane.remove(obj1)
             plane.remove(obj2)
-            dists = [ (c,d,obj1,obj2) for (c,d,obj1,obj2) in dists
-                      if (obj1 in plane and obj2 in plane) ]
+            dists = [(c, d, obj1, obj2) for (c, d, obj1, obj2) in dists
+                     if obj1 in plane and obj2 in plane]
             for other in plane:
                 dists.append((0, dist(group, other), group, other))
             dists = csort(dists, key=key_obj)
@@ -684,11 +625,8 @@ class LTLayoutContainer(LTContainer):
                 assigner.run(group)
             textboxes.sort(key=lambda box: box.index)
         self._objs = textboxes + otherobjs + empties
-        return
 
 
-##  LTFigure
-##
 class LTFigure(LTLayoutContainer):
 
     def __init__(self, name, bbox, matrix):
@@ -698,7 +636,6 @@ class LTFigure(LTLayoutContainer):
         bbox = get_bound(apply_matrix_pt(matrix, (p, q))
                          for (p, q) in ((x, y), (x+w, y), (x, y+h), (x+w, y+h)))
         LTLayoutContainer.__init__(self, bbox)
-        return
 
     def __repr__(self):
         return ('<%s(%s) %s matrix=%s>' %
@@ -706,14 +643,10 @@ class LTFigure(LTLayoutContainer):
                  bbox2str(self.bbox), matrix2str(self.matrix)))
 
     def analyze(self, laparams):
-        if not laparams.all_texts:
-            return
-        LTLayoutContainer.analyze(self, laparams)
-        return
+        if laparams.all_texts:
+            LTLayoutContainer.analyze(self, laparams)
 
 
-##  LTPage
-##
 class LTPage(LTLayoutContainer):
 
     def __init__(self, pageid, bbox, rotate=0):

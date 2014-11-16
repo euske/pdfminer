@@ -1,29 +1,14 @@
-#!/usr/bin/env python
 import logging
 import re
+
 from .pdfdevice import PDFTextDevice
 from .pdffont import PDFUnicodeNotDefined
-from .layout import LTContainer
-from .layout import LTPage
-from .layout import LTText
-from .layout import LTLine
-from .layout import LTRect
-from .layout import LTCurve
-from .layout import LTFigure
-from .layout import LTImage
-from .layout import LTChar
-from .layout import LTTextLine
-from .layout import LTTextBox
-from .layout import LTTextBoxVertical
-from .layout import LTTextGroup
-from .utils import apply_matrix_pt
-from .utils import mult_matrix
-from .utils import enc
-from .utils import bbox2str
+from .layout import LTContainer, LTPage, LTText, LTLine, LTRect, LTCurve, \
+    LTFigure, LTImage, LTChar, LTTextLine, LTTextBox, LTTextBoxVertical,\
+    LTTextGroup
+from .utils import apply_matrix_pt, mult_matrix, enc, bbox2str
 
 
-##  PDFLayoutAnalyzer
-##
 class PDFLayoutAnalyzer(PDFTextDevice):
 
     def __init__(self, rsrcmgr, pageno=1, laparams=None):
@@ -31,7 +16,6 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         self.pageno = pageno
         self.laparams = laparams
         self._stack = []
-        return
 
     def begin_page(self, page, ctm):
         (x0, y0, x1, y1) = page.mediabox
@@ -39,7 +23,6 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         (x1, y1) = apply_matrix_pt(ctm, (x1, y1))
         mediabox = (0, 0, abs(x0-x1), abs(y0-y1))
         self.cur_item = LTPage(self.pageno, mediabox)
-        return
 
     def end_page(self, page):
         assert not self._stack
@@ -48,19 +31,16 @@ class PDFLayoutAnalyzer(PDFTextDevice):
             self.cur_item.analyze(self.laparams)
         self.pageno += 1
         self.receive_layout(self.cur_item)
-        return
 
     def begin_figure(self, name, bbox, matrix):
         self._stack.append(self.cur_item)
         self.cur_item = LTFigure(name, bbox, mult_matrix(matrix, self.ctm))
-        return
 
     def end_figure(self, _):
         fig = self.cur_item
         assert isinstance(self.cur_item, LTFigure)
         self.cur_item = self._stack.pop()
         self.cur_item.add(fig)
-        return
 
     def render_image(self, name, stream):
         assert isinstance(self.cur_item, LTFigure)
@@ -68,7 +48,6 @@ class PDFLayoutAnalyzer(PDFTextDevice):
                        (self.cur_item.x0, self.cur_item.y0,
                         self.cur_item.x1, self.cur_item.y1))
         self.cur_item.add(item)
-        return
 
     def paint_path(self, gstate, stroke, fill, evenodd, path):
         shape = ''.join(x[0] for x in path)
@@ -101,7 +80,6 @@ class PDFLayoutAnalyzer(PDFTextDevice):
             for i in xrange(1, len(p), 2):
                 pts.append(apply_matrix_pt(self.ctm, (p[i], p[i+1])))
         self.cur_item.add(LTCurve(gstate.linewidth, pts))
-        return
 
     def render_char(self, matrix, font, fontsize, scaling, rise, cid):
         try:
@@ -120,51 +98,41 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         return '(cid:%d)' % cid
 
     def receive_layout(self, ltpage):
-        return
+        pass
 
 
-##  PDFPageAggregator
-##
 class PDFPageAggregator(PDFLayoutAnalyzer):
 
     def __init__(self, rsrcmgr, pageno=1, laparams=None):
         PDFLayoutAnalyzer.__init__(self, rsrcmgr, pageno=pageno, laparams=laparams)
         self.result = None
-        return
 
     def receive_layout(self, ltpage):
         self.result = ltpage
-        return
 
     def get_result(self):
         return self.result
 
 
-##  PDFConverter
-##
 class PDFConverter(PDFLayoutAnalyzer):
 
     def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None):
         PDFLayoutAnalyzer.__init__(self, rsrcmgr, pageno=pageno, laparams=laparams)
         self.outfp = outfp
         self.codec = codec
-        return
 
 
-##  TextConverter
-##
 class TextConverter(PDFConverter):
 
     def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None,
                  showpageno=False, imagewriter=None):
-        PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno, laparams=laparams)
+        PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno,
+                              laparams=laparams)
         self.showpageno = showpageno
         self.imagewriter = imagewriter
-        return
 
     def write_text(self, text):
         self.outfp.write(text.encode(self.codec, 'ignore'))
-        return
 
     def receive_layout(self, ltpage):
         def render(item):
@@ -182,7 +150,6 @@ class TextConverter(PDFConverter):
             self.write_text('Page %s\n' % ltpage.pageid)
         render(ltpage)
         self.write_text('\f')
-        return
 
     # Some dummy functions to save memory/CPU when all that is wanted
     # is text.  This stops all the image and drawing ouput from being
@@ -197,8 +164,6 @@ class TextConverter(PDFConverter):
         return
 
 
-##  HTMLConverter
-##
 class HTMLConverter(PDFConverter):
 
     RECT_COLORS = {
@@ -394,8 +359,6 @@ class HTMLConverter(PDFConverter):
         return
 
 
-##  XMLConverter
-##
 class XMLConverter(PDFConverter):
 
     CONTROL = re.compile(ur'[\x00-\x08\x0b-\x0c\x0e-\x1f]')

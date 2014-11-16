@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """ Python implementation of Rijndael encryption algorithm.
 
 This code is in the public domain.
@@ -1038,14 +1036,10 @@ def rijndaelDecrypt(rk, nrounds, ciphertext):
     return plaintext
 
 
-# decrypt(key, fin, fout, keybits=256)
 class RijndaelDecryptor(object):
-
     """
-    >>> key = b'00010203050607080a0b0c0d0f101112'.decode('hex')
-    >>> ciphertext = b'd8f532538289ef7d06b506a4fd5be9c9'.decode('hex')
-    >>> RijndaelDecryptor(key, 128).decrypt(ciphertext).encode('hex')
-    '506812a45f08c889b97f5980038b8359'
+    Supply a key to the initializer and use `decrypt(ciphertext)` to
+    decrypt the text with that key.
     """
 
     def __init__(self, key, keybits=256):
@@ -1060,14 +1054,11 @@ class RijndaelDecryptor(object):
         return rijndaelDecrypt(self.rk, self.nrounds, ciphertext)
 
 
-# encrypt(key, fin, fout, keybits=256)
 class RijndaelEncryptor(object):
-
     """
-    >>> key = b'00010203050607080a0b0c0d0f101112'.decode('hex')
-    >>> plaintext = b'506812a45f08c889b97f5980038b8359'.decode('hex')
-    >>> RijndaelEncryptor(key, 128).encrypt(plaintext).encode('hex')
-    'd8f532538289ef7d06b506a4fd5be9c9'
+    Inverse of RijndaelDecryptor:
+    Supply a key to the initializer and use `encrypt(plaintext)` to
+    encrypt the text.
     """
 
     def __init__(self, key, keybits=256):
@@ -1080,8 +1071,3 @@ class RijndaelEncryptor(object):
     def encrypt(self, plaintext):
         assert len(plaintext) == 16
         return rijndaelEncrypt(self.rk, self.nrounds, plaintext)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

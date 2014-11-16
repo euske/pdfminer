@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """ Adobe character mapping (CMap) support.
 
 CMaps provide the mapping between character codes and Unicode
@@ -21,56 +19,45 @@ except ImportError:
     import pickle as pickle
 import struct
 import logging
-from .psparser import PSStackParser
-from .psparser import PSSyntaxError
-from .psparser import PSEOF
-from .psparser import PSLiteral
-from .psparser import literal_name
-from .psparser import KWD
+
+from .psparser import PSStackParser, PSSyntaxError, PSEOF, PSLiteral, \
+    literal_name, KWD
 from .encodingdb import name2unicode
-from .utils import choplist
-from .utils import nunpack
+from .utils import choplist, nunpack
 
 
 class CMapError(Exception):
     pass
 
 
-##  CMapBase
-##
 class CMapBase(object):
 
     debug = 0
 
     def __init__(self, **kwargs):
         self.attrs = kwargs.copy()
-        return
 
     def is_vertical(self):
         return self.attrs.get('WMode', 0) != 0
 
     def set_attr(self, k, v):
         self.attrs[k] = v
-        return
 
     def add_code2cid(self, code, cid):
-        return
+        pass
 
     def add_cid2unichr(self, cid, code):
-        return
+        pass
 
     def use_cmap(self, cmap):
-        return
+        pass
 
 
-##  CMap
-##
 class CMap(CMapBase):
 
     def __init__(self, **kwargs):
         CMapBase.__init__(self, **kwargs)
         self.code2cid = {}
-        return
 
     def __repr__(self):
         return '<CMap: %s>' % self.attrs.get('CMapName')
@@ -87,7 +74,6 @@ class CMap(CMapBase):
                 else:
                     dst[k] = v
         copy(self.code2cid, cmap.code2cid)
-        return
 
     def decode(self, code):
         if self.debug:
@@ -102,7 +88,6 @@ class CMap(CMapBase):
                     d = self.code2cid
             else:
                 d = self.code2cid
-        return
 
     def dump(self, out=sys.stdout, code2cid=None, code=None):
         if code2cid is None:
@@ -114,11 +99,8 @@ class CMap(CMapBase):
                 out.write('code %r = cid %d\n' % (c, v))
             else:
                 self.dump(out=out, code2cid=v, code=c)
-        return
 
 
-##  IdentityCMap
-##
 class IdentityCMap(CMapBase):
 
     def decode(self, code):
@@ -129,14 +111,11 @@ class IdentityCMap(CMapBase):
             return ()
 
 
-##  UnicodeMap
-##
 class UnicodeMap(CMapBase):
 
     def __init__(self, **kwargs):
         CMapBase.__init__(self, **kwargs)
         self.cid2unichr = {}
-        return
 
     def __repr__(self):
         return '<UnicodeMap: %s>' % self.attrs.get('CMapName')
@@ -149,11 +128,8 @@ class UnicodeMap(CMapBase):
     def dump(self, out=sys.stdout):
         for (k, v) in sorted(self.cid2unichr.iteritems()):
             out.write('cid %d = unicode %r\n' % (k, v))
-        return
 
 
-##  FileCMap
-##
 class FileCMap(CMap):
 
     def add_code2cid(self, code, cid):
@@ -169,11 +145,8 @@ class FileCMap(CMap):
                 d = t
         c = ord(code[-1])
         d[c] = cid
-        return
 
 
-##  FileUnicodeMap
-##
 class FileUnicodeMap(UnicodeMap):
 
     def add_cid2unichr(self, cid, code):
@@ -188,11 +161,8 @@ class FileUnicodeMap(UnicodeMap):
             self.cid2unichr[cid] = unichr(code)
         else:
             raise TypeError(code)
-        return
 
 
-##  PyCMap
-##
 class PyCMap(CMap):
 
     def __init__(self, name, module):
@@ -200,11 +170,8 @@ class PyCMap(CMap):
         self.code2cid = module.CODE2CID
         if module.IS_VERTICAL:
             self.attrs['WMode'] = 1
-        return
 
 
-##  PyUnicodeMap
-##
 class PyUnicodeMap(UnicodeMap):
 
     def __init__(self, name, module, vertical):
@@ -214,11 +181,8 @@ class PyUnicodeMap(UnicodeMap):
             self.attrs['WMode'] = 1
         else:
             self.cid2unichr = module.CID2UNICHR_H
-        return
 
 
-##  CMapDB
-##
 class CMapDB(object):
 
     _cmap_cache = {}
@@ -228,7 +192,7 @@ class CMapDB(object):
         pass
 
     @classmethod
-    def _load_data(klass, name):
+    def _load_data(cls, name):
         filename = '%s.pickle.gz' % name
         logging.info('loading: %r' % name)
         cmap_paths = (os.environ.get('CMAP_PATH', '/usr/share/pdfminer/'),
@@ -245,32 +209,31 @@ class CMapDB(object):
             raise CMapDB.CMapNotFound(name)
 
     @classmethod
-    def get_cmap(klass, name):
+    def get_cmap(cls, name):
         if name == 'Identity-H':
             return IdentityCMap(WMode=0)
         elif name == 'Identity-V':
             return IdentityCMap(WMode=1)
         try:
-            return klass._cmap_cache[name]
+            return cls._cmap_cache[name]
         except KeyError:
             pass
-        data = klass._load_data(name)
-        klass._cmap_cache[name] = cmap = PyCMap(name, data)
+        data = cls._load_data(name)
+        cls._cmap_cache[name] = cmap = PyCMap(name, data)
         return cmap
 
     @classmethod
-    def get_unicode_map(klass, name, vertical=False):
+    def get_unicode_map(cls, name, vertical=False):
         try:
-            return klass._umap_cache[name][vertical]
+            return cls._umap_cache[name][vertical]
         except KeyError:
             pass
-        data = klass._load_data('to-unicode-%s' % name)
-        klass._umap_cache[name] = umaps = [PyUnicodeMap(name, data, v) for v in (False, True)]
+        data = cls._load_data('to-unicode-%s' % name)
+        cls._umap_cache[name] = umaps = [PyUnicodeMap(name, data, v)
+                                         for v in (False, True)]
         return umaps[vertical]
 
 
-##  CMapParser
-##
 class CMapParser(PSStackParser):
 
     def __init__(self, cmap, fp):
@@ -278,14 +241,12 @@ class CMapParser(PSStackParser):
         self.cmap = cmap
         # some ToUnicode maps don't have "begincmap" keyword.
         self._in_cmap = True
-        return
 
     def run(self):
         try:
             self.nextobject()
         except PSEOF:
             pass
-        return
 
     KEYWORD_BEGINCMAP = KWD(b'begincmap')
     KEYWORD_ENDCMAP = KWD(b'endcmap')
@@ -417,7 +378,6 @@ class CMapParser(PSStackParser):
             return
 
         self.push((pos, token))
-        return
 
 
 # test

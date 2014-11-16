@@ -1,7 +1,7 @@
-#!/usr/bin/env python
 import re
 import struct
 import logging
+
 try:
     import hashlib as md5
 except ImportError:
@@ -13,44 +13,33 @@ try:
 except ImportError:
     AES = SHA256 = None
     from . import arcfour as ARC4
-from .psparser import PSEOF
-from .psparser import literal_name
-from .psparser import LIT
-from .psparser import KWD
-from .psparser import STRICT
-from .pdftypes import PDFException
-from .pdftypes import PDFTypeError
-from .pdftypes import PDFStream
-from .pdftypes import PDFObjectNotFound
-from .pdftypes import decipher_all
-from .pdftypes import int_value
-from .pdftypes import str_value
-from .pdftypes import list_value
-from .pdftypes import dict_value
-from .pdftypes import stream_value
-from .pdfparser import PDFSyntaxError
-from .pdfparser import PDFStreamParser
-from .utils import choplist
-from .utils import nunpack
-from .utils import decode_text
+
+from .psparser import PSEOF, literal_name, LIT, KWD, STRICT
+from .pdftypes import PDFException, PDFTypeError, PDFStream, PDFObjectNotFound,\
+    decipher_all, int_value, str_value, list_value, dict_value, stream_value
+from .pdfparser import PDFSyntaxError, PDFStreamParser
+from .utils import choplist, nunpack, decode_text
 
 
-##  Exceptions
-##
 class PDFNoValidXRef(PDFSyntaxError):
     pass
+
 
 class PDFNoOutlines(PDFException):
     pass
 
+
 class PDFDestinationNotFound(PDFException):
     pass
+
 
 class PDFEncryptionError(PDFException):
     pass
 
+
 class PDFPasswordIncorrect(PDFEncryptionError):
     pass
+
 
 class PDFTextExtractionNotAllowed(PDFEncryptionError):
     pass
@@ -61,8 +50,6 @@ LITERAL_XREF = LIT('XRef')
 LITERAL_CATALOG = LIT('Catalog')
 
 
-##  XRefs
-##
 class PDFBaseXRef(object):
 
     def get_trailer(self):
@@ -78,8 +65,6 @@ class PDFBaseXRef(object):
         raise KeyError(objid)
 
 
-##  PDFXRef
-##
 class PDFXRef(PDFBaseXRef):
 
     def __init__(self):
@@ -154,8 +139,6 @@ class PDFXRef(PDFBaseXRef):
             raise
 
 
-##  PDFXRefFallback
-##
 class PDFXRefFallback(PDFXRef):
 
     def __repr__(self):
@@ -208,8 +191,6 @@ class PDFXRefFallback(PDFXRef):
         return
 
 
-##  PDFXRefStream
-##
 class PDFXRefStream(PDFBaseXRef):
 
     def __init__(self):
@@ -220,7 +201,7 @@ class PDFXRefStream(PDFBaseXRef):
         return
 
     def __repr__(self):
-        return '<PDFXRefStream: ranges=%r>' % (self.ranges)
+        return '<PDFXRefStream: ranges=%r>' % self.ranges
 
     def load(self, parser):
         (_, objid) = parser.nexttoken()  # ignored
@@ -272,16 +253,14 @@ class PDFXRefStream(PDFBaseXRef):
         f2 = nunpack(ent[self.fl1:self.fl1+self.fl2])
         f3 = nunpack(ent[self.fl1+self.fl2:])
         if f1 == 1:
-            return (None, f2, f3)
+            return None, f2, f3
         elif f1 == 2:
-            return (f2, f3, 0)
+            return f2, f3, 0
         else:
             # this is a free object
             raise KeyError(objid)
 
 
-##  PDFSecurityHandler
-##
 class PDFStandardSecurityHandler(object):
 
     PASSWORD_PADDING = (b'(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08'
@@ -505,10 +484,7 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
         return AES.new(self.key, mode=AES.MODE_CBC, IV=data[:16]).decrypt(data[16:])
 
 
-##  PDFDocument
-##
 class PDFDocument(object):
-
     """PDFDocument object represents a PDF document.
 
     Since a PDF file can be very big, normally it is not loaded at
@@ -533,7 +509,9 @@ class PDFDocument(object):
     debug = 0
 
     def __init__(self, parser, password=b'', caching=True, fallback=True):
-        "Set the document to use a given PDFParser object."
+        """
+        Set the document to use a given PDFParser object.
+        """
         self.caching = caching
         self.xrefs = []
         self.info = []
@@ -596,7 +574,7 @@ class PDFDocument(object):
         self.is_printable = handler.is_printable()
         self.is_modifiable = handler.is_modifiable()
         self.is_extractable = handler.is_extractable()
-        self._parser.fallback = False # need to read streams with exact length
+        self._parser.fallback = False  # need to read streams with exact length
         return
 
     def _getobj_objstm(self, stream, index, objid):
@@ -632,7 +610,7 @@ class PDFDocument(object):
                 objs.append(obj)
         except PSEOF:
             pass
-        return (objs, n)
+        return objs, n
 
     KEYWORD_OBJ = KWD('obj')
 

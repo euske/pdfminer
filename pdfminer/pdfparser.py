@@ -1,28 +1,14 @@
-#!/usr/bin/env python
 import logging
 from io import BytesIO
-from .psparser import PSStackParser
-from .psparser import PSSyntaxError
-from .psparser import PSEOF
-from .psparser import KWD
-from .psparser import STRICT
-from .pdftypes import PDFException
-from .pdftypes import PDFStream
-from .pdftypes import PDFObjRef
-from .pdftypes import int_value
-from .pdftypes import dict_value
+from .psparser import PSStackParser, PSSyntaxError, PSEOF, KWD, STRICT
+from .pdftypes import PDFException, PDFStream, PDFObjRef, int_value, dict_value
 
 
-##  Exceptions
-##
 class PDFSyntaxError(PDFException):
     pass
 
 
-##  PDFParser
-##
 class PDFParser(PSStackParser):
-
     """
     PDFParser fetch PDF objects from a file stream.
     It can handle indirect references by referring to
@@ -121,7 +107,7 @@ class PDFParser(PSStackParser):
             self.seek(pos+objlen)
             # XXX limit objlen not to exceed object boundary
             if self.debug:
-                logging.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...' % \
+                logging.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...' %
                               (pos, objlen, dic, data[:10]))
             obj = PDFStream(dic, data, self.doc.decipher)
             self.push((pos, obj))
@@ -133,10 +119,7 @@ class PDFParser(PSStackParser):
         return
 
 
-##  PDFStreamParser
-##
 class PDFStreamParser(PDFParser):
-
     """
     PDFStreamParser is used to parse PDF content streams
     that is contained in each page and has instructions
@@ -154,6 +137,7 @@ class PDFStreamParser(PDFParser):
         return
 
     KEYWORD_OBJ = KWD(b'obj')
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_R:
             # reference to indirect object

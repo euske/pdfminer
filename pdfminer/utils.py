@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Miscellaneous Routines.
 """
@@ -6,14 +5,12 @@ import struct
 from sys import maxint as INF
 
 
-##  PNG Predictor
-##
 def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     if bitspercomponent != 8:
         # unsupported
         raise ValueError(bitspercomponent)
     nbytes = colors*columns*bitspercomponent//8
-    i = 0
+
     buf = b''
     line0 = b'\x00' * columns
     for i in xrange(0, len(data), nbytes+1):
@@ -49,8 +46,6 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     return buf
 
 
-##  Matrix operations
-##
 MATRIX_IDENTITY = (1, 0, 0, 1, 0, 0)
 
 
@@ -67,31 +62,27 @@ def translate_matrix(m, v):
     """Translates a matrix by (x, y)."""
     (a, b, c, d, e, f) = m
     (x, y) = v
-    return (a, b, c, d, x*a+y*c+e, x*b+y*d+f)
+    return a, b, c, d, x*a+y*c+e, x*b+y*d+f
 
 
 def apply_matrix_pt(m, v):
+    """Applies a matrix to a point."""
     (a, b, c, d, e, f) = m
     (x, y) = v
-    """Applies a matrix to a point."""
-    return (a*x+c*y+e, b*x+d*y+f)
+    return a*x+c*y+e, b*x+d*y+f
 
 
 def apply_matrix_norm(m, v):
     """Equivalent to apply_matrix_pt(M, (p,q)) - apply_matrix_pt(M, (0,0))"""
     (a, b, c, d, e, f) = m
     (p, q) = v
-    return (a*p+c*q, b*p+d*q)
+    return a*p+c*q, b*p+d*q
 
 
-##  Utility functions
-##
-
-# isnumber
 def isnumber(x):
     return isinstance(x, (int, long, float))
 
-# uniq
+
 def uniq(objs):
     """Eliminates duplicated elements."""
     done = set()
@@ -100,17 +91,14 @@ def uniq(objs):
             continue
         done.add(obj)
         yield obj
-    return
 
 
-# csort
 def csort(objs, key):
     """Order-preserving sorting function."""
     idxs = dict((obj, i) for (i, obj) in enumerate(objs))
     return sorted(objs, key=lambda obj: (key(obj), idxs[obj]))
 
 
-# fsplit
 def fsplit(pred, objs):
     """Split a list into two classes according to the predicate."""
     t = []
@@ -120,17 +108,15 @@ def fsplit(pred, objs):
             t.append(obj)
         else:
             f.append(obj)
-    return (t, f)
+    return t, f
 
 
-# drange
 def drange(v0, v1, d):
     """Returns a discrete range."""
     assert v0 < v1
     return xrange(int(v0)//d, int(v1+d)//d)
 
 
-# get_bound
 def get_bound(pts):
     """Compute a minimal rectangle that covers all the points."""
     (x0, y0, x1, y1) = (INF, INF, -INF, -INF)
@@ -139,10 +125,9 @@ def get_bound(pts):
         y0 = min(y0, y)
         x1 = max(x1, x)
         y1 = max(y1, y)
-    return (x0, y0, x1, y1)
+    return x0, y0, x1, y1
 
 
-# pick
 def pick(seq, func, maxobj=None):
     """Picks the object obj where func(obj) has the highest value."""
     maxscore = None
@@ -153,7 +138,6 @@ def pick(seq, func, maxobj=None):
     return maxobj
 
 
-# choplist
 def choplist(n, seq):
     """Groups every n elements of the list."""
     r = []
@@ -165,7 +149,6 @@ def choplist(n, seq):
     return
 
 
-# nunpack
 def nunpack(s, default=0):
     """Unpacks 1 to 4 byte integers (big endian)."""
     l = len(s)
@@ -228,10 +211,10 @@ def decode_text(s):
         return ''.join(PDFDocEncoding[ord(c)] for c in s)
 
 
-# enc
 def enc(x, codec='ascii'):
     """Encodes a string for SGML/XML/HTML"""
-    x = x.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+    x = x.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')\
+        .replace('"', '&quot;')
     return x.encode(codec, 'xmlcharrefreplace')
 
 
@@ -245,28 +228,25 @@ def matrix2str(m):
     return '[%.2f,%.2f,%.2f,%.2f, (%.2f,%.2f)]' % (a, b, c, d, e, f)
 
 
-##  Plane
-##
-##  A set-like data structure for objects placed on a plane.
-##  Can efficiently find objects in a certain rectangular area.
-##  It maintains two parallel lists of objects, each of
-##  which is sorted by its x or y coordinate.
-##
 class Plane(object):
-
+    """
+    A set-like data structure for objects placed on a plane.
+    Can efficiently find objects in a certain rectangular area.
+    It maintains two parallel lists of objects, each of
+    which is sorted by its x or y coordinate.
+    """
     def __init__(self, bbox, gridsize=50):
         self._seq = []          # preserve the object order.
         self._objs = set()
         self._grid = {}
         self.gridsize = gridsize
         (self.x0, self.y0, self.x1, self.y1) = bbox
-        return
 
     def __repr__(self):
-        return ('<Plane objs=%r>' % list(self))
+        return '<Plane objs=%r>' % list(self)
 
     def __iter__(self):
-        return ( obj for obj in self._seq if obj in self._objs )
+        return (obj for obj in self._seq if obj in self._objs)
 
     def __len__(self):
         return len(self._objs)
@@ -276,8 +256,8 @@ class Plane(object):
 
     def _getrange(self, bbox):
         (x0, y0, x1, y1) = bbox
-        if (x1 <= self.x0 or self.x1 <= x0 or
-            y1 <= self.y0 or self.y1 <= y0): return
+        if x1 <= self.x0 or self.x1 <= x0 or y1 <= self.y0 or self.y1 <= y0:
+            return
         x0 = max(self.x0, x0)
         y0 = max(self.y0, y0)
         x1 = min(self.x1, x1)
@@ -285,13 +265,11 @@ class Plane(object):
         for y in drange(y0, y1, self.gridsize):
             for x in drange(x0, x1, self.gridsize):
                 yield (x, y)
-        return
 
     # extend(objs)
     def extend(self, objs):
         for obj in objs:
             self.add(obj)
-        return
 
     # add(obj): place an object.
     def add(self, obj):
@@ -304,7 +282,6 @@ class Plane(object):
             r.append(obj)
         self._seq.append(obj)
         self._objs.add(obj)
-        return
 
     # remove(obj): displace an object.
     def remove(self, obj):
@@ -314,7 +291,6 @@ class Plane(object):
             except (KeyError, ValueError):
                 pass
         self._objs.remove(obj)
-        return
 
     # find(): finds objects that are in a certain area.
     def find(self, bbox):
@@ -327,8 +303,6 @@ class Plane(object):
                 if obj in done:
                     continue
                 done.add(obj)
-                if (obj.x1 <= x0 or x1 <= obj.x0 or
-                    obj.y1 <= y0 or y1 <= obj.y0):
+                if obj.x1 <= x0 or x1 <= obj.x0 or obj.y1 <= y0 or y1 <= obj.y0:
                     continue
                 yield obj
-        return

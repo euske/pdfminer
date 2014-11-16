@@ -1,16 +1,10 @@
-#!/usr/bin/env python
 import zlib
 from .lzw import lzwdecode
-from .ascii85 import ascii85decode
-from .ascii85 import asciihexdecode
+from .ascii85 import ascii85decode, asciihexdecode
 from .runlength import rldecode
 from .ccitt import ccittfaxdecode
-from .psparser import PSException
-from .psparser import PSObject
-from .psparser import LIT
-from .psparser import STRICT
-from .utils import apply_png_predictor
-from .utils import isnumber
+from .psparser import PSException, PSObject, LIT, STRICT
+from .utils import apply_png_predictor, isnumber
 
 
 LITERAL_CRYPT = LIT('Crypt')
@@ -25,29 +19,30 @@ LITERALS_CCITTFAX_DECODE = (LIT('CCITTFaxDecode'), LIT('CCF'))
 LITERALS_DCT_DECODE = (LIT('DCTDecode'), LIT('DCT'))
 
 
-##  PDF Objects
-##
 class PDFObject(PSObject):
     pass
+
 
 class PDFException(PSException):
     pass
 
+
 class PDFTypeError(PDFException):
     pass
+
 
 class PDFValueError(PDFException):
     pass
 
+
 class PDFObjectNotFound(PDFException):
     pass
+
 
 class PDFNotImplementedError(PDFException):
     pass
 
 
-##  PDFObjRef
-##
 class PDFObjRef(PDFObject):
 
     def __init__(self, doc, objid, _):
@@ -60,7 +55,7 @@ class PDFObjRef(PDFObject):
         return
 
     def __repr__(self):
-        return '<PDFObjRef:%d>' % (self.objid)
+        return '<PDFObjRef:%d>' % self.objid
 
     def resolve(self, default=None):
         try:
@@ -69,7 +64,6 @@ class PDFObjRef(PDFObject):
             return default
 
 
-# resolve
 def resolve1(x, default=None):
     """Resolves an object.
 
@@ -110,7 +104,6 @@ def decipher_all(decipher, objid, genno, x):
     return x
 
 
-# Type cheking
 def int_value(x):
     x = resolve1(x)
     if not isinstance(x, int):
@@ -174,8 +167,6 @@ def stream_value(x):
     return x
 
 
-##  PDFStream type
-##
 class PDFStream(PDFObject):
 
     def __init__(self, attrs, rawdata, decipher=None):
@@ -238,7 +229,7 @@ class PDFStream(PDFObject):
             self.data = data
             self.rawdata = None
             return
-        for (f,params) in filters:
+        for (f, params) in filters:
             if f in LITERALS_FLATE_DECODE:
                 # will get errors if the document is encrypted.
                 try:

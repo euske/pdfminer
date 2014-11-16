@@ -6,6 +6,7 @@
 #  * public domain *
 #
 
+
 def rldecode(data):
     """
     RunLength decoder (Adobe version) implementation based on PDF Reference
@@ -19,30 +20,19 @@ def rldecode(data):
         129 to 255, the following single byte is to be copied 257 - length
         (2 to 128) times during decompression. A length value of 128
         denotes EOD.
-    >>> s = b'\x05123456\xfa7\x04abcde\x80junk'
-    >>> rldecode(s)
-    '1234567777777abcde'
     """
     decoded = []
     i = 0
     while i < len(data):
-        #print 'data[%d]=:%d:' % (i,ord(data[i]))
         length = ord(data[i])
         if length == 128:
             break
         if length >= 0 and length < 128:
             run = data[i+1:(i+1)+(length+1)]
-            #print 'length=%d, run=%s' % (length+1,run)
             decoded.append(run)
             i = (i+1) + (length+1)
         if length > 128:
             run = data[i+1]*(257-length)
-            #print 'length=%d, run=%s' % (257-length,run)
             decoded.append(run)
             i = (i+1) + 1
     return b''.join(decoded)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
