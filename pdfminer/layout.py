@@ -380,7 +380,7 @@ class LTTextLineHorizontal(LTTextLine):
                 # But only do it if there is not already a space.
                 last_was_alpha = self._objs and \
                                 isinstance(self._objs[-1], LTChar) and \
-                                self._objs[-1]._text == ' '
+                                self._objs[-1].get_text() == ' '
                 if not last_was_alpha:
                     LTContainer.add(self, LTAnno(' '))
         self._x1 = obj.x1
@@ -542,55 +542,60 @@ class LTLayoutContainer(LTContainer):
         self.groups = None
         return
 
+    @staticmethod
+    def is_halign(obj0, obj1, laparams):
+        # halign: obj0 and obj1 is horizontally aligned.
+        #
+        #   +------+ - - -
+        #   | obj0 | - - +------+   -
+        #   |      |     | obj1 |   | (line_overlap)
+        #   +------+ - - |      |   -
+        #          - - - +------+
+        #
+        #          |<--->|
+        #        (char_margin)
+        return (obj0.is_compatible(obj1) and
+                  obj0.is_voverlap(obj1) and
+                  (min(obj0.height, obj1.height) * laparams.line_overlap <
+                   obj0.voverlap(obj1)) and
+                  (obj0.hdistance(obj1) <
+                   max(obj0.width, obj1.width) * laparams.char_margin) or
+                   # If the line is zero width, default to horizontal
+                   (max(obj0.width, obj1.width) == 0 and obj1.x0 >= obj0.x0))
+    
+    @staticmethod
+    def is_valign(obj0, obj1, laparams):
+        # valign: obj0 and obj1 is vertically aligned.
+        #
+        #   +------+
+        #   | obj0 |
+        #   |      |
+        #   +------+ - - -
+        #     |    |     | (char_margin)
+        #     +------+ - -
+        #     | obj1 |
+        #     |      |
+        #     +------+
+        #
+        #     |<-->|
+        #   (line_overlap)
+        return (laparams.detect_vertical and
+                  obj0.is_compatible(obj1) and
+                  obj0.is_hoverlap(obj1) and
+                  (min(obj0.width, obj1.width) * laparams.line_overlap <
+                   obj0.hoverlap(obj1)) and
+                  (obj0.vdistance(obj1) <
+                   max(obj0.height, obj1.height) * laparams.char_margin))
+        
+    
     # group_objects: group text object to textlines.
     def group_objects(self, laparams, objs):
         obj0 = None
         line = None
-        for obj1 in objs:
+        for obj1_i, obj1 in enumerate(objs):
             if obj0 is not None:
-                # halign: obj0 and obj1 is horizontally aligned.
-                #
-                #   +------+ - - -
-                #   | obj0 | - - +------+   -
-                #   |      |     | obj1 |   | (line_overlap)
-                #   +------+ - - |      |   -
-                #          - - - +------+
-                #
-                #          |<--->|
-                #        (char_margin)
-                halign = (obj0.is_compatible(obj1) and
-                          obj0.is_voverlap(obj1) and
-                          (min(obj0.height, obj1.height) * laparams.line_overlap <
-                           obj0.voverlap(obj1)) and
-                          (obj0.hdistance(obj1) <
-                           max(obj0.width, obj1.width) * laparams.char_margin) or
-                           # If the line is zero width, default to horizontal
-                           (max(obj0.width, obj1.width) == 0 and obj1.x0 >= obj0.x0))
-                
-                # valign: obj0 and obj1 is vertically aligned.
-                #
-                #   +------+
-                #   | obj0 |
-                #   |      |
-                #   +------+ - - -
-                #     |    |     | (char_margin)
-                #     +------+ - -
-                #     | obj1 |
-                #     |      |
-                #     +------+
-                #
-                #     |<-->|
-                #   (line_overlap)
-                valign = (laparams.detect_vertical and
-                          obj0.is_compatible(obj1) and
-                          obj0.is_hoverlap(obj1) and
-                          (min(obj0.width, obj1.width) * laparams.line_overlap <
-                           obj0.hoverlap(obj1)) and
-                          (obj0.vdistance(obj1) <
-                           max(obj0.height, obj1.height) * laparams.char_margin) and
-                           # Don't start a vertical line if the previous letter is 
-                           # whitspace. Prevents double spaces being caught as vert lines.
-                           (line or obj0._text.strip()))
+                halign = self.is_halign(obj0, obj1, laparams)
+                valign = self.is_valign(obj0, obj1, laparams)
                 
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
                     (valign and isinstance(line, LTTextLineVertical))):
@@ -599,6 +604,23 @@ class LTLayoutContainer(LTContainer):
                     yield line
                     line = None
                 else:
+                    if valign and not halign and not obj0.get_text().strip():
+                        # There is vertical alignment, but obj0 is whitespace.
+                        # We don't know if obj0 is space above a horizontal 
+                        # line or part of a vertical line (wp for whitespace):
+                        #     obj0            |   obj0
+                        #     obj1            |   obj1 obj2
+                        #     obj2            |
+                        # The solution is to look ahead and find the next object.
+                        obj2 = objs[obj1_i+1]
+                        if self.is_valign(obj1, obj2, laparams):
+                            # They are indeed vertically aligned.
+                            pass
+                        elif self.is_halign(obj1, obj2, laparams):
+                            # They are horizontally aligned (second case 
+                            # above). Give obj0 and obj1 their own line.
+                            valign = False
+                        
                     if valign and not halign:
                         line = LTTextLineVertical(laparams.word_margin)
                         line.add(obj0)
@@ -624,8 +646,6 @@ class LTLayoutContainer(LTContainer):
         plane = Plane(self.bbox)
         plane.extend(lines)
         boxes = {}
-        # for line in plane:
-            # print "line", ("".join([s._text for s in line])).encode('ascii', 'ignore')
         for line in lines:
             neighbors = line.find_neighbors(plane, laparams.line_margin)
             if line not in neighbors: 
@@ -637,7 +657,6 @@ class LTLayoutContainer(LTContainer):
                 members.append(obj1)
                 if obj1 in boxes:
                     members.extend(boxes.pop(obj1))
-            # print "members: ", ["".join([o._text for o in line]) for line in members]
             if isinstance(line, LTTextLineHorizontal):
                 box = LTTextBoxHorizontal()
             else:
