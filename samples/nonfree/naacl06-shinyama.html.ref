@@ -6,10 +6,10 @@
 <div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:79px; top:125px; width:452px; height:18px;"><span style="font-family: MZSZGI+NimbusRomNo9L-Medi; font-size:18px">Preemptive Information Extraction using Unrestricted Relation Discovery
 <br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:148px; top:164px; width:91px; height:15px;"><span style="font-family: MZSZGI+NimbusRomNo9L-Medi; font-size:15px">Yusuke Shinyama
 <br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:389px; top:164px; width:74px; height:15px;"><span style="font-family: MZSZGI+NimbusRomNo9L-Medi; font-size:15px">Satoshi Sekine
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:255px; top:187px; width:101px; height:14px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:14px">New York University
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:244px; top:201px; width:122px; height:14px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:14px">715, Broadway, 7th Floor
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:252px; top:215px; width:106px; height:14px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:14px">New York, NY, 10003
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:222px; top:224px; width:168px; height:18px;"><span style="font-family: ZNQAHA+CMSY10; font-size:18px">{</span><span style="font-family: CXOZYQ+NimbusMonL-Regu; font-size:11px">yusuke,sekine</span><span style="font-family: ZNQAHA+CMSY10; font-size:18px">}</span><span style="font-family: CXOZYQ+NimbusMonL-Regu; font-size:11px">@cs.nyu.edu
+<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:222px; top:187px; width:168px; height:56px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:14px">New York University
+<br>715, Broadway, 7th Floor
+<br>New York, NY, 10003
+<br></span><span style="font-family: ZNQAHA+CMSY10; font-size:18px">{</span><span style="font-family: CXOZYQ+NimbusMonL-Regu; font-size:11px">yusuke,sekine</span><span style="font-family: ZNQAHA+CMSY10; font-size:18px">}</span><span style="font-family: CXOZYQ+NimbusMonL-Regu; font-size:11px">@cs.nyu.edu
 <br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:163px; top:281px; width:44px; height:15px;"><span style="font-family: MZSZGI+NimbusRomNo9L-Medi; font-size:15px">Abstract
 <br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:93px; top:310px; width:183px; height:175px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">We are trying to extend the boundary of
 <br>Information Extraction (IE) systems. Ex-
@@ -43,14 +43,14 @@
 <br>helping people create such patterns. But each time
 <br>you want to extract a different kind of information,
 <br>you need to repeat the whole process: specify arti-
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:313px; top:284px; width:226px; height:94px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">cles and adjust its patterns, either manually or semi-
+<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:313px; top:284px; width:226px; height:488px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">cles and adjust its patterns, either manually or semi-
 <br>automatically. There is a bit of a dangerous pitfall
 <br>here. First, it is hard to estimate how good the sys-
 <br>tem can be after months of work. Furthermore, you
 <br>might not know if the task is even doable in the ﬁrst
 <br>place. Knowing what kind of information is easily
 <br>obtained in advance would help reduce this risk.
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:313px; top:379px; width:226px; height:175px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">An IE task can be deﬁned as ﬁnding a relation
+<br></span><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">An IE task can be deﬁned as ﬁnding a relation
 <br></span><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">among several entities involved in a certain type of
 <br>event. For example, in the MUC-6 management
 <br>succession scenario, one seeks a relation between
@@ -63,7 +63,7 @@
 <br>terns for pre-deﬁned relations (Riloff, 1996; Yangar-
 <br>ber et al., 2000; Agichtein and Gravano, 2000; Sudo
 <br>et al., 2003).
-<br></span></div><div style="position:absolute; border: textbox 1px solid; writing-mode:lr-tb; left:313px; top:555px; width:226px; height:216px;"><span style="font-family: QTLIUY+NimbusRomNo9L-Regu; font-size:13px">Unrestricted Relation Discovery is a technique to
+<br>Unrestricted Relation Discovery is a technique to
 <br>automatically discover such relations that repeatedly
 <br>appear in a corpus and present them as a table, with
 <br>absolutely no human intervention. Unlike most ex-
