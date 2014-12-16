@@ -604,7 +604,8 @@ class LTLayoutContainer(LTContainer):
                     yield line
                     line = None
                 else:
-                    if valign and not halign and not obj0.get_text().strip():
+                    if valign and not halign and not obj0.get_text().strip() \
+                            and obj1_i < len(objs) - 1:
                         # There is vertical alignment, but obj0 is whitespace.
                         # We don't know if obj0 is space above a horizontal 
                         # line or part of a vertical line (wp for whitespace):
