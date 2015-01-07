@@ -639,7 +639,8 @@ class PDFCIDFont(PDFFont):
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
         self.cidcoding = '%s-%s' % (self.cidsysteminfo.get('Registry', 'unknown'),
-                                    self.cidsysteminfo.get('Ordering', 'unknown'))
+                                    self.cidsysteminfo.get(
+                                        'Ordering', 'unknown').replace('\x00', ''))
         try:
             name = literal_name(spec['Encoding'])
         except KeyError:
