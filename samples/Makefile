@@ -5,7 +5,7 @@ CMP=:
 ECHO=echo
 PYTHON=python2
 
-PDF2TXT=PYTHONPATH=.. $(PYTHON) ../tools/pdf2txt.py -p1 -V
+PDF2TXT=PYTHONPATH=.. time $(PYTHON) ../tools/pdf2txt.py -p1 -V
 
 FREE= \
 	simple1 \
@@ -46,6 +46,11 @@ tests:
 		$(PDF2TXT) -t text -o $$i.txt $$i.pdf || eixt 1; \
 		$(CMP) $$i.txt $$i.txt.ref || exit 1; \
 	done
+	for i in $(TESTS); do \
+		$(ECHO) $$i; \
+		$(PDF2TXT) -t text -o $$i.txt2 -S $$i.pdf || eixt 1; \
+		$(CMP) $$i.txt2 $$i.txt.ref || exit 1; \
+	done
 
 crypts:
 	for i in $(CRYPTS); do \
@@ -61,7 +66,7 @@ test:
 
 clean:
 	-for i in $(TESTS); do \
-		$(RM) $$i.html $$i.xml $$i.txt; \
+		$(RM) $$i.html $$i.xml $$i.txt $$i.txt2; \
 	done
 	-for i in $(CRYPTS); do \
 		$(RM) $$i.1.xml $$i.2.xml; \

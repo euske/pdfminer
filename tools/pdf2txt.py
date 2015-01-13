@@ -17,7 +17,7 @@ def main(argv):
         print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output]'
                ' [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
                ' [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-R rotation] [-S]'
-               ' [-t text|html|xml|tag] [-c codec] [-s scale]'
+               ' [-t text|html|xml|tag] [-c codec] [-s scale] [-S]'
                ' file ...' % argv[0])
         return 100
     try:
@@ -58,6 +58,7 @@ def main(argv):
         elif k == '-L': laparams.line_margin = float(v)
         elif k == '-W': laparams.word_margin = float(v)
         elif k == '-F': laparams.boxes_flow = float(v)
+        elif k == '-S': laparams.group_textboxes = True
         elif k == '-Y': layoutmode = v
         elif k == '-O': imagewriter = ImageWriter(v)
         elif k == '-R': rotation = int(v)
