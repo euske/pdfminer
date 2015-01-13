@@ -5,7 +5,7 @@ CMP=:
 ECHO=echo
 PYTHON=python2
 
-PDF2TXT=PYTHONPATH=.. time $(PYTHON) ../tools/pdf2txt.py -p1 -V
+PDF2TXT=PYTHONPATH=.. $(PYTHON) ../tools/pdf2txt.py -p1 -V
 
 FREE= \
 	simple1 \
