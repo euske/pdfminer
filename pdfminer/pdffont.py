@@ -398,7 +398,7 @@ class TrueTypeFont(object):
         for i in xrange(nsubtables):
             subtables.append(struct.unpack('>HHL', fp.read(8)))
         char2gid = {}
-        # Only supports subtable type 0, 2 and 4.
+        # Only supports subtable type 0, 2, 4 and 6
         for (_1, _2, st_offset) in subtables:
             fp.seek(base_offset+st_offset)
             (fmttype, fmtlen, fmtlang) = struct.unpack('>HHH', fp.read(6))
@@ -441,6 +441,11 @@ class TrueTypeFont(object):
                     else:
                         for c in xrange(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
+            elif fmttype == 6:
+                (firstcode, entcount) = struct.unpack('>HH', fp.read(4))
+                for c in xrange(entcount):
+                    gid = struct.unpack('>H', fp.read(2))[0]
+                    char2gid[firstcode + c] = gid
             else:
                 assert 0
         # create unicode map
