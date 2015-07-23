@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <pages>
 <page id="1" bbox="0.000,0.000,612.000,792.000" rotate="0">
-<textbox id="0" bbox="138.240,710.280,473.675,728.163">
+<textbox id="0" bbox="138.240,695.179,473.675,728.163">
 <textline bbox="138.240,710.280,473.675,728.163">
 <text font="Garamond,Bold" bbox="138.240,711.122,148.643,728.163" size="17.040">T</text>
 <text font="Garamond,Bold" bbox="148.560,710.280,158.940,723.804" size="13.524">H</text>
@@ -50,8 +50,6 @@
 <text>
 </text>
 </textline>
-</textbox>
-<textbox id="1" bbox="218.640,695.179,393.589,709.785">
 <textline bbox="218.640,695.179,393.589,709.785">
 <text font="Garamond,Bold" bbox="218.640,695.179,228.490,709.785" size="14.606">U</text>
 <text font="Garamond,Bold" bbox="228.502,695.179,231.871,709.785" size="14.606">.</text>
@@ -86,7 +84,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="2" bbox="72.000,585.221,165.363,601.686">
+<textbox id="1" bbox="72.000,585.221,165.363,601.686">
 <textline bbox="72.000,585.221,165.363,601.686">
 <text font="Garamond,Bold" bbox="72.000,585.998,77.512,601.686" size="15.688">I</text>
 <text font="Garamond,Bold" bbox="77.520,585.221,86.838,597.663" size="12.442">N</text>
@@ -104,7 +102,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="3" bbox="267.600,614.040,344.460,627.564">
+<textbox id="2" bbox="267.600,614.040,344.460,627.564">
 <textline bbox="267.600,614.040,344.460,627.564">
 <text font="Garamond,Bold" bbox="267.600,614.040,276.972,627.564" size="13.524">D</text>
 <text font="Garamond,Bold" bbox="276.912,614.040,282.540,627.564" size="13.524">e</text>
@@ -123,13 +121,12 @@
 </text>
 </textline>
 </textbox>
-<textbox id="4" bbox="108.000,504.252,504.072,571.584">
+<textbox id="3" bbox="108.000,504.252,504.072,571.584">
 <textline bbox="144.000,558.012,503.964,571.584">
 <text font="Garamond" bbox="144.000,558.012,151.380,571.584" size="13.572">T</text>
 <text font="Garamond" bbox="151.452,558.012,157.572,571.584" size="13.572">h</text>
 <text font="Garamond" bbox="157.644,558.012,162.648,571.584" size="13.572">e</text>
 <text font="Garamond" bbox="162.720,558.012,165.720,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="168.480,558.012,177.732,571.584" size="13.572">D</text>
 <text font="Garamond" bbox="177.752,558.012,180.500,571.584" size="13.572">i</text>
 <text font="Garamond" bbox="180.520,558.012,185.896,571.584" size="13.572">g</text>
@@ -138,7 +135,6 @@
 <text font="Garamond" bbox="192.209,558.012,197.081,571.584" size="13.572">a</text>
 <text font="Garamond" bbox="197.101,558.012,199.849,571.584" size="13.572">l</text>
 <text font="Garamond" bbox="199.869,558.012,202.869,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="205.389,558.012,215.385,571.584" size="13.572">M</text>
 <text font="Garamond" bbox="215.406,558.012,218.154,571.584" size="13.572">i</text>
 <text font="Garamond" bbox="218.174,558.012,220.922,571.584" size="13.572">l</text>
@@ -150,7 +146,6 @@
 <text font="Garamond" bbox="243.783,558.012,249.663,571.584" size="13.572">u</text>
 <text font="Garamond" bbox="249.683,558.012,258.935,571.584" size="13.572">m</text>
 <text font="Garamond" bbox="258.955,558.012,261.955,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="264.475,558.012,272.095,571.584" size="13.572">C</text>
 <text font="Garamond" bbox="272.116,558.012,278.236,571.584" size="13.572">o</text>
 <text font="Garamond" bbox="278.256,558.012,284.376,571.584" size="13.572">p</text>
@@ -161,12 +156,10 @@
 <text font="Garamond" bbox="301.601,558.012,307.721,571.584" size="13.572">h</text>
 <text font="Garamond" bbox="307.741,558.012,311.245,571.584" size="13.572">t</text>
 <text font="Garamond" bbox="311.265,558.012,314.265,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="316.785,558.012,324.909,571.584" size="13.572">A</text>
 <text font="Garamond" bbox="324.929,558.012,329.933,571.584" size="13.572">c</text>
 <text font="Garamond" bbox="329.954,558.012,333.458,571.584" size="13.572">t</text>
 <text font="Garamond" bbox="333.478,558.012,336.478,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="338.998,558.012,342.502,571.584" size="13.572">(</text>
 <text font="Garamond" bbox="342.522,558.012,351.774,571.584" size="13.572">D</text>
 <text font="Garamond" bbox="351.794,558.012,361.790,571.584" size="13.572">M</text>
@@ -175,12 +168,10 @@
 <text font="Garamond" bbox="377.595,558.012,381.099,571.584" size="13.572">)</text>
 <text> </text>
 <text font="Garamond" bbox="384.480,558.012,387.480,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="390.000,558.012,398.004,571.584" size="13.572">w</text>
 <text font="Garamond" bbox="397.990,558.012,402.862,571.584" size="13.572">a</text>
 <text font="Garamond" bbox="402.848,558.012,407.228,571.584" size="13.572">s</text>
 <text font="Garamond" bbox="407.214,558.012,410.214,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="412.734,558.012,417.114,571.584" size="13.572">s</text>
 <text font="Garamond" bbox="417.100,558.012,419.848,571.584" size="13.572">i</text>
 <text font="Garamond" bbox="419.834,558.012,425.209,571.584" size="13.572">g</text>
@@ -188,20 +179,22 @@
 <text font="Garamond" bbox="431.301,558.012,436.305,571.584" size="13.572">e</text>
 <text font="Garamond" bbox="436.291,558.012,442.291,571.584" size="13.572">d</text>
 <text font="Garamond" bbox="442.277,558.012,445.277,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="447.797,558.012,450.545,571.584" size="13.572">i</text>
 <text font="Garamond" bbox="450.531,558.012,456.651,571.584" size="13.572">n</text>
 <text font="Garamond" bbox="456.637,558.012,460.141,571.584" size="13.572">t</text>
 <text font="Garamond" bbox="460.127,558.012,466.247,571.584" size="13.572">o</text>
 <text font="Garamond" bbox="466.233,558.012,469.233,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="471.753,558.012,474.501,571.584" size="13.572">l</text>
 <text font="Garamond" bbox="474.487,558.012,479.359,571.584" size="13.572">a</text>
 <text font="Garamond" bbox="479.345,558.012,487.349,571.584" size="13.572">w</text>
 <text font="Garamond" bbox="487.334,558.012,490.334,571.584" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="492.854,558.012,498.974,571.584" size="13.572">b</text>
 <text font="Garamond" bbox="498.960,558.012,503.964,571.584" size="13.572">y</text>
+<text>
+</text>
+</textline>
+<textline bbox="381.120,561.319,384.497,569.462">
+<text font="Garamond" bbox="381.120,561.319,384.497,569.462" size="8.143">1</text>
 <text>
 </text>
 </textline>
@@ -381,13 +374,11 @@
 <text font="Garamond" bbox="111.588,517.692,117.708,531.264" size="13.572">h</text>
 <text font="Garamond" bbox="117.792,517.692,122.796,531.264" size="13.572">e</text>
 <text font="Garamond" bbox="122.880,517.692,125.880,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="127.920,517.692,138.540,531.264" size="13.572">W</text>
 <text font="Garamond" bbox="138.565,517.692,142.813,531.264" size="13.572">I</text>
 <text font="Garamond" bbox="142.837,517.692,149.593,531.264" size="13.572">P</text>
 <text font="Garamond" bbox="149.618,517.692,158.990,531.264" size="13.572">O</text>
 <text font="Garamond" bbox="159.014,517.692,162.014,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="164.054,517.692,170.810,531.264" size="13.572">P</text>
 <text font="Garamond" bbox="170.835,517.692,175.839,531.264" size="13.572">e</text>
 <text font="Garamond" bbox="175.864,517.692,179.860,531.264" size="13.572">r</text>
@@ -401,12 +392,10 @@
 <text font="Garamond" bbox="219.296,517.692,224.300,531.264" size="13.572">e</text>
 <text font="Garamond" bbox="224.325,517.692,228.705,531.264" size="13.572">s</text>
 <text font="Garamond" bbox="228.730,517.692,231.730,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="233.770,517.692,238.642,531.264" size="13.572">a</text>
 <text font="Garamond" bbox="238.666,517.692,244.786,531.264" size="13.572">n</text>
 <text font="Garamond" bbox="244.811,517.692,250.811,531.264" size="13.572">d</text>
 <text font="Garamond" bbox="250.835,517.692,253.835,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="255.875,517.692,262.631,531.264" size="13.572">P</text>
 <text font="Garamond" bbox="262.656,517.692,268.776,531.264" size="13.572">h</text>
 <text font="Garamond" bbox="268.801,517.692,274.921,531.264" size="13.572">o</text>
@@ -418,7 +407,6 @@
 <text font="Garamond" bbox="301.552,517.692,310.804,531.264" size="13.572">m</text>
 <text font="Garamond" bbox="310.829,517.692,315.209,531.264" size="13.572">s</text>
 <text font="Garamond" bbox="315.233,517.692,318.233,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="320.273,517.692,327.653,531.264" size="13.572">T</text>
 <text font="Garamond" bbox="327.678,517.692,331.674,531.264" size="13.572">r</text>
 <text font="Garamond" bbox="331.699,517.692,336.703,531.264" size="13.572">e</text>
@@ -427,26 +415,21 @@
 <text font="Garamond" bbox="345.152,517.692,350.156,531.264" size="13.572">y</text>
 <text font="Garamond" bbox="350.181,517.692,352.809,531.264" size="13.572">.</text>
 <text font="Garamond" bbox="352.834,517.692,355.834,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="357.874,517.692,360.874,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="362.914,517.692,370.294,531.264" size="13.572">T</text>
 <text font="Garamond" bbox="370.318,517.692,376.438,531.264" size="13.572">h</text>
 <text font="Garamond" bbox="376.463,517.692,381.467,531.264" size="13.572">e</text>
 <text font="Garamond" bbox="381.491,517.692,384.491,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="386.531,517.692,395.783,531.264" size="13.572">D</text>
 <text font="Garamond" bbox="395.808,517.692,405.804,531.264" size="13.572">M</text>
 <text font="Garamond" bbox="405.829,517.692,413.449,531.264" size="13.572">C</text>
 <text font="Garamond" bbox="413.473,517.692,421.597,531.264" size="13.572">A</text>
 <text font="Garamond" bbox="421.622,517.692,424.622,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="426.662,517.692,431.534,531.264" size="13.572">a</text>
 <text font="Garamond" bbox="431.558,517.692,434.306,531.264" size="13.572">l</text>
 <text font="Garamond" bbox="434.331,517.692,438.711,531.264" size="13.572">s</text>
 <text font="Garamond" bbox="438.736,517.692,444.856,531.264" size="13.572">o</text>
 <text font="Garamond" bbox="444.880,517.692,447.880,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="449.920,517.692,454.792,531.264" size="13.572">a</text>
 <text font="Garamond" bbox="454.817,517.692,460.817,531.264" size="13.572">d</text>
 <text font="Garamond" bbox="460.841,517.692,466.841,531.264" size="13.572">d</text>
@@ -457,7 +440,6 @@
 <text font="Garamond" bbox="484.724,517.692,489.728,531.264" size="13.572">e</text>
 <text font="Garamond" bbox="489.753,517.692,494.133,531.264" size="13.572">s</text>
 <text font="Garamond" bbox="494.158,517.692,497.158,531.264" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="499.200,517.692,504.072,531.264" size="13.572">a</text>
 <text>
 </text>
@@ -520,14 +502,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="5" bbox="381.120,561.319,384.497,569.462">
-<textline bbox="381.120,561.319,384.497,569.462">
-<text font="Garamond" bbox="381.120,561.319,384.497,569.462" size="8.143">1</text>
-<text>
-</text>
-</textline>
-</textbox>
-<textbox id="6" bbox="144.000,477.372,323.881,490.944">
+<textbox id="4" bbox="144.000,477.372,323.881,490.944">
 <textline bbox="144.000,477.372,323.881,490.944">
 <text font="Garamond" bbox="144.000,477.372,151.380,490.944" size="13.572">T</text>
 <text font="Garamond" bbox="151.381,477.372,157.501,490.944" size="13.572">h</text>
@@ -572,42 +547,42 @@
 </text>
 </textline>
 </textbox>
-<textbox id="7" bbox="144.000,450.000,152.004,462.480">
+<textbox id="5" bbox="144.000,450.000,152.004,462.480">
 <textline bbox="144.000,450.000,152.004,462.480">
 <text font="ELCKGH+WPTypographicSymbols" bbox="144.000,450.000,152.004,462.480" size="12.480">!</text>
 <text>
 </text>
 </textline>
 </textbox>
-<textbox id="8" bbox="144.000,409.680,152.004,422.160">
+<textbox id="6" bbox="144.000,409.680,152.004,422.160">
 <textline bbox="144.000,409.680,152.004,422.160">
 <text font="ELCKGH+WPTypographicSymbols" bbox="144.000,409.680,152.004,422.160" size="12.480">!</text>
 <text>
 </text>
 </textline>
 </textbox>
-<textbox id="9" bbox="144.000,369.360,152.004,381.840">
+<textbox id="7" bbox="144.000,369.360,152.004,381.840">
 <textline bbox="144.000,369.360,152.004,381.840">
 <text font="ELCKGH+WPTypographicSymbols" bbox="144.000,369.360,152.004,381.840" size="12.480">!</text>
 <text>
 </text>
 </textline>
 </textbox>
-<textbox id="10" bbox="144.000,329.040,152.004,341.520">
+<textbox id="8" bbox="144.000,329.040,152.004,341.520">
 <textline bbox="144.000,329.040,152.004,341.520">
 <text font="ELCKGH+WPTypographicSymbols" bbox="144.000,329.040,152.004,341.520" size="12.480">!</text>
 <text>
 </text>
 </textline>
 </textbox>
-<textbox id="11" bbox="144.000,248.400,152.004,260.880">
+<textbox id="9" bbox="144.000,248.400,152.004,260.880">
 <textline bbox="144.000,248.400,152.004,260.880">
 <text font="ELCKGH+WPTypographicSymbols" bbox="144.000,248.400,152.004,260.880" size="12.480">!</text>
 <text>
 </text>
 </textline>
 </textbox>
-<textbox id="12" bbox="180.000,235.452,504.108,464.124">
+<textbox id="10" bbox="180.000,235.452,504.108,464.124">
 <textline bbox="180.000,450.492,503.985,464.124">
 <text font="Garamond" bbox="180.000,450.492,187.380,464.064" size="13.572">T</text>
 <text font="Garamond" bbox="187.440,450.492,190.188,464.064" size="13.572">i</text>
@@ -682,7 +657,6 @@
 <text font="Garamond,Bold" bbox="210.708,437.160,216.336,450.684" size="13.524">e</text>
 <text font="Garamond,Bold" bbox="216.306,437.160,221.310,450.684" size="13.524">s</text>
 <text font="Garamond,Bold" bbox="221.280,437.160,224.280,450.684" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="227.520,437.160,232.272,450.684" size="13.524">I</text>
 <text font="Garamond,Bold" bbox="232.267,437.160,242.395,450.684" size="13.524">m</text>
 <text font="Garamond,Bold" bbox="242.391,437.160,249.015,450.684" size="13.524">p</text>
@@ -698,16 +672,13 @@
 <text font="Garamond,Bold" bbox="296.728,437.160,302.980,450.684" size="13.524">o</text>
 <text font="Garamond,Bold" bbox="302.975,437.160,309.599,450.684" size="13.524">n</text>
 <text font="Garamond,Bold" bbox="309.594,437.160,312.594,450.684" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="315.834,437.160,323.706,450.684" size="13.524">A</text>
 <text font="Garamond,Bold" bbox="323.701,437.160,329.329,450.684" size="13.524">c</text>
 <text font="Garamond,Bold" bbox="329.325,437.160,333.081,450.684" size="13.524">t</text>
 <text font="Garamond,Bold" bbox="333.076,437.160,336.076,450.684" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="339.316,437.160,345.568,450.684" size="13.524">o</text>
 <text font="Garamond,Bold" bbox="345.563,437.160,349.187,450.684" size="13.524">f</text>
 <text font="Garamond,Bold" bbox="349.183,437.160,352.183,450.684" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="355.423,437.160,360.175,450.684" size="13.524">1</text>
 <text font="Garamond,Bold" bbox="360.170,437.160,365.798,450.684" size="13.524">9</text>
 <text font="Garamond,Bold" bbox="365.793,437.160,371.421,450.684" size="13.524">9</text>
@@ -715,7 +686,6 @@
 <text font="Garamond" bbox="377.040,437.052,379.668,450.624" size="13.572">,</text>
 <text font="Garamond" bbox="379.695,437.052,385.071,450.624" size="13.572">”</text>
 <text font="Garamond" bbox="385.099,437.052,388.099,450.624" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="391.339,437.052,394.087,450.624" size="13.572">i</text>
 <text font="Garamond" bbox="394.114,437.052,403.366,450.624" size="13.572">m</text>
 <text font="Garamond" bbox="403.393,437.052,409.513,450.624" size="13.572">p</text>
@@ -727,12 +697,10 @@
 <text font="Garamond" bbox="437.805,437.052,441.309,450.624" size="13.572">t</text>
 <text font="Garamond" bbox="441.336,437.052,445.716,450.624" size="13.572">s</text>
 <text font="Garamond" bbox="445.744,437.052,448.744,450.624" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="451.984,437.052,455.488,450.624" size="13.572">t</text>
 <text font="Garamond" bbox="455.515,437.052,461.635,450.624" size="13.572">h</text>
 <text font="Garamond" bbox="461.662,437.052,466.666,450.624" size="13.572">e</text>
 <text font="Garamond" bbox="466.693,437.052,469.693,450.624" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="472.933,437.052,483.553,450.624" size="13.572">W</text>
 <text font="Garamond" bbox="483.581,437.052,487.829,450.624" size="13.572">I</text>
 <text font="Garamond" bbox="487.856,437.052,494.612,450.624" size="13.572">P</text>
@@ -980,18 +948,15 @@
 <text font="Garamond" bbox="194.307,369.852,197.055,383.424" size="13.572">l</text>
 <text font="Garamond" bbox="197.280,369.852,202.284,383.424" size="13.572">e</text>
 <text font="Garamond" bbox="202.320,369.852,205.320,383.424" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="207.600,369.852,211.848,383.424" size="13.572">I</text>
 <text font="Garamond" bbox="211.896,369.852,216.144,383.424" size="13.572">I</text>
 <text font="Garamond" bbox="216.192,369.852,220.440,383.424" size="13.572">I</text>
 <text font="Garamond" bbox="220.488,369.852,223.116,383.424" size="13.572">,</text>
 <text font="Garamond" bbox="223.164,369.852,226.164,383.424" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="228.444,369.852,231.948,383.424" size="13.572">t</text>
 <text font="Garamond" bbox="231.996,369.852,238.116,383.424" size="13.572">h</text>
 <text font="Garamond" bbox="238.164,369.852,243.168,383.424" size="13.572">e</text>
 <text font="Garamond" bbox="243.216,369.852,246.216,383.424" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="248.496,369.852,253.872,383.424" size="13.572">“</text>
 <text font="Garamond,Bold" bbox="253.920,369.960,262.044,383.484" size="13.524">C</text>
 <text font="Garamond,Bold" bbox="262.058,369.960,268.310,383.484" size="13.524">o</text>
@@ -1002,7 +967,6 @@
 <text font="Garamond,Bold" bbox="295.515,369.960,301.143,383.484" size="13.524">e</text>
 <text font="Garamond,Bold" bbox="301.157,369.960,305.285,383.484" size="13.524">r</text>
 <text font="Garamond,Bold" bbox="305.300,369.960,308.300,383.484" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="310.580,369.960,321.584,383.484" size="13.524">M</text>
 <text font="Garamond,Bold" bbox="321.599,369.960,327.346,383.484" size="13.524">a</text>
 <text font="Garamond,Bold" bbox="327.361,369.960,330.733,383.484" size="13.524">i</text>
@@ -1015,7 +979,6 @@
 <text font="Garamond,Bold" bbox="365.838,369.960,371.466,383.484" size="13.524">c</text>
 <text font="Garamond,Bold" bbox="371.481,369.960,377.109,383.484" size="13.524">e</text>
 <text font="Garamond,Bold" bbox="377.123,369.960,380.123,383.484" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="382.403,369.960,390.527,383.484" size="13.524">C</text>
 <text font="Garamond,Bold" bbox="390.542,369.960,396.794,383.484" size="13.524">o</text>
 <text font="Garamond,Bold" bbox="396.808,369.960,406.936,383.484" size="13.524">m</text>
@@ -1028,7 +991,6 @@
 <text font="Garamond,Bold" bbox="433.546,369.960,439.798,383.484" size="13.524">o</text>
 <text font="Garamond,Bold" bbox="439.812,369.960,446.437,383.484" size="13.524">n</text>
 <text font="Garamond,Bold" bbox="446.451,369.960,449.451,383.484" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="451.731,369.960,459.603,383.484" size="13.524">A</text>
 <text font="Garamond,Bold" bbox="459.617,369.960,464.621,383.484" size="13.524">s</text>
 <text font="Garamond,Bold" bbox="464.636,369.960,469.640,383.484" size="13.524">s</text>
@@ -1185,11 +1147,9 @@
 <text font="Garamond" bbox="194.307,329.532,197.055,343.104" size="13.572">l</text>
 <text font="Garamond" bbox="197.280,329.532,202.284,343.104" size="13.572">e</text>
 <text font="Garamond" bbox="202.320,329.532,205.320,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="208.800,329.532,213.048,343.104" size="13.572">I</text>
 <text font="Garamond" bbox="213.065,329.532,221.189,343.104" size="13.572">V</text>
 <text font="Garamond" bbox="221.205,329.532,224.205,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="227.685,329.532,232.689,343.104" size="13.572">c</text>
 <text font="Garamond" bbox="232.706,329.532,238.826,343.104" size="13.572">o</text>
 <text font="Garamond" bbox="238.842,329.532,244.962,343.104" size="13.572">n</text>
@@ -1199,12 +1159,10 @@
 <text font="Garamond" bbox="256.153,329.532,262.273,343.104" size="13.572">n</text>
 <text font="Garamond" bbox="262.289,329.532,266.669,343.104" size="13.572">s</text>
 <text font="Garamond" bbox="266.686,329.532,269.686,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="273.166,329.532,277.546,343.104" size="13.572">s</text>
 <text font="Garamond" bbox="277.563,329.532,280.311,343.104" size="13.572">i</text>
 <text font="Garamond" bbox="280.327,329.532,285.823,343.104" size="13.572">x</text>
 <text font="Garamond" bbox="285.840,329.532,288.840,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="292.320,329.640,302.448,343.164" size="13.524">m</text>
 <text font="Garamond,Bold" bbox="302.451,329.640,305.823,343.164" size="13.524">i</text>
 <text font="Garamond,Bold" bbox="305.826,329.640,310.830,343.164" size="13.524">s</text>
@@ -1219,7 +1177,6 @@
 <text font="Garamond,Bold" bbox="352.606,329.640,359.230,343.164" size="13.524">u</text>
 <text font="Garamond,Bold" bbox="359.233,329.640,364.237,343.164" size="13.524">s</text>
 <text font="Garamond,Bold" bbox="364.240,329.640,367.240,343.164" size="13.524"> </text>
-<text> </text>
 <text font="Garamond,Bold" bbox="370.720,329.640,377.344,343.164" size="13.524">p</text>
 <text font="Garamond,Bold" bbox="377.347,329.640,381.475,343.164" size="13.524">r</text>
 <text font="Garamond,Bold" bbox="381.478,329.640,387.730,343.164" size="13.524">o</text>
@@ -1232,7 +1189,6 @@
 <text font="Garamond,Bold" bbox="417.872,329.640,422.876,343.164" size="13.524">s</text>
 <text font="Garamond" bbox="422.880,329.532,425.508,343.104" size="13.572">,</text>
 <text font="Garamond" bbox="425.538,329.532,428.538,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="432.018,329.532,436.014,343.104" size="13.572">r</text>
 <text font="Garamond" bbox="436.045,329.532,441.049,343.104" size="13.572">e</text>
 <text font="Garamond" bbox="441.079,329.532,443.827,343.104" size="13.572">l</text>
@@ -1242,11 +1198,9 @@
 <text font="Garamond" bbox="455.073,329.532,461.193,343.104" size="13.572">n</text>
 <text font="Garamond" bbox="461.224,329.532,466.600,343.104" size="13.572">g</text>
 <text font="Garamond" bbox="466.630,329.532,469.630,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="473.110,329.532,476.614,343.104" size="13.572">t</text>
 <text font="Garamond" bbox="476.645,329.532,482.765,343.104" size="13.572">o</text>
 <text font="Garamond" bbox="482.795,329.532,485.795,343.104" size="13.572"> </text>
-<text> </text>
 <text font="Garamond" bbox="489.275,329.532,492.779,343.104" size="13.572">t</text>
 <text font="Garamond" bbox="492.810,329.532,498.930,343.104" size="13.572">h</text>
 <text font="Garamond" bbox="498.960,329.532,503.964,343.104" size="13.572">e</text>
@@ -1706,7 +1660,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="13" bbox="108.000,168.360,504.108,222.144">
+<textbox id="11" bbox="108.000,168.360,504.108,222.144">
 <textline bbox="144.000,208.572,504.060,222.144">
 <text font="Garamond" bbox="144.000,208.572,151.380,222.144" size="13.572">T</text>
 <text font="Garamond" bbox="151.623,208.572,157.743,222.144" size="13.572">h</text>
@@ -2037,7 +1991,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="14" bbox="144.000,103.201,372.217,115.688">
+<textbox id="12" bbox="144.000,103.201,372.217,115.688">
 <textline bbox="147.360,103.201,372.217,115.688">
 <text font="Garamond" bbox="147.360,103.201,153.576,115.688" size="12.486">P</text>
 <text font="Garamond" bbox="153.598,103.201,159.007,115.688" size="12.486">u</text>
@@ -2100,7 +2054,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="15" bbox="108.000,78.240,214.562,91.680">
+<textbox id="13" bbox="108.000,78.240,214.562,91.680">
 <textline bbox="108.000,78.240,214.562,91.680">
 <text font="Garamond,Italic" bbox="108.000,78.240,115.500,91.680" size="13.440">C</text>
 <text font="Garamond,Italic" bbox="115.498,78.240,119.746,91.680" size="13.440">o</text>
@@ -2130,7 +2084,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="16" bbox="274.080,78.240,337.945,91.680">
+<textbox id="14" bbox="274.080,78.240,337.945,91.680">
 <textline bbox="274.080,78.240,337.945,91.680">
 <text font="Garamond,Italic" bbox="274.080,78.240,282.828,91.680" size="13.440">D</text>
 <text font="Garamond,Italic" bbox="282.803,78.240,286.307,91.680" size="13.440">e</text>
@@ -2149,7 +2103,7 @@
 </text>
 </textline>
 </textbox>
-<textbox id="17" bbox="476.640,78.240,504.002,91.680">
+<textbox id="15" bbox="476.640,78.240,504.002,91.680">
 <textline bbox="476.640,78.240,504.002,91.680">
 <text font="Garamond,Italic" bbox="476.640,78.240,483.012,91.680" size="13.440">P</text>
 <text font="Garamond,Italic" bbox="483.010,78.240,487.882,91.680" size="13.440">a</text>
@@ -2167,52 +2121,46 @@
 </figure>
 <layout>
 <textgroup bbox="72.000,78.240,504.108,728.163">
-<textgroup bbox="138.240,695.179,473.675,728.163">
-<textbox id="0" bbox="138.240,710.280,473.675,728.163" />
-<textbox id="1" bbox="218.640,695.179,393.589,709.785" />
-</textgroup>
+<textbox id="0" bbox="138.240,695.179,473.675,728.163" />
 <textgroup bbox="72.000,78.240,504.108,627.564">
 <textgroup bbox="72.000,585.221,344.460,627.564">
-<textbox id="2" bbox="72.000,585.221,165.363,601.686" />
-<textbox id="3" bbox="267.600,614.040,344.460,627.564" />
+<textbox id="1" bbox="72.000,585.221,165.363,601.686" />
+<textbox id="2" bbox="267.600,614.040,344.460,627.564" />
 </textgroup>
 <textgroup bbox="108.000,78.240,504.108,571.584">
 <textgroup bbox="108.000,168.360,504.108,571.584">
-<textgroup bbox="108.000,504.252,504.072,571.584">
-<textbox id="4" bbox="108.000,504.252,504.072,571.584" />
-<textbox id="5" bbox="381.120,561.319,384.497,569.462" />
-</textgroup>
+<textbox id="3" bbox="108.000,504.252,504.072,571.584" />
 <textgroup bbox="108.000,168.360,504.108,490.944">
 <textgroup bbox="144.000,235.452,504.108,490.944">
-<textbox id="6" bbox="144.000,477.372,323.881,490.944" />
+<textbox id="4" bbox="144.000,477.372,323.881,490.944" />
 <textgroup bbox="144.000,235.452,504.108,464.124">
 <textgroup bbox="144.000,248.400,152.004,462.480">
 <textgroup bbox="144.000,329.040,152.004,462.480">
 <textgroup bbox="144.000,369.360,152.004,462.480">
 <textgroup bbox="144.000,409.680,152.004,462.480">
-<textbox id="7" bbox="144.000,450.000,152.004,462.480" />
-<textbox id="8" bbox="144.000,409.680,152.004,422.160" />
+<textbox id="5" bbox="144.000,450.000,152.004,462.480" />
+<textbox id="6" bbox="144.000,409.680,152.004,422.160" />
 </textgroup>
-<textbox id="9" bbox="144.000,369.360,152.004,381.840" />
+<textbox id="7" bbox="144.000,369.360,152.004,381.840" />
 </textgroup>
-<textbox id="10" bbox="144.000,329.040,152.004,341.520" />
+<textbox id="8" bbox="144.000,329.040,152.004,341.520" />
 </textgroup>
-<textbox id="11" bbox="144.000,248.400,152.004,260.880" />
+<textbox id="9" bbox="144.000,248.400,152.004,260.880" />
 </textgroup>
-<textbox id="12" bbox="180.000,235.452,504.108,464.124" />
+<textbox id="10" bbox="180.000,235.452,504.108,464.124" />
 </textgroup>
 </textgroup>
-<textbox id="13" bbox="108.000,168.360,504.108,222.144" />
+<textbox id="11" bbox="108.000,168.360,504.108,222.144" />
 </textgroup>
 </textgroup>
 <textgroup bbox="108.000,78.240,504.002,115.688">
-<textbox id="14" bbox="144.000,103.201,372.217,115.688" />
+<textbox id="12" bbox="144.000,103.201,372.217,115.688" />
 <textgroup bbox="108.000,78.240,504.002,91.680">
 <textgroup bbox="108.000,78.240,337.945,91.680">
-<textbox id="15" bbox="108.000,78.240,214.562,91.680" />
-<textbox id="16" bbox="274.080,78.240,337.945,91.680" />
+<textbox id="13" bbox="108.000,78.240,214.562,91.680" />
+<textbox id="14" bbox="274.080,78.240,337.945,91.680" />
 </textgroup>
-<textbox id="17" bbox="476.640,78.240,504.002,91.680" />
+<textbox id="15" bbox="476.640,78.240,504.002,91.680" />
 </textgroup>
 </textgroup>
 </textgroup>

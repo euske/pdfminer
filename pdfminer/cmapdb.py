@@ -190,6 +190,10 @@ class FileUnicodeMap(UnicodeMap):
             raise TypeError(code)
         return
 
+    def add_code2cid(self, code, cid):
+        # Handle non-unicode the same way we'd handle unicode.
+        assert isinstance(code, str) and isinstance(cid, int)
+        return self.add_cid2unichr(cid, code)
 
 ##  PyCMap
 ##
