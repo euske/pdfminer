@@ -5,6 +5,7 @@ try:
 except ImportError:
     import pickle as pickle
 
+is_py27 = (sys.version_info[0] == 2 and sys.version_info[1] == 7)
 
 ##  CMapConverter
 ##
@@ -186,7 +187,10 @@ def main(argv):
         with open(path, 'wb') as fp:
             # with statement support for GzipFile is available only from Python
             # 2.7
-            fgz = gzip.GzipFile('', 'wb', 9, fp, 0.)
+            args = ['', 'wb', 9, fp]
+            if is_py27:
+                args.append(0.)
+            fgz = gzip.GzipFile(*args)
             converter.dump_cmap(fgz, enc)
             fgz.close()
 
@@ -196,7 +200,10 @@ def main(argv):
     with open(path, 'wb') as fp:
         # with statement support for GzipFile is available only from Python
         # 2.7
-        fgz = gzip.GzipFile('', 'wb', 9, fp, 0.)
+        args = ['', 'wb', 9, fp]
+        if is_py27:
+            args.append(0.)
+        fgz = gzip.GzipFile(*args)
         converter.dump_unicodemap(fgz)
         fgz.close()
     return
