@@ -383,8 +383,12 @@ class TrueTypeFont(object):
         self.fonttype = fp.read(4)
         (ntables, _1, _2, _3) = struct.unpack('>HHHH', fp.read(8))
         for _ in xrange(ntables):
-            (name, tsum, offset, length) = struct.unpack('>4sLLL', fp.read(16))
-            self.tables[name] = (offset, length)
+            chunk = fp.read(16)
+            if len(chunk) == 16:
+                (name, tsum, offset, length) = struct.unpack('>4sLLL', chunk)
+                self.tables[name] = (offset, length)
+            else:
+                break
         return
 
     def create_unicode_map(self):
