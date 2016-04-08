@@ -218,14 +218,22 @@ class PDFStream(PDFObject):
 
     def get_filters(self):
         filters = self.get_any(('F', 'Filter'))
-        params = self.get_any(('DP', 'DecodeParms', 'FDecodeParms'), {})
         if not filters:
             return []
         if not isinstance(filters, list):
-            filters = [filters]
+            params = self.get_any(('DP', 'DecodeParms', 'FDecodeParms'), {})
+            return [(filters, params)]
+
+        # `Filter` is an list, then, params must also be a list.
+        params = self.get_any(('DP', 'DecodeParms', 'FDecodeParms'))
         if not isinstance(params, list):
-            params = [params]
-        return zip(filters, params)
+            params = []
+        nparams = len(params)
+        # zip filters & params together, filling in where params is shorter.
+        return [
+            (f, (params[idx] if idx < nparams else {}))
+            for idx, f in enumerate(filters)
+        ]
 
     def decode(self):
         assert self.data is None and self.rawdata is not None
