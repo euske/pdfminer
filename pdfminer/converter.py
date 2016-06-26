@@ -614,7 +614,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<ComposedBlock ID="PAG_%d_CB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_composedblock,
                             self.scale(item.height), self.scale(item.width),
-                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
                 return
 
             def begin_textblock(item):
@@ -622,7 +622,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<TextBlock ID="PAG_%d_TB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_textblock,
                             self.scale(item.height), self.scale(item.width),
-                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
                 return
 
             def begin_textline(item):
@@ -630,7 +630,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<TextLine ID="PAG_%d_TL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_textline,
                             self.scale(item.height), self.scale(item.width),
-                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
                 return
 
             def write_illustration(item, name = ''):
@@ -640,7 +640,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<Illustration ID="PAG_%d_IL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" %s/>\n' %
                            (ltpage.pageid, self._index_illustration,
                             self.scale(item.height), self.scale(item.width),
-                            self.scale(item.x0), self.scale(ltpage.height - item.y0),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1),
                             name))
                 return
 
@@ -649,7 +649,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<GraphicalElement ID="PAG_%d_GE_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
                            (ltpage.pageid, self._index_graphicalelement,
                             self.scale(item.height), self.scale(item.width),
-                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
                 return
 
             def end_xmltag(xmltag):
@@ -661,7 +661,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<String ID="PAG_%d_ST_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" CONTENT="' %
                            (ltpage.pageid, self._index_string,
                             self.scale(height), self.scale(width),
-                            self.scale(x), self.scale(y)))
+                            self.scale(x), self.scale(ltpage.height - y)))
                 self.write_text(content)
                 self.write('" />\n')
                 return
@@ -671,7 +671,7 @@ class XMLAltoConverter(PDFConverter):
                 self.write('<SP ID="PAG_%d_SP_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
                            (ltpage.pageid, self._index_space,
                             self.scale(height), self.scale(width),
-                            self.scale(x), self.scale(y)))
+                            self.scale(x), self.scale(ltpage.height - y)))
                 return
 
             def write_shape(item):
@@ -769,11 +769,11 @@ class XMLAltoConverter(PDFConverter):
                         # added.
                         if prev_word:
                             if self._textblock_vertical:
-                                write_space(word_y1 - min(y0), word_width,
-                                            word_x0, ltpage.height - word_y1)
+                                write_space(word_y0 - max(y1), word_width,
+                                            word_x0, word_y0)
                             else:
                                 write_space(word_height, min(x0) - word_x1,
-                                            word_x1, ltpage.height - word_y0)
+                                            word_x1, word_y1)
                         # Remember and write the string for next missing space.
                         word_x0 = min(x0)
                         word_x1 = max(x1)
@@ -783,7 +783,7 @@ class XMLAltoConverter(PDFConverter):
                         word_height = word_y1 - word_y0
                         prev_word = True
                         write_string(word_width, word_height,
-                                     word_x0, ltpage.height - word_y0,
+                                     word_x0, word_y1,
                                      content)
                     else:
                         word_x0 = min(x0)
@@ -794,7 +794,7 @@ class XMLAltoConverter(PDFConverter):
                         word_height = word_y1 - word_y0
                         prev_word = False
                         write_space(word_width, word_height,
-                                    word_x0, ltpage.height - word_y0)
+                                    word_x0, word_y1)
                 end_xmltag('TextLine')
             elif isinstance(item, LTFigure):
                 for child in item:
