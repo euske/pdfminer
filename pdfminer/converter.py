@@ -245,8 +245,14 @@ class HTMLConverter(PDFConverter):
 
     def write_header(self):
         self.write('<html><head>\n')
-        self.write('<meta http-equiv="Content-Type" content="text/html; charset=%s">\n' % self.codec)
-        self.write('</head><body>\n')
+        if self.codec:
+            self.write('<meta http-equiv="Content-Type" content="text/html; charset=%s">\n' % self.codec)
+        else:
+            self.write('<meta http-equiv="Content-Type" content="text/html">\n')
+        if self.layoutmode == 'medium':
+            self.write('</head><body style="white-space: nowrap;">\n')
+        else:
+            self.write('</head><body>\n')
         return
 
     def write_footer(self):
@@ -295,11 +301,18 @@ class HTMLConverter(PDFConverter):
     def begin_div(self, color, borderwidth, x, y, w, h, writing_mode=False):
         self._fontstack.append(self._font)
         self._font = None
-        self.write('<div style="position:absolute; border: %s %dpx solid; writing-mode:%s; '
+        if writing_mode:
+            self.write('<div style="position:absolute; border: %s %dpx solid; writing-mode:%s; '
                    'left:%dpx; top:%dpx; width:%dpx; height:%dpx;">' %
                    (color, borderwidth, writing_mode,
                     x*self.scale, (self._yoffset-y)*self.scale,
                     w*self.scale, h*self.scale))
+        else:
+            self.write('<div style="position:absolute; border: %s %dpx solid; '
+                    'left:%dpx; top:%dpx; width:%dpx; height:%dpx;">' %
+                    (color, borderwidth,
+                     x*self.scale, (self._yoffset-y)*self.scale,
+                     w*self.scale, h*self.scale))
         return
 
     def end_div(self, color):
@@ -368,6 +381,43 @@ class HTMLConverter(PDFConverter):
                     elif isinstance(item, LTChar):
                         self.place_border('char', 1, item)
                         self.place_text('char', item.get_text(), item.x0, item.y1, item.size)
+                elif self.layoutmode == 'medium':
+                    if isinstance(item, LTTextBox):
+                        self._textbox_top = item.y1 - self._yoffset
+                        self.begin_div('textbox', 1, item.x0, item.y1, item.width, item.height,
+                                       item.get_writing_mode())
+                        for child in item:
+                            render(child)
+                        self.end_div('textbox')
+                    elif isinstance(item, LTTextLine):
+                        words = []
+                        word = []
+                        for child in item:
+                            character = child.get_text()
+                            if isinstance(child, LTChar) and  character != ' ':
+                                word.append(child)
+                            elif word:
+                                words.append(word)
+                                word = []
+                        for word in words:
+                            x0, x1, y0, y1 = [], [], [], []
+                            for char in word:
+                                x0.append(char.x0)
+                                x1.append(char.x1)
+                                y0.append(char.y0)
+                                y1.append(char.y1)
+                            self.begin_div('textbox', 1,
+                                           min(x0) - item.x0,
+                                           max(y1) - self._textbox_top,
+                                           max(x1) - min(x0),
+                                           max(y1) - min(y0))
+                            for char in word:
+                                render(char)
+                            self.end_div('textbox')
+                    elif isinstance(item, LTChar):
+                        self.put_text(item.get_text(), item.fontname, item.size)
+                    elif isinstance(item, LTText):
+                        self.write_text(item.get_text())
                 else:
                     if isinstance(item, LTTextLine):
                         for child in item:
