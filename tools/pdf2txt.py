@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+"""
+Converts PDF text content (though not images containing text) to plain text, html, xml, xml alto or "tags".
+"""
 import sys
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfdevice import PDFDevice, TagExtractor
 from pdfminer.pdfpage import PDFPage
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+from pdfminer.converter import XMLConverter, XMLAltoConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
@@ -17,7 +20,7 @@ def main(argv):
         print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output]'
                ' [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
                ' [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-R rotation] [-S]'
-               ' [-t text|html|xml|tag] [-c codec] [-s scale]'
+               ' [-t text|html|xml|alto|tag] [-c codec] [-s scale]'
                ' file ...' % argv[0])
         return 100
     try:
@@ -79,6 +82,8 @@ def main(argv):
                 outtype = 'html'
             elif outfile.endswith('.xml'):
                 outtype = 'xml'
+            elif outfile.endswith('.alto.xml'):
+                outtype = 'alto'
             elif outfile.endswith('.tag'):
                 outtype = 'tag'
     if outfile:
@@ -92,6 +97,10 @@ def main(argv):
         device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
                               imagewriter=imagewriter,
                               stripcontrol=stripcontrol)
+    elif outtype == 'alto':
+        device = XMLAltoConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+                                  imagewriter=imagewriter,
+                                  stripcontrol=stripcontrol)
     elif outtype == 'html':
         device = HTMLConverter(rsrcmgr, outfp, codec=codec, scale=scale,
                                layoutmode=layoutmode, laparams=laparams,

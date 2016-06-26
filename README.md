@@ -9,7 +9,7 @@ and analyzing text data. PDFMiner allows one to obtain
 the exact location of text in a page, as well as 
 other information such as fonts or lines.
 It includes a PDF converter that can transform PDF files
-into other text formats (such as HTML). It has an extensible
+into other text formats (such as HTML and XML ALTO). It has an extensible
 PDF parser that can be used for other purposes than text analysis.
 
  * Webpage: https://euske.github.io/pdfminer/
@@ -29,6 +29,7 @@ Features
  * Outline (TOC) extraction.
  * Tagged contents extraction.
  * Automatic layout analysis.
+ * [XML ALTO] (https://www.loc.gov/standards/alto) output.
 
 
 How to Install
