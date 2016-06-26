@@ -781,11 +781,17 @@ class XMLAltoConverter(PDFConverter):
                         render(child)
                         end_xmltag('ComposedBlock')
             elif isinstance(item, LTImage):
-                if self.imagewriter is not None:
-                    name = self.imagewriter.export_image(item)
-                else:
-                    name = ''
-                write_illustration(item, name)
+                # The image should not be the image layer of the pdf.
+                if not(abs(self.cur_item.x0 - item.x0) < 1
+                    and abs(self.cur_item.y0 - item.y0) < 1
+                    and abs(self.cur_item.x1 - item.x1) < 1
+                    and abs(self.cur_item.y1 - item.y1) < 1
+                    ):
+                    if self.imagewriter is not None:
+                        name = self.imagewriter.export_image(item)
+                    else:
+                        name = ''
+                    write_illustration(item, name)
             elif isinstance(item, LTLine):
                 write_graphicalelement(item)
             elif isinstance(item, LTRect):
