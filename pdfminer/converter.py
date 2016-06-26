@@ -510,9 +510,18 @@ class XMLAltoConverter(PDFConverter):
 
     CONTROL = re.compile(u'[\x00-\x08\x0b-\x0c\x0e-\x1f]')
 
-    def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1,
-                 laparams=None, imagewriter=None, stripcontrol=False):
+    def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None,
+                 resolution=72.0, measurement_unit='pixel', decimal=0,
+                 imagewriter=None, stripcontrol=False):
         PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno, laparams=laparams)
+        if measurement_unit != 'mm10' and measurement_unit != 'inch1200' :
+            measurement_unit = 'pixel'
+            decimal = 0
+        if decimal:
+            self.decimal_format = '%.' + str(decimal) + 'f'
+        self.resolution = resolution
+        self.measurement_unit = measurement_unit
+        self.decimal = decimal
         self.imagewriter = imagewriter
         self.stripcontrol = stripcontrol
         self.write_header()
@@ -549,9 +558,8 @@ class XMLAltoConverter(PDFConverter):
         return
 
     def div_description(self):
-        # TODO Convert into millimeters.
         self.write('<Description>\n')
-        self.write('<MeasurementUnit>pixel</MeasurementUnit>\n')
+        self.write('<MeasurementUnit>%s</MeasurementUnit>\n' % self.measurement_unit)
         # TODO Get filepath
         # self.write('<sourceImageInformation>\n')
         # self.write('<fileName>%s</fileName>\n' % ('filename.pdf'))
@@ -572,19 +580,32 @@ class XMLAltoConverter(PDFConverter):
         # self.write('</Tags>\n')
         return
 
+    def scale(self, value):
+        if self.measurement_unit == 'mm10':
+            result = value * 254.0 / self.resolution
+        elif self.measurement_unit == 'inch1200':
+            result = value * 1200.0 / self.resolution
+        else:
+            result = value * self.resolution / 72.0
+        if self.decimal:
+            result = self.decimal_format % round(result, self.decimal)
+        else:
+            result = str(int(round(result)))
+        return result
+
     def receive_layout(self, ltpage):
         def render(item):
             def begin_page(item):
                 self.write('<Page ID="PAG_%d" HEIGHT="%s" WIDTH="%s" PHYSICAL_IMG_NR="%d">\n' %
                            (item.pageid,
-                            item.height, item.width,
+                            self.scale(item.height), self.scale(item.width),
                             item.pageid))
                 return
 
             def begin_printspace(item):
                 self.write('<PrintSpace ID="PAG_%d_PrintSpace" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (item.pageid,
-                            item.height, item.width,
+                            self.scale(item.height), self.scale(item.width),
                             0, 0))
                 return
 
@@ -592,24 +613,24 @@ class XMLAltoConverter(PDFConverter):
                 self._index_composedblock += 1
                 self.write('<ComposedBlock ID="PAG_%d_CB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_composedblock,
-                            item.height, item.width,
-                            item.x0, ltpage.height - item.y0))
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
                 return
 
             def begin_textblock(item):
                 self._index_textblock += 1
                 self.write('<TextBlock ID="PAG_%d_TB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_textblock,
-                            item.height, item.width,
-                            item.x0, ltpage.height - item.y0))
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
                 return
 
             def begin_textline(item):
                 self._index_textline += 1
                 self.write('<TextLine ID="PAG_%d_TL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
                            (ltpage.pageid, self._index_textline,
-                            item.height, item.width,
-                            item.x0, ltpage.height - item.y0))
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
                 return
 
             def write_illustration(item, name = ''):
@@ -618,8 +639,8 @@ class XMLAltoConverter(PDFConverter):
                     name = 'FILEID=%s ' % enc(name, None)
                 self.write('<Illustration ID="PAG_%d_IL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" %s/>\n' %
                            (ltpage.pageid, self._index_illustration,
-                            item.height, item.width,
-                            item.x0, ltpage.height - item.y0,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y0),
                             name))
                 return
 
@@ -627,8 +648,8 @@ class XMLAltoConverter(PDFConverter):
                 self._index_graphicalelement += 1
                 self.write('<GraphicalElement ID="PAG_%d_GE_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
                            (ltpage.pageid, self._index_graphicalelement,
-                            item.height, item.width,
-                            item.x0, ltpage.height - item.y0))
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y0)))
                 return
 
             def end_xmltag(xmltag):
@@ -639,8 +660,8 @@ class XMLAltoConverter(PDFConverter):
                 self._index_string += 1
                 self.write('<String ID="PAG_%d_ST_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" CONTENT="' %
                            (ltpage.pageid, self._index_string,
-                            height, width,
-                            x, y))
+                            self.scale(height), self.scale(width),
+                            self.scale(x), self.scale(y)))
                 self.write_text(content)
                 self.write('" />\n')
                 return
@@ -649,13 +670,16 @@ class XMLAltoConverter(PDFConverter):
                 self._index_space += 1
                 self.write('<SP ID="PAG_%d_SP_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
                            (ltpage.pageid, self._index_space,
-                            height, width,
-                            x, y))
+                            self.scale(height), self.scale(width),
+                            self.scale(x), self.scale(y)))
                 return
 
             def write_shape(item):
                 self.write('<Shape>\n')
-                self.write('<Polygon POINTS="%s" />\n' % item.get_pts())
+                points = ''
+                for p in item.pts:
+                    points += self.scale(p[0]) + ',' + self.scale(p[1]) + ','
+                self.write('<Polygon POINTS="%s" />\n' % points[:-1])
                 self.write('</Shape>\n')
                 return
 
