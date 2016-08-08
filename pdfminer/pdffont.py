@@ -442,7 +442,7 @@ class TrueTypeFont(object):
                         for c in xrange(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
             else:
-                assert 0
+                pass
         # create unicode map
         unicode_map = FileUnicodeMap()
         for (char, gid) in char2gid.iteritems():
