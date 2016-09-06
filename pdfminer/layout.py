@@ -4,6 +4,10 @@ from itertools import combinations
 from .utils import (INF, get_bound, uniq, fsplit, drange, bbox2str, matrix2str, apply_matrix_pt,
     trailiter)
 
+
+logger = logging.getLogger(__name__)
+
+
 class IndexAssigner:
 
     def __init__(self, index=0):
@@ -620,7 +624,7 @@ class LTLayoutContainer(LTContainer):
         if len(boxes) > 100:
             # Grouping this many boxes would take too long and it doesn't make much sense to do so
             # considering the type of grouping (nesting 2-sized subgroups) that is done here.
-            logging.warning("Too many boxes (%d) to group, skipping.", len(boxes))
+            logger.warning("Too many boxes (%d) to group, skipping.", len(boxes))
             return boxes
         # XXX this still takes O(n^2)  :(
         dists = []

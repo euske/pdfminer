@@ -28,6 +28,9 @@ from .encodingdb import name2unicode
 from .utils import choplist, nunpack
 
 
+logger = logging.getLogger(__name__)
+
+
 class CMapError(Exception): pass
 
 
@@ -52,7 +55,7 @@ class CMap:
         copy(self.code2cid, cmap.code2cid)
 
     def decode(self, code):
-        logging.debug('decode: %r, %r', self, code)
+        logger.debug('decode: %r, %r', self, code)
         if isinstance(code, str):
             code = code.encode('latin-1')
         d = self.code2cid
@@ -90,7 +93,7 @@ class IdentityCMap:
             code = code.encode('latin-1')
         if len(code) % 2 != 0:
             # Something's wrong, but we have to at least prevent a crash by removing the last char
-            logging.warning("The code %r has an uneven length, trimming last byte.", code)
+            logger.warning("The code %r has an uneven length, trimming last byte.", code)
             code = code[:-1]
         n = len(code)//2
         if n:
@@ -106,7 +109,7 @@ class UnicodeMap:
         self.cid2unichr = cid2unichr or {}
 
     def get_unichr(self, cid):
-        logging.debug('get_unichr: %r, %r', self, cid)
+        logger.debug('get_unichr: %r, %r', self, cid)
         return self.cid2unichr[cid]
 
     def dump(self, out=sys.stdout):
@@ -211,7 +214,7 @@ class CMapDB:
     @classmethod
     def _load_data(klass, name):
         filename = '%s.pickle.gz' % name
-        logging.debug('loading: %s', name)
+        logger.debug('loading: %s', name)
         default_path = os.environ.get('CMAP_PATH', '/usr/share/pdfminer/')
         for directory in (os.path.dirname(cmap.__file__), default_path):
             path = os.path.join(directory, filename)

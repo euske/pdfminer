@@ -12,6 +12,9 @@ from .utils import apply_matrix_pt, mult_matrix
 from .utils import htmlescape, bbox2str, create_bmp
 
 
+logger = logging.getLogger(__name__)
+
+
 class PDFLayoutAnalyzer(PDFTextDevice):
 
     def __init__(self, rsrcmgr, pageno=1, laparams=None):
@@ -97,7 +100,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         return item.adv
 
     def handle_undefined_char(self, font, cid):
-        logging.warning('undefined: %r, %r', font, cid)
+        logger.warning('undefined: %r, %r', font, cid)
         return '(cid:%d)' % cid
 
     def receive_layout(self, ltpage):
