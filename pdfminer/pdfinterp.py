@@ -16,6 +16,9 @@ from .utils import choplist
 from .utils import mult_matrix, MATRIX_IDENTITY
 
 
+logger = logging.getLogger(__name__)
+
+
 ##  Exceptions
 ##
 class PDFResourceError(PDFException): pass
@@ -133,7 +136,7 @@ class PDFResourceManager:
         if objid and objid in self._cached_fonts:
             font = self._cached_fonts[objid]
         else:
-            # logging.debug('get_font: create: objid=%r, spec=%r', objid, spec)
+            # logger.debug('get_font: create: objid=%r, spec=%r', objid, spec)
             if spec['Type'] is not LITERAL_FONT:
                 handle_error(PDFFontError, 'Type is not /Font')
             # Create a Font object.
@@ -266,7 +269,7 @@ class PDFPageInterpreter:
             else:
                 return PREDEFINED_COLORSPACE[name]
         for (k,v) in dict_value(resources).items():
-            # logging.debug('Resource: %r: %r', k,v)
+            # logger.debug('Resource: %r: %r', k,v)
             if k == 'Font':
                 for (fontid,spec) in dict_value(v).items():
                     objid = None
@@ -593,7 +596,7 @@ class PDFPageInterpreter:
         except TypeError:
             # Sometimes, 'obj' is a PSLiteral. I'm not sure why, but I'm guessing it's because it's
             # malformed or something. We can just ignore the thing.
-            logging.warning("Malformed inline image")
+            logger.warning("Malformed inline image")
 
     # invoke an XObject
     def do_Do(self, xobjid):
@@ -603,7 +606,7 @@ class PDFPageInterpreter:
         except KeyError:
             handle_error(PDFInterpreterError, 'Undefined xobject id: %r' % xobjid)
             return
-        logging.debug('Processing xobj: %r', xobj)
+        logger.debug('Processing xobj: %r', xobj)
         subtype = xobj.get('Subtype')
         if subtype is LITERAL_FORM and 'BBox' in xobj:
             interpreter = self.dup()
@@ -625,7 +628,7 @@ class PDFPageInterpreter:
             pass
 
     def process_page(self, page):
-        logging.debug('Processing page: %r', page)
+        logger.debug('Processing page: %r', page)
         (x0,y0,x1,y1) = page.mediabox
         if page.rotate == 90:
             ctm = (0,-1,1,0, -y0,x1)
@@ -643,7 +646,7 @@ class PDFPageInterpreter:
     #   Render the content streams.
     #   This method may be called recursively.
     def render_contents(self, resources, streams, ctm=MATRIX_IDENTITY):
-        logging.debug('render_contents: resources=%r, streams=%r, ctm=%r', resources, streams, ctm)
+        logger.debug('render_contents: resources=%r, streams=%r, ctm=%r', resources, streams, ctm)
         self.init_resources(resources)
         self.init_state(ctm)
         self.execute(list_value(streams))
@@ -667,11 +670,11 @@ class PDFPageInterpreter:
                     nargs = func.__code__.co_argcount-1
                     if nargs:
                         args = self.pop(nargs)
-                        # logging.debug('exec: %s %r', name, args)
+                        # logger.debug('exec: %s %r', name, args)
                         if len(args) == nargs:
                             func(*args)
                     else:
-                        # logging.debug('exec: %s', name)
+                        # logger.debug('exec: %s', name)
                         func()
                 else:
                     handle_error(PDFInterpreterError, 'Unknown operator: %r' % name)

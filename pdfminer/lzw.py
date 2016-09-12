@@ -1,6 +1,10 @@
 import io
 import logging
 
+
+logger = logging.getLogger(__name__)
+
+
 class CorruptDataError(Exception):
     pass
 
@@ -85,7 +89,7 @@ class LZWDecoder:
                 # just ignore corrupt data and stop yielding there
                 break
             yield x
-            logging.debug('nbits=%d, code=%d, output=%r, table=%r', self.nbits, code, x, self.table)
+            logger.debug('nbits=%d, code=%d, output=%r, table=%r', self.nbits, code, x, self.table)
 
 # lzwdecode
 def lzwdecode(data):
