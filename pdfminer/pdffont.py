@@ -111,7 +111,7 @@ class Type1FontHeaderParser(PSStackParser):
                 break
             try:
                 self._cid2unicode[cid] = name2unicode(name)
-            except KeyError:
+            except (KeyError, OverflowError):
                 pass
         return self._cid2unicode
 
