@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+from cStringIO import StringIO
 import struct
 import os
 import os.path
 from io import BytesIO
-from .pdftypes import LITERALS_DCT_DECODE
+from .jbig2 import JBIG2StreamReader, JBIG2StreamWriter
+from .pdftypes import LITERALS_DCT_DECODE, LITERALS_JBIG2_DECODE
 from .pdfcolor import LITERAL_DEVICE_GRAY
 from .pdfcolor import LITERAL_DEVICE_RGB
 from .pdfcolor import LITERAL_DEVICE_CMYK
@@ -71,8 +73,17 @@ class ImageWriter(object):
         stream = image.stream
         filters = stream.get_filters()
         (width, height) = image.srcsize
+
+        is_jbig2 = False
+        for name, params in filters:
+            if name in LITERALS_JBIG2_DECODE:
+                is_jbig2 = True
+                break
+
         if len(filters) == 1 and filters[0][0] in LITERALS_DCT_DECODE:
             ext = '.jpg'
+        elif is_jbig2:
+            ext = '.jb2'
         elif (image.bits == 1 or
               image.bits == 8 and image.colorspace in (LITERAL_DEVICE_RGB, LITERAL_DEVICE_GRAY)):
             ext = '.%dx%d.bmp' % (width, height)
@@ -80,6 +91,12 @@ class ImageWriter(object):
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
         name = image.name+ext
         path = os.path.join(self.outdir, name)
+        img_index = 0
+        while os.path.exists(path):
+            name = '%s.%d%s' % (image.name, img_index, ext)
+            path = os.path.join(self.outdir, name)
+            img_index += 1
+
         fp = file(path, 'wb')
         if ext == '.jpg':
             raw_data = stream.get_rawdata()
@@ -93,6 +110,15 @@ class ImageWriter(object):
                 i.save(fp, 'JPEG')
             else:
                 fp.write(raw_data)
+        elif is_jbig2:
+            input_stream = StringIO()
+            input_stream.write(stream.get_data())
+            input_stream.seek(0)
+            reader = JBIG2StreamReader(input_stream)
+            segments = reader.get_segments()
+
+            writer = JBIG2StreamWriter(fp)
+            writer.write_file(segments)
         elif image.bits == 1:
             bmp = BMPWriter(fp, 1, width, height)
             data = stream.get_data()
