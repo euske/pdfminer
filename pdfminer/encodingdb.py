@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import re
+import struct
 from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
@@ -17,7 +18,14 @@ def name2unicode(name):
     m = STRIP_NAME.search(name)
     if not m:
         raise KeyError(name)
-    return unichr(int(m.group(0)))
+    return unichar(int(m.group(0)))
+
+
+def unichar(i):
+    try:
+        return unichr(i)
+    except ValueError:
+        return struct.pack('i', i).decode('utf-32')
 
 
 ##  EncodingDB
