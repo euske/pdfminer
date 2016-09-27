@@ -5,6 +5,7 @@ try:
 except ImportError:
     import pickle as pickle
 
+is_py27 = (sys.version_info[0] == 2 and sys.version_info[1] == 7)
 
 ##  CMapConverter
 ##
@@ -183,16 +184,28 @@ def main(argv):
         fname = '%s.pickle.gz' % enc
         path = os.path.join(outdir, fname)
         print ('writing: %r...' % path)
-        fp = gzip.open(path, 'wb')
-        converter.dump_cmap(fp, enc)
-        fp.close()
+        with open(path, 'wb') as fp:
+            # with statement support for GzipFile is available only from Python
+            # 2.7
+            args = ['', 'wb', 9, fp]
+            if is_py27:
+                args.append(0.)
+            fgz = gzip.GzipFile(*args)
+            converter.dump_cmap(fgz, enc)
+            fgz.close()
 
     fname = 'to-unicode-%s.pickle.gz' % regname
     path = os.path.join(outdir, fname)
     print ('writing: %r...' % path)
-    fp = gzip.open(path, 'wb')
-    converter.dump_unicodemap(fp)
-    fp.close()
+    with open(path, 'wb') as fp:
+        # with statement support for GzipFile is available only from Python
+        # 2.7
+        args = ['', 'wb', 9, fp]
+        if is_py27:
+            args.append(0.)
+        fgz = gzip.GzipFile(*args)
+        converter.dump_unicodemap(fgz)
+        fgz.close()
     return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
