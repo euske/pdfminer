@@ -282,6 +282,24 @@ This will reduce the memory consumption but also slows down the process.
 <dd> Forces to perform layout analysis for all the text strings, 
 including text contained in figures.
 <p>
+<dt> <code>-B <em>bidi_mode</em></code>
+<dd> Specifies how to handle bidirectional text.
+<ul>
+<li> <code>-1</code> : disable the bidirectional mode. (Default)
+<li> <code>0</code> : set the line direction to left-to-right (to be exact:
+     set the initial text level to 0).
+<li> <code>1</code> : set the line direction to right-to-left (to be exact:
+     set the initial text level to 1).
+<li> <code>253</code> : don't apply the inverse Unicode bidirectional algorithm.
+<li> <code>254</code> : try to auto detect the line direction, fall back is left-to-right.
+<li> <code>255</code> : try to auto detect the line direction, fall back is right-to-left.
+<li> <code>add 256</code> : reverse vertical lines (text runs bottom up).
+<li> <code>add 512</code> : reverse horizontal lines (text runs right to left).
+</ul>
+<p>
+<dt> <code>-D</code>
+<dd> Insert Unicode implicit directional marks (LRM, RLM) into the text, if bidi_mode is enabled.
+<p>
 <dt> <code>-V</code> 
 <dd> Allows vertical writing detection.
 <p>
@@ -375,6 +393,7 @@ no stream header is displayed for the ease of saving it to a file.
 
 <h2><a name="changes">Changes</a></h2>
 <ul>
+<li> 2014/06/26: Bidirectional mode.
 <li> 2014/03/28: Further bugfixes.
 <li> 2014/03/24: Bugfixes and improvements for fauly PDFs.<br>
 API changes:

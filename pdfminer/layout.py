@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import unicodedata
 from .utils import INF
 from .utils import Plane
 from .utils import get_bound
@@ -8,6 +9,7 @@ from .utils import fsplit
 from .utils import bbox2str
 from .utils import matrix2str
 from .utils import apply_matrix_pt
+from .bidi import reorder_text_line
 
 
 ##  IndexAssigner
@@ -39,7 +41,9 @@ class LAParams(object):
                  word_margin=0.1,
                  boxes_flow=0.5,
                  detect_vertical=False,
-                 all_texts=False):
+                 all_texts=False,
+                 bidi_mode=-1,
+                 add_directional_marks=False):
         self.line_overlap = line_overlap
         self.char_margin = char_margin
         self.line_margin = line_margin
@@ -47,6 +51,8 @@ class LAParams(object):
         self.boxes_flow = boxes_flow
         self.detect_vertical = detect_vertical
         self.all_texts = all_texts
+        self.bidi_mode = bidi_mode
+        self.add_directional_marks = add_directional_marks
         return
 
     def __repr__(self):
@@ -340,6 +346,8 @@ class LTTextContainer(LTExpandableContainer, LTText):
 ##
 class LTTextLine(LTTextContainer):
 
+    isVertical = False
+
     def __init__(self, word_margin):
         LTTextContainer.__init__(self)
         self.word_margin = word_margin
@@ -351,11 +359,69 @@ class LTTextLine(LTTextContainer):
                  self.get_text()))
 
     def analyze(self, laparams):
+        if laparams.bidi_mode != -1:
+            if self.word_margin == 0:
+                # insert spaces between words. It didn't happen yet
+                gaps = list(self.find_gaps(laparams.word_margin))
+                for gap in reversed(gaps):
+                    for obj in self._objs[gap - 1:gap + 1]:
+                        text = obj.get_text()
+                        if text and unicodedata.bidirectional(text[0]) == 'WS':
+                            break  # space already present
+                    else:
+                        # insert space
+                        self._objs.insert(gap, LTAnno(u' '))
+
+            # We know the visual order of the glyphs and need the logical
+            # text, that yields this glyph sequence, if feed into the
+            # "Unicode Standard Annex #9 Unicode Bidirectional Algorithm".
+            #
+            # Unfortunately such an algorithm is lange and complicated,
+            # especially when it comes to Arabic glyph shaping and ligatures.
+            # Therefore it is in an separate module.
+            def set_text(obj, text):
+                obj._text = text
+
+            self._objs = reorder_text_line(self._objs, laparams.bidi_mode,
+                                           laparams.add_directional_marks,
+                                           LTAnno, set_text)
+
         LTTextContainer.analyze(self, laparams)
         LTContainer.add(self, LTAnno('\n'))
         return
 
     def find_neighbors(self, plane, ratio):
+        raise NotImplementedError
+
+    def sort_visual_and_split(self, laparams):
+        reverse = laparams.bidi_mode & (0x100 if self.isVertical else 0x200)
+        self.sort_visual()
+
+        gap0 = 0
+        for gap in list(self.find_gaps(laparams.char_margin)):
+            line = self.__class__(self.word_margin)
+            objs = self._objs[gap0:gap]
+            if reverse:
+                objs.reverse()
+            for obj in objs:
+                LTExpandableContainer.add(line, obj)
+            gap0 = gap
+            yield line
+        if gap0 or reverse:
+            line = self.__class__(self.word_margin)
+            objs = self._objs[gap0:]
+            if reverse:
+                objs.reverse()
+            for obj in objs:
+                LTExpandableContainer.add(line, obj)
+            yield line
+        else:
+            yield self
+
+    def find_gaps(self, char_margin):
+        raise NotImplementedError
+
+    def sort_visual(self):
         raise NotImplementedError
 
 
@@ -384,8 +450,26 @@ class LTTextLineHorizontal(LTTextLine):
                     (abs(obj.x0-self.x0) < d or
                      abs(obj.x1-self.x1) < d))]
 
+    def sort_visual(self):
+        def sort_key(obj):
+            return obj.x0 + obj.x1
+        self._objs = csort(self._objs, key=sort_key)
+
+    def find_gaps(self, char_margin):
+        if len(self._objs) < 2:
+            return
+
+        iterator = iter(self._objs)
+        obj0 = iterator.next()
+        for i, obj1 in enumerate(iterator, 1):
+            if obj0.hdistance(obj1) >= max(obj0.width, obj1.width) * char_margin:
+                yield i
+            obj0 = obj1
+
 
 class LTTextLineVertical(LTTextLine):
+
+    isVertical = True
 
     def __init__(self, word_margin):
         LTTextLine.__init__(self, word_margin)
@@ -409,6 +493,22 @@ class LTTextLineVertical(LTTextLine):
                     abs(obj.width-self.width) < d and
                     (abs(obj.y0-self.y0) < d or
                      abs(obj.y1-self.y1) < d))]
+
+    def sort_visual(self):
+        def sort_key(obj):
+            return -(obj.y0 + obj.y1)
+        self._objs = csort(self._objs, key=sort_key)
+
+    def find_gaps(self, char_margin):
+        if len(self._objs) < 2:
+            return
+
+        iterator = iter(self._objs)
+        obj0 = iterator.next()
+        for i, obj1 in enumerate(iterator, 1):
+            if obj0.vdistance(obj1) >= max(obj0.height, obj1.height) * char_margin:
+                yield i
+            obj0 = obj1
 
 
 ##  LTTextBox
@@ -494,6 +594,25 @@ class LTLayoutContainer(LTContainer):
 
     # group_objects: group text object to textlines.
     def group_objects(self, laparams, objs):
+        line_overlap = laparams.line_overlap
+        detect_vertical = laparams.detect_vertical
+
+        if laparams.bidi_mode != -1:
+            # disable early line and word splitting
+            char_margin = float("inf")
+            word_margin = 0.0
+
+            # sort the original line, then split and eventually reverse it
+            def accomplish_lines(line):
+                for l in line.sort_visual_and_split(laparams):
+                    yield l
+        else:
+            char_margin = laparams.char_margin
+            word_margin = laparams.word_margin
+
+            def accomplish_lines(line):
+                yield line
+
         obj0 = None
         line = None
         for obj1 in objs:
@@ -510,11 +629,11 @@ class LTLayoutContainer(LTContainer):
                 #        (char_margin)
                 halign = (obj0.is_compatible(obj1) and
                           obj0.is_voverlap(obj1) and
-                          (min(obj0.height, obj1.height) * laparams.line_overlap <
+                          (min(obj0.height, obj1.height) * line_overlap <
                            obj0.voverlap(obj1)) and
                           (obj0.hdistance(obj1) <
-                           max(obj0.width, obj1.width) * laparams.char_margin))
-                
+                           max(obj0.width, obj1.width) * char_margin))
+
                 # valign: obj0 and obj1 is vertically aligned.
                 #
                 #   +------+
@@ -529,39 +648,42 @@ class LTLayoutContainer(LTContainer):
                 #
                 #     |<-->|
                 #   (line_overlap)
-                valign = (laparams.detect_vertical and
+                valign = (detect_vertical and
                           obj0.is_compatible(obj1) and
                           obj0.is_hoverlap(obj1) and
-                          (min(obj0.width, obj1.width) * laparams.line_overlap <
+                          (min(obj0.width, obj1.width) * line_overlap <
                            obj0.hoverlap(obj1)) and
                           (obj0.vdistance(obj1) <
-                           max(obj0.height, obj1.height) * laparams.char_margin))
-                
+                           max(obj0.height, obj1.height) * char_margin))
+
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
                     (valign and isinstance(line, LTTextLineVertical))):
                     line.add(obj1)
                 elif line is not None:
-                    yield line
+                    for line in accomplish_lines(line):
+                        yield line
                     line = None
                 else:
                     if valign and not halign:
-                        line = LTTextLineVertical(laparams.word_margin)
+                        line = LTTextLineVertical(word_margin)
                         line.add(obj0)
                         line.add(obj1)
                     elif halign and not valign:
-                        line = LTTextLineHorizontal(laparams.word_margin)
+                        line = LTTextLineHorizontal(word_margin)
                         line.add(obj0)
                         line.add(obj1)
                     else:
-                        line = LTTextLineHorizontal(laparams.word_margin)
+                        line = LTTextLineHorizontal(word_margin)
                         line.add(obj0)
-                        yield line
+                        for line in accomplish_lines(line):
+                            yield line
                         line = None
             obj0 = obj1
         if line is None:
-            line = LTTextLineHorizontal(laparams.word_margin)
+            line = LTTextLineHorizontal(word_margin)
             line.add(obj0)
-        yield line
+        for line in accomplish_lines(line):
+            yield line
         return
 
     # group_textlines: group neighboring lines to textboxes.

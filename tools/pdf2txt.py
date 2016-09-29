@@ -15,13 +15,13 @@ def main(argv):
     import getopt
     def usage():
         print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output]'
-               ' [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
+               ' [-C] [-n] [-A] [-B bidi_mode] [-D] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
                ' [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-R rotation] [-S]'
                ' [-t text|html|xml|tag] [-c codec] [-s scale]'
                ' file ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dp:m:P:o:CnAVM:L:W:F:Y:O:R:St:c:s:')
+        (opts, args) = getopt.getopt(argv[1:], 'dp:m:P:o:CnAB:DVM:L:W:F:Y:O:R:St:c:s:')
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
@@ -53,6 +53,8 @@ def main(argv):
         elif k == '-C': caching = False
         elif k == '-n': laparams = None
         elif k == '-A': laparams.all_texts = True
+        elif k == '-B': laparams.bidi_mode = int(v)
+        elif k == '-D': laparams.add_directional_marks = True
         elif k == '-V': laparams.detect_vertical = True
         elif k == '-M': laparams.char_margin = float(v)
         elif k == '-L': laparams.line_margin = float(v)
