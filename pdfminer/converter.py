@@ -500,3 +500,334 @@ class XMLConverter(PDFConverter):
     def close(self):
         self.write_footer()
         return
+
+
+##  XMLAltoConverter
+##
+## TODO Manage hyphenations (in a second step with all pages).
+##
+class XMLAltoConverter(PDFConverter):
+
+    CONTROL = re.compile(u'[\x00-\x08\x0b-\x0c\x0e-\x1f]')
+
+    def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None,
+                 resolution=72.0, measurement_unit='pixel', decimal=0,
+                 imagewriter=None, stripcontrol=False):
+        PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno, laparams=laparams)
+        if measurement_unit != 'mm10' and measurement_unit != 'inch1200' :
+            measurement_unit = 'pixel'
+            decimal = 0
+        if decimal:
+            self.decimal_format = '%.' + str(decimal) + 'f'
+        self.resolution = resolution
+        self.measurement_unit = measurement_unit
+        self.decimal = decimal
+        self.imagewriter = imagewriter
+        self.stripcontrol = stripcontrol
+        self.write_header()
+        return
+
+    def write(self, text):
+        if self.codec:
+            text = text.encode(self.codec)
+        self.outfp.write(text)
+        return
+
+    def write_header(self):
+        if self.codec:
+            self.write('<?xml version="1.0" encoding="%s" ?>\n' % self.codec)
+        else:
+            self.write('<?xml version="1.0" ?>\n')
+        # TODO Add ID="alto.0000004" from filename without extension.
+        self.write('<alto xmlns="http://www.loc.gov/standards/alto/ns-v3#" xmlns:xlink="http://www.w3.org/TR/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v3# https://www.loc.gov/standards/alto/v3/alto.xsd" SCHEMAVERSION="3.1">\n')
+        self.div_description()
+        # self.div_styles()
+        # self.div_tags()
+        self.write('<Layout>\n')
+        return
+
+    def write_footer(self):
+        self.write('</Layout>\n')
+        self.write('</alto>\n')
+        return
+
+    def write_text(self, text):
+        if self.stripcontrol:
+            text = self.CONTROL.sub(u'', text)
+        self.write(text)
+        return
+
+    def div_description(self):
+        self.write('<Description>\n')
+        self.write('<MeasurementUnit>%s</MeasurementUnit>\n' % self.measurement_unit)
+        # TODO Get filepath
+        # self.write('<sourceImageInformation>\n')
+        # self.write('<fileName>%s</fileName>\n' % ('filename.pdf'))
+        # self.write('</sourceImageInformation>\n')
+        # TODO Add more description if available in source.
+        self.write('</Description>\n')
+        return
+
+    def div_styles(self):
+        # TODO List of fonts for texts and paragraphs.
+        # self.write('<Styles>\n')
+        # self.write('</Styles>\n')
+        return
+
+    def div_tags(self):
+        # TODO List of tags.
+        # self.write('<Tags>\n')
+        # self.write('</Tags>\n')
+        return
+
+    def scale(self, value):
+        if self.measurement_unit == 'mm10':
+            result = value * 254.0 / self.resolution
+        elif self.measurement_unit == 'inch1200':
+            result = value * 1200.0 / self.resolution
+        else:
+            result = value * self.resolution / 72.0
+        if self.decimal:
+            result = self.decimal_format % round(result, self.decimal)
+        else:
+            result = str(int(round(result)))
+        return result
+
+    def receive_layout(self, ltpage):
+        def render(item):
+            def begin_page(item):
+                self.write('<Page ID="PAG_%d" HEIGHT="%s" WIDTH="%s" PHYSICAL_IMG_NR="%d">\n' %
+                           (item.pageid,
+                            self.scale(item.height), self.scale(item.width),
+                            item.pageid))
+                return
+
+            def begin_printspace(item):
+                self.write('<PrintSpace ID="PAG_%d_PrintSpace" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
+                           (item.pageid,
+                            self.scale(item.height), self.scale(item.width),
+                            0, 0))
+                return
+
+            def begin_composedblock(item):
+                self._index_composedblock += 1
+                self.write('<ComposedBlock ID="PAG_%d_CB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
+                           (ltpage.pageid, self._index_composedblock,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
+                return
+
+            def begin_textblock(item):
+                self._index_textblock += 1
+                self.write('<TextBlock ID="PAG_%d_TB_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
+                           (ltpage.pageid, self._index_textblock,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
+                return
+
+            def begin_textline(item):
+                self._index_textline += 1
+                self.write('<TextLine ID="PAG_%d_TL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s">\n' %
+                           (ltpage.pageid, self._index_textline,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
+                return
+
+            def write_illustration(item, name = ''):
+                self._index_illustration += 1
+                if name:
+                    name = 'FILEID=%s ' % enc(name, None)
+                self.write('<Illustration ID="PAG_%d_IL_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" %s/>\n' %
+                           (ltpage.pageid, self._index_illustration,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1),
+                            name))
+                return
+
+            def write_graphicalelement(item):
+                self._index_graphicalelement += 1
+                self.write('<GraphicalElement ID="PAG_%d_GE_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
+                           (ltpage.pageid, self._index_graphicalelement,
+                            self.scale(item.height), self.scale(item.width),
+                            self.scale(item.x0), self.scale(ltpage.height - item.y1)))
+                return
+
+            def end_xmltag(xmltag):
+                self.write('</' + xmltag + '>\n')
+                return
+
+            def write_string(width, height, x, y, content):
+                self._index_string += 1
+                self.write('<String ID="PAG_%d_ST_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" CONTENT="' %
+                           (ltpage.pageid, self._index_string,
+                            self.scale(height), self.scale(width),
+                            self.scale(x), self.scale(ltpage.height - y)))
+                self.write_text(content)
+                self.write('" />\n')
+                return
+
+            def write_space(width, height, x, y):
+                self._index_space += 1
+                self.write('<SP ID="PAG_%d_SP_%d" HEIGHT="%s" WIDTH="%s" HPOS="%s" VPOS="%s" />\n' %
+                           (ltpage.pageid, self._index_space,
+                            self.scale(height), self.scale(width),
+                            self.scale(x), self.scale(ltpage.height - y)))
+                return
+
+            def write_shape(item):
+                self.write('<Shape>\n')
+                points = ''
+                for p in item.pts:
+                    points += self.scale(p[0]) + ',' + self.scale(p[1]) + ','
+                self.write('<Polygon POINTS="%s" />\n' % points[:-1])
+                self.write('</Shape>\n')
+                return
+
+            if isinstance(item, LTPage):
+                self._index_composedblock = 0
+                self._index_textblock = 0
+                self._index_textline = 0
+                self._index_string = 0
+                self._index_space = 0
+                self._index_illustration = 0
+                self._index_graphicalelement = 0
+                self._textblock_vertical = False
+                # TODO Add the printed page number (PRINTED_IMG_NR), etc.
+                begin_page(item)
+                # TODO Identify margins and print space.
+                # PrintSpace is required when there is no margin.
+                # <TopMargin/>
+                # <LeftMargin/>
+                # <RightMargin/>
+                # <BottomMargin/>
+                begin_printspace(item)
+                # TODO Add an option to create composed blocks.
+                #if (item.groups is not None) and layoutmode == medium:
+                #    for group in item.groups:
+                #        render(group)
+                #else:
+                for child in item:
+                    render(child)
+                end_xmltag('PrintSpace')
+                end_xmltag('Page')
+            elif isinstance(item, LTTextGroup):
+                begin_composedblock(item)
+                for child in item:
+                    render(child)
+                end_xmltag('ComposedBlock')
+            elif isinstance(item, LTTextBox):
+                # NOTE With text with non-standard spaces, the text boxes and
+                # the text lines may be wider than the width for words, because
+                # words contains the excedent space. So, the size of the text
+                # box and the text lines should be computed without the last
+                # space of each word. This is not done currently, because these
+                # text are rare.
+                self._textblock_vertical = isinstance(item, LTTextBoxVertical)
+                # The textbox contains the next space, except the last on the line.
+                begin_textblock(item)
+                for child in item:
+                    render(child)
+                end_xmltag('TextBlock')
+            elif isinstance(item, LTTextLine):
+                begin_textline(item)
+                # A line contain characters, but only words and spaces are
+                # managed in Alto, so the words are rebuilt.
+                words = []
+                word = []
+                prev_character = ''
+                for child in item:
+                    character = child.get_text()
+                    if isinstance(child, LTChar):
+                        if word:
+                            if character != ' ':
+                                if prev_character == ' ':
+                                    words.append(word)
+                                    word = []
+                            else:
+                                if prev_character != ' ':
+                                    words.append(word)
+                                    word = []
+                        word.append(child)
+                    elif word and prev_character != ' ':
+                        words.append(word)
+                        word = []
+                    prev_character = character
+                # Print each string (word or space).
+                prev_word = False
+                for word in words:
+                    x0, x1, y0, y1 = [], [], [], []
+                    content = ''
+                    for character in word:
+                        x0.append(character.x0)
+                        x1.append(character.x1)
+                        y0.append(character.y0)
+                        y1.append(character.y1)
+                        content += character.get_text()
+                    if content[0] != ' ':
+                        # The required space between two words may be missing
+                        # according to the parameter "word margin", so it may be
+                        # added.
+                        if prev_word:
+                            if self._textblock_vertical:
+                                write_space(word_y0 - max(y1), word_width,
+                                            word_x0, word_y0)
+                            else:
+                                write_space(word_height, min(x0) - word_x1,
+                                            word_x1, word_y1)
+                        # Remember and write the string for next missing space.
+                        word_x0 = min(x0)
+                        word_x1 = max(x1)
+                        word_width = word_x1 - word_x0
+                        word_y0 = min(y0)
+                        word_y1 = max(y1)
+                        word_height = word_y1 - word_y0
+                        prev_word = True
+                        write_string(word_width, word_height,
+                                     word_x0, word_y1,
+                                     content)
+                    else:
+                        word_x0 = min(x0)
+                        word_x1 = max(x1)
+                        word_width = word_x1 - word_x0
+                        word_y0 = min(y0)
+                        word_y1 = max(y1)
+                        word_height = word_y1 - word_y0
+                        prev_word = False
+                        write_space(word_width, word_height,
+                                    word_x0, word_y1)
+                end_xmltag('TextLine')
+            elif isinstance(item, LTFigure):
+                for child in item:
+                    if isinstance(child, LTImage):
+                        render(child)
+                    else:
+                        begin_composedblock(item)
+                        render(child)
+                        end_xmltag('ComposedBlock')
+            elif isinstance(item, LTImage):
+                # The image should not be the image layer of the pdf.
+                if not(abs(self.cur_item.x0 - item.x0) < 1
+                    and abs(self.cur_item.y0 - item.y0) < 1
+                    and abs(self.cur_item.x1 - item.x1) < 1
+                    and abs(self.cur_item.y1 - item.y1) < 1
+                    ):
+                    if self.imagewriter is not None:
+                        name = self.imagewriter.export_image(item)
+                    else:
+                        name = ''
+                    write_illustration(item, name)
+            elif isinstance(item, LTLine):
+                write_graphicalelement(item)
+            elif isinstance(item, LTRect):
+                write_graphicalelement(item)
+            elif isinstance(item, LTCurve):
+                write_shape(item)
+            else:
+                assert 0, item
+            return
+        render(ltpage)
+        return
+
+    def close(self):
+        self.write_footer()
+        return

@@ -52,7 +52,7 @@ and analyzing text data. PDFMiner allows one to obtain
 the exact location of text in a page, as well as 
 other information such as fonts or lines.
 It includes a PDF converter that can transform PDF files
-into other text formats (such as HTML). It has an extensible
+into other text formats (such as HTML and XML ALTO). It has an extensible
 PDF parser that can be used for other purposes than text analysis.
 
 <p>
@@ -68,6 +68,7 @@ PDF parser that can be used for other purposes than text analysis.
 <li> Outline (TOC) extraction.
 <li> Tagged contents extraction.
 <li> Reconstruct the original layout by grouping text chunks.
+<li> <a href="https://www.loc.gov/standards/alto">XML ALTO</a> output.
 </ul>
 <p>
 PDFMiner is about 20 times slower than 
@@ -212,6 +213,7 @@ By default, it extracts text from all the pages.
 <li> <code>text</code> : TEXT format. (Default)
 <li> <code>html</code> : HTML format. Not recommended for extraction purposes because the markup is messy.
 <li> <code>xml</code> : XML format. Provides the most information.
+<li> <code>alto</code> : XML ALTO format. International standard for long-term archiving.
 <li> <code>tag</code> : "Tagged PDF" format. A tagged PDF has its own contents annotated with
 HTML-like tags. pdf2txt tries to extract its content streams rather than inferring its text locations.
 Tags used here are defined in the PDF specification (See &sect;10.7 "<em>Tagged PDF</em>").
