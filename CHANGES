@@ -1,6 +1,11 @@
 Changes
 =======
 
+Version 1.3.1 -- 2016/11/05
+---------------------------
+
+* Replaced root loggers with module-wide loggers. This allows user to disable the log messages from pdfminer3k.
+
 Version 1.3.0 -- 2012/07/20
 ---------------------------
 

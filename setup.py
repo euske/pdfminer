@@ -22,9 +22,9 @@ setup(
     license='MIT/X',
     author='Yusuke Shinyama',
     author_email='yusuke at cs dot nyu dot edu',
-    maintainer='Virgil Dupras',
-    maintainer_email='hsoft@hardcoded.net',
-    url='http://bitbucket.org/hsoft/pdfminer3k',
+    maintainer='Jaepil Jeong, Virgil Dupras',
+    maintainer_email='jaepil@kaist.ac.kr, hsoft@hardcoded.net',
+    url='https://github.com/jaepil/pdfminer3k',
     install_requires=[
         'pytest>=2.0',
         'ply>=3.4',
@@ -48,6 +48,6 @@ setup(
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: MIT License',
-    'Topic :: Text Processing',
-    ],
+    'Topic :: Text Processing'
+    ]
 )
