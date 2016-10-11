@@ -229,7 +229,7 @@ def main(argv):
         print ('usage: %s [-d] [-a] [-p pageid] [-P password] [-r|-b|-t] [-T] [-E directory] [-i objid] file ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dap:P:rbtTE:i:')
+        (opts, args) = getopt.getopt(argv[1:], 'dap:P:rbtTE:i:o:')
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
