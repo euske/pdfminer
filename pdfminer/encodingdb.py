@@ -5,7 +5,7 @@ from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
 
 
-STRIP_NAME = re.compile(r'[0-9]+')
+STRIP_NAME = re.compile(r'[0-9A-F]{4}$')
 
 
 ##  name2unicode
@@ -17,7 +17,7 @@ def name2unicode(name):
     m = STRIP_NAME.search(name)
     if not m:
         raise KeyError(name)
-    return unichr(int(m.group(0)))
+    return unichr(int(m.group(0),16))
 
 
 ##  EncodingDB
