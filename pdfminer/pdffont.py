@@ -442,7 +442,7 @@ class TrueTypeFont(object):
                         for c in xrange(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
             else:
-                assert 0
+                pass
         # create unicode map
         unicode_map = FileUnicodeMap()
         for (char, gid) in char2gid.iteritems():
@@ -639,7 +639,8 @@ class PDFCIDFont(PDFFont):
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
         self.cidcoding = '%s-%s' % (self.cidsysteminfo.get('Registry', 'unknown'),
-                                    self.cidsysteminfo.get('Ordering', 'unknown'))
+                                    self.cidsysteminfo.get(
+                                        'Ordering', 'unknown').replace('\x00', ''))
         try:
             name = literal_name(spec['Encoding'])
         except KeyError:
