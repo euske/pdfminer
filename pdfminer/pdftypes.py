@@ -110,7 +110,7 @@ def decipher_all(decipher, objid, genno, x):
     return x
 
 
-# Type cheking
+# Type checking
 def int_value(x):
     x = resolve1(x)
     if not isinstance(x, int):
@@ -224,7 +224,10 @@ class PDFStream(PDFObject):
         if not isinstance(filters, list):
             filters = [filters]
         if not isinstance(params, list):
-            params = [params]
+            # Make sure the parameters list is the same as filters.
+            params = [params]*len(filters)
+        if STRICT and len(params) != len(filters):
+            raise PDFException("Parameters len filter mismatch")
         return zip(filters, params)
 
     def decode(self):
