@@ -1,6 +1,8 @@
 PDFMiner
 ========
 
+*This is a custom version of PDFMiner that extracts color information for text alongside the bbox, font, and size info.
+
 [![Build Status](https://travis-ci.org/euske/pdfminer.svg?branch=master)](https://travis-ci.org/euske/pdfminer)
 
 PDFMiner is a tool for extracting information from PDF documents.
