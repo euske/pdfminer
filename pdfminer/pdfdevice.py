@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-from .utils import mult_matrix
-from .utils import translate_matrix
-from .utils import enc
-from .utils import bbox2str
-from .utils import isnumber
-from .pdffont import PDFUnicodeNotDefined
+from utils import mult_matrix, translate_matrix
+from utils import enc, bbox2str, isnumber
+from pdffont import PDFUnicodeNotDefined
 
 
 ##  PDFDevice
 ##
 class PDFDevice(object):
+
+    debug = 0
 
     def __init__(self, rsrcmgr):
         self.rsrcmgr = rsrcmgr
@@ -53,7 +52,7 @@ class PDFDevice(object):
     def render_image(self, name, stream):
         return
 
-    def render_string(self, textstate, seq):
+    def render_string(self, textstate, seq, scs):
         return
 
 
@@ -61,7 +60,7 @@ class PDFDevice(object):
 ##
 class PDFTextDevice(PDFDevice):
 
-    def render_string(self, textstate, seq):
+    def render_string(self, textstate, seq, ncs, nc):
         matrix = mult_matrix(textstate.matrix, self.ctm)
         font = textstate.font
         fontsize = textstate.fontsize
@@ -75,16 +74,15 @@ class PDFTextDevice(PDFDevice):
         if font.is_vertical():
             textstate.linematrix = self.render_string_vertical(
                 seq, matrix, textstate.linematrix, font, fontsize,
-                scaling, charspace, wordspace, rise, dxscale)
+                scaling, charspace, wordspace, rise, dxscale, ncs, nc)
         else:
             textstate.linematrix = self.render_string_horizontal(
                 seq, matrix, textstate.linematrix, font, fontsize,
-                scaling, charspace, wordspace, rise, dxscale)
+                scaling, charspace, wordspace, rise, dxscale, ncs, nc)
         return
 
-    def render_string_horizontal(self, seq, matrix, pos,
-                                 font, fontsize, scaling, charspace, wordspace, rise, dxscale):
-        (x, y) = pos
+    def render_string_horizontal(self, seq, matrix, (x, y),
+                                 font, fontsize, scaling, charspace, wordspace, rise, dxscale, ncs, nc):
         needcharspace = False
         for obj in seq:
             if isnumber(obj):
@@ -95,15 +93,14 @@ class PDFTextDevice(PDFDevice):
                     if needcharspace:
                         x += charspace
                     x += self.render_char(translate_matrix(matrix, (x, y)),
-                                          font, fontsize, scaling, rise, cid)
+                                          font, fontsize, scaling, rise, cid, ncs, nc)
                     if cid == 32 and wordspace:
                         x += wordspace
                     needcharspace = True
         return (x, y)
 
-    def render_string_vertical(self, seq, matrix, pos,
-                               font, fontsize, scaling, charspace, wordspace, rise, dxscale):
-        (x, y) = pos
+    def render_string_vertical(self, seq, matrix, (x, y),
+                               font, fontsize, scaling, charspace, wordspace, rise, dxscale, ncs, nc):
         needcharspace = False
         for obj in seq:
             if isnumber(obj):
@@ -114,13 +111,13 @@ class PDFTextDevice(PDFDevice):
                     if needcharspace:
                         y += charspace
                     y += self.render_char(translate_matrix(matrix, (x, y)),
-                                          font, fontsize, scaling, rise, cid)
+                                          font, fontsize, scaling, rise, cid, ncs, nc)
                     if cid == 32 and wordspace:
                         y += wordspace
                     needcharspace = True
         return (x, y)
 
-    def render_char(self, matrix, font, fontsize, scaling, rise, cid):
+    def render_char(self, matrix, font, fontsize, scaling, rise, cid, ncs, nc):
         return 0
 
 
@@ -128,10 +125,11 @@ class PDFTextDevice(PDFDevice):
 ##
 class TagExtractor(PDFDevice):
 
-    def __init__(self, rsrcmgr, outfp, codec='utf-8'):
+    def __init__(self, rsrcmgr, outfp, codec='utf-8', debug=0):
         PDFDevice.__init__(self, rsrcmgr)
         self.outfp = outfp
         self.codec = codec
+        self.debug = debug
         self.pageno = 0
         self._stack = []
         return

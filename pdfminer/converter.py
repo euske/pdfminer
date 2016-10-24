@@ -1,25 +1,12 @@
 #!/usr/bin/env python
-import logging
-import re
-from .pdfdevice import PDFTextDevice
-from .pdffont import PDFUnicodeNotDefined
-from .layout import LTContainer
-from .layout import LTPage
-from .layout import LTText
-from .layout import LTLine
-from .layout import LTRect
-from .layout import LTCurve
-from .layout import LTFigure
-from .layout import LTImage
-from .layout import LTChar
-from .layout import LTTextLine
-from .layout import LTTextBox
-from .layout import LTTextBoxVertical
-from .layout import LTTextGroup
-from .utils import apply_matrix_pt
-from .utils import mult_matrix
-from .utils import enc
-from .utils import bbox2str
+import sys
+from pdfdevice import PDFTextDevice
+from pdffont import PDFUnicodeNotDefined
+from layout import LTContainer, LTPage, LTText, LTLine, LTRect, LTCurve
+from layout import LTFigure, LTImage, LTChar, LTTextLine
+from layout import LTTextBox, LTTextBoxVertical, LTTextGroup
+from utils import apply_matrix_pt, mult_matrix
+from utils import enc, bbox2str
 
 
 ##  PDFLayoutAnalyzer
@@ -103,7 +90,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         self.cur_item.add(LTCurve(gstate.linewidth, pts))
         return
 
-    def render_char(self, matrix, font, fontsize, scaling, rise, cid):
+    def render_char(self, matrix, font, fontsize, scaling, rise, cid, ncs, nc):
         try:
             text = font.to_unichr(cid)
             assert isinstance(text, unicode), text
@@ -111,12 +98,13 @@ class PDFLayoutAnalyzer(PDFTextDevice):
             text = self.handle_undefined_char(font, cid)
         textwidth = font.char_width(cid)
         textdisp = font.char_disp(cid)
-        item = LTChar(matrix, font, fontsize, scaling, rise, text, textwidth, textdisp)
+        item = LTChar(matrix, font, fontsize, scaling, rise, text, textwidth, textdisp, ncs, nc)
         self.cur_item.add(item)
         return item.adv
 
     def handle_undefined_char(self, font, cid):
-        logging.info('undefined: %r, %r' % (font, cid))
+        if self.debug:
+            print >>sys.stderr, 'undefined: %r, %r' % (font, cid)
         return '(cid:%d)' % cid
 
     def receive_layout(self, ltpage):
@@ -185,7 +173,7 @@ class TextConverter(PDFConverter):
         return
 
     # Some dummy functions to save memory/CPU when all that is wanted
-    # is text.  This stops all the image and drawing output from being
+    # is text.  This stops all the image and drawing ouput from being
     # recorded and taking up RAM.
     def render_image(self, name, stream):
         if self.imagewriter is None:
@@ -218,7 +206,7 @@ class HTMLConverter(PDFConverter):
 
     def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1, laparams=None,
                  scale=1, fontscale=1.0, layoutmode='normal', showpageno=True,
-                 pagemargin=50, imagewriter=None, debug=0,
+                 pagemargin=50, imagewriter=None,
                  rect_colors={'curve': 'black', 'page': 'gray'},
                  text_colors={'char': 'black'}):
         PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno, laparams=laparams)
@@ -230,7 +218,7 @@ class HTMLConverter(PDFConverter):
         self.imagewriter = imagewriter
         self.rect_colors = rect_colors
         self.text_colors = text_colors
-        if debug:
+        if self.debug:
             self.rect_colors.update(self.RECT_COLORS)
             self.text_colors.update(self.TEXT_COLORS)
         self._yoffset = self.pagemargin
@@ -315,7 +303,7 @@ class HTMLConverter(PDFConverter):
             if self._font is not None:
                 self.write('</span>')
             self.write('<span style="font-family: %s; font-size:%dpx">' %
-                       (enc(fontname), fontsize * self.scale * self.fontscale))
+                       (fontname, fontsize * self.scale * self.fontscale))
             self._font = font
         self.write_text(text)
         return
@@ -398,13 +386,10 @@ class HTMLConverter(PDFConverter):
 ##
 class XMLConverter(PDFConverter):
 
-    CONTROL = re.compile(ur'[\x00-\x08\x0b-\x0c\x0e-\x1f]')
-
     def __init__(self, rsrcmgr, outfp, codec='utf-8', pageno=1,
-                 laparams=None, imagewriter=None, stripcontrol=False):
+                 laparams=None, imagewriter=None):
         PDFConverter.__init__(self, rsrcmgr, outfp, codec=codec, pageno=pageno, laparams=laparams)
         self.imagewriter = imagewriter
-        self.stripcontrol = stripcontrol
         self.write_header()
         return
 
@@ -418,8 +403,6 @@ class XMLConverter(PDFConverter):
         return
 
     def write_text(self, text):
-        if self.stripcontrol:
-            text = self.CONTROL.sub(u'', text)
         self.outfp.write(enc(text, self.codec))
         return
 
@@ -477,8 +460,8 @@ class XMLConverter(PDFConverter):
                     render(child)
                 self.outfp.write('</textbox>\n')
             elif isinstance(item, LTChar):
-                self.outfp.write('<text font="%s" bbox="%s" size="%.3f">' %
-                                 (enc(item.fontname), bbox2str(item.bbox), item.size))
+                self.outfp.write('<text font="%s" bbox="%s" color="%s%s" size="%.3f">' %
+                                 (enc(item.fontname), bbox2str(item.bbox), item.ncs.name, item.nc, item.size))
                 self.write_text(item.get_text())
                 self.outfp.write('</text>\n')
             elif isinstance(item, LTText):
