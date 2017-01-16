@@ -16,7 +16,7 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.utils import isnumber
 
 
-ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
+ESC_PAT = re.compile(r'[\000-\037&<>()"\047\134\177-\377]')
 def e(s):
     return ESC_PAT.sub(lambda m:'&#%d;' % ord(m.group(0)), s)
 
