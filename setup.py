@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-from distutils.core import setup
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
 from pdfminer import __version__
 
 setup(
