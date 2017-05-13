@@ -641,7 +641,11 @@ class PDFCIDFont(PDFFont):
         self.cidcoding = '%s-%s' % (self.cidsysteminfo.get('Registry', 'unknown'),
                                     self.cidsysteminfo.get('Ordering', 'unknown'))
         try:
-            name = literal_name(spec['Encoding'])
+            spec_encoding = spec['Encoding']
+            if hasattr(spec_encoding, 'name'):
+                name = literal_name(spec['Encoding'])
+            else:
+                name = literal_name(spec_encoding['CMapName'])
         except KeyError:
             if STRICT:
                 raise PDFFontError('Encoding is unspecified')
