@@ -11,6 +11,8 @@ from .psparser import LIT
 from .psparser import STRICT
 from .utils import apply_png_predictor
 from .utils import isnumber
+import six
+from six.moves import zip
 
 
 LITERAL_CRYPT = LIT('Crypt')
@@ -92,7 +94,7 @@ def resolve_all(x, default=None):
     if isinstance(x, list):
         x = [resolve_all(v, default=default) for v in x]
     elif isinstance(x, dict):
-        for (k, v) in x.iteritems():
+        for (k, v) in six.iteritems(x):
             x[k] = resolve_all(v, default=default)
     return x
 
@@ -105,7 +107,7 @@ def decipher_all(decipher, objid, genno, x):
     if isinstance(x, list):
         x = [decipher_all(decipher, objid, genno, v) for v in x]
     elif isinstance(x, dict):
-        for (k, v) in x.iteritems():
+        for (k, v) in six.iteritems(x):
             x[k] = decipher_all(decipher, objid, genno, v)
     return x
 

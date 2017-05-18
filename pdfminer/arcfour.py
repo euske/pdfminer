@@ -5,6 +5,7 @@
 This code is in the public domain.
 
 """
+from six.moves import range
 
 
 ##  Arcfour
@@ -21,10 +22,10 @@ class Arcfour(object):
     """
 
     def __init__(self, key):
-        s = range(256)
+        s = list(range(256))
         j = 0
         klen = len(key)
-        for i in xrange(256):
+        for i in range(256):
             j = (j + s[i] + ord(key[i % klen])) % 256
             (s[i], s[j]) = (s[j], s[i])
         self.s = s

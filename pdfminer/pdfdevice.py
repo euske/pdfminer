@@ -5,6 +5,7 @@ from .utils import enc
 from .utils import bbox2str
 from .utils import isnumber
 from .pdffont import PDFUnicodeNotDefined
+import six
 
 
 ##  PDFDevice
@@ -166,7 +167,7 @@ class TagExtractor(PDFDevice):
         s = ''
         if isinstance(props, dict):
             s = ''.join(' %s="%s"' % (enc(k), enc(str(v))) for (k, v)
-                        in sorted(props.iteritems()))
+                        in sorted(six.iteritems(props)))
         self.outfp.write('<%s%s>' % (enc(tag.name), s))
         self._stack.append(tag)
         return

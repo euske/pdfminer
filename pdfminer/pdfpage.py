@@ -9,6 +9,7 @@ from .pdftypes import dict_value
 from .pdfparser import PDFParser
 from .pdfdocument import PDFDocument
 from .pdfdocument import PDFTextExtractionNotAllowed
+import six
 
 # some predefined literals and keywords.
 LITERAL_PAGE = LIT('Page')
@@ -84,7 +85,7 @@ class PDFPage(object):
             else:
                 objid = obj.objid
                 tree = dict_value(obj).copy()
-            for (k, v) in parent.iteritems():
+            for (k, v) in six.iteritems(parent):
                 if k in klass.INHERITABLE_ATTRS and k not in tree:
                     tree[k] = v
             if tree.get('Type') is LITERAL_PAGES and 'Kids' in tree:

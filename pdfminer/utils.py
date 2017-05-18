@@ -3,7 +3,9 @@
 Miscellaneous Routines.
 """
 import struct
-from sys import maxint as INF
+from sys import maxsize as INF
+import six
+from six.moves import range
 
 
 ##  PNG Predictor
@@ -16,7 +18,7 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     i = 0
     buf = b''
     line0 = b'\x00' * columns
-    for i in xrange(0, len(data), nbytes+1):
+    for i in range(0, len(data), nbytes+1):
         ft = data[i]
         i += 1
         line1 = data[i:i+nbytes]
@@ -89,7 +91,7 @@ def apply_matrix_norm(m, v):
 
 # isnumber
 def isnumber(x):
-    return isinstance(x, (int, long, float))
+    return isinstance(x, (int, float))
 
 # uniq
 def uniq(objs):
@@ -127,7 +129,7 @@ def fsplit(pred, objs):
 def drange(v0, v1, d):
     """Returns a discrete range."""
     assert v0 < v1
-    return xrange(int(v0)//d, int(v1+d)//d)
+    return range(int(v0)//d, int(v1+d)//d)
 
 
 # get_bound
@@ -184,7 +186,7 @@ def nunpack(s, default=0):
 
 
 # decode_text
-PDFDocEncoding = ''.join(unichr(x) for x in (
+PDFDocEncoding = ''.join(six.unichr(x) for x in (
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
     0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
     0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0017, 0x0017,
@@ -223,7 +225,7 @@ PDFDocEncoding = ''.join(unichr(x) for x in (
 def decode_text(s):
     """Decodes a PDFDocEncoding string to Unicode."""
     if s.startswith(b'\xfe\xff'):
-        return unicode(s[2:], 'utf-16be', 'ignore')
+        return six.text_type(s[2:], 'utf-16be', 'ignore')
     else:
         return ''.join(PDFDocEncoding[ord(c)] for c in s)
 

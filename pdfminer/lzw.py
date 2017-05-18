@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from io import BytesIO
+from six.moves import range
 
 
 class CorruptDataError(Exception):
@@ -47,7 +48,7 @@ class LZWDecoder(object):
     def feed(self, code):
         x = b''
         if code == 256:
-            self.table = [chr(c) for c in xrange(256)]  # 0-255
+            self.table = [chr(c) for c in range(256)]  # 0-255
             self.table.append(None)  # 256
             self.table.append(None)  # 257
             self.prevbuf = b''
