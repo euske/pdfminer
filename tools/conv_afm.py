@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import fileinput
+import six
 
 def main(argv):
     fonts = {}
@@ -32,8 +33,8 @@ def main(argv):
             props[k] = tuple(map(float, f[1:5]))
     print ('# -*- python -*-')
     print ('FONT_METRICS = {')
-    for (fontname,(props,chars)) in fonts.iteritems():
-        print (' %r: %r,' % (fontname, (props,chars)))
+    for (fontname,(props,chars)) in six.iteritems(fonts):
+        six.print_((' %r: %r,' % (fontname, (props,chars))))
     print ('}')
     return 0
 

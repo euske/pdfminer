@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/opt/python3/bin/python3.6
 #
 # dumppdf.py - dump pdf contents in XML format.
 #

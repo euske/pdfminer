@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import fileinput
+import six
 
 def main(argv):
     state = 0
@@ -17,6 +18,6 @@ def main(argv):
             state = 1
         (name,x) = line.split(';')
         codes = x.split(' ')
-        print (' %r: u\'%s\',' % (name, ''.join( '\\u%s' % code for code in codes )))
+        six.print_((' %r: u\'%s\',' % (name, ''.join( '\\u%s' % code for code in codes ))))
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

@@ -7,10 +7,13 @@
 ##
 
 import sys
-import urllib
-from httplib import responses
-from BaseHTTPServer import HTTPServer
-from SimpleHTTPServer import SimpleHTTPRequestHandler
+from six.moves.urllib.parse import unquote
+
+from six.moves.http_client import responses
+from six.moves.http.server import HTTPServer
+from six.moves.http.server import SimpleHTTPRequestHandler
+from six.moves import filter
+import six
 
 ##  WebAppHandler
 ##
@@ -45,7 +48,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         env['SERVER_PROTOCOL'] = self.protocol_version
         env['SERVER_PORT'] = str(self.server.server_port)
         env['REQUEST_METHOD'] = self.command
-        uqrest = urllib.unquote(rest)
+        uqrest = unquote(rest)
         env['PATH_INFO'] = uqrest
         env['PATH_TRANSLATED'] = self.translate_path(uqrest)
         env['SCRIPT_NAME'] = scriptname
@@ -72,7 +75,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         ua = self.headers.getheader('user-agent')
         if ua:
             env['HTTP_USER_AGENT'] = ua
-        co = filter(None, self.headers.getheaders('cookie'))
+        co = [_f for _f in self.headers.getheaders('cookie') if _f]
         if co:
             env['HTTP_COOKIE'] = ', '.join(co)
         for k in ('QUERY_STRING', 'REMOTE_HOST', 'CONTENT_LENGTH',
@@ -88,7 +91,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
 def main(argv):
     import getopt, imp
     def usage():
-        print ('usage: %s [-h host] [-p port] [-n name] module.class' % argv[0])
+        six.print_(('usage: %s [-h host] [-p port] [-n name] module.class' % argv[0]))
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'h:p:n:')
@@ -105,7 +108,7 @@ def main(argv):
     path = args.pop(0)
     module = imp.load_source('app', path)
     WebAppHandler.APP_CLASS = getattr(module, name)
-    print ('Listening %s:%d...' % (host,port))
+    six.print_(('Listening %s:%d...' % (host,port)))
     httpd = HTTPServer((host,port), WebAppHandler)
     httpd.serve_forever()
     return

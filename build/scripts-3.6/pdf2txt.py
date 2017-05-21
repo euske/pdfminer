@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/opt/python3/bin/python3.6
 import sys
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser

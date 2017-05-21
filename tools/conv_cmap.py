@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
+import six
 try:
-    import cPickle as pickle
+    from six.moves import cPickle
 except ImportError:
     import pickle as pickle
 
@@ -19,7 +20,7 @@ class CMapConverter(object):
         return
 
     def get_encs(self):
-        return self.code2cid.keys()
+        return list(self.code2cid.keys())
 
     def get_maps(self, enc):
         if enc.endswith('-H'):
@@ -83,8 +84,8 @@ class CMapConverter(object):
                 return
 
             def pick(unimap):
-                chars = unimap.items()
-                chars.sort(key=(lambda (c,n):(n,-ord(c))), reverse=True)
+                chars = list(unimap.items())
+                chars.sort(key=(lambda c_n:(c_n[1],-ord(c_n[0]))), reverse=True)
                 (c,_) = chars[0]
                 return c
 
@@ -156,7 +157,7 @@ def main(argv):
     import os.path
 
     def usage():
-        print ('usage: %s [-c enc=codec] output_dir regname [cid2code.txt ...]' % argv[0])
+        six.print_(('usage: %s [-c enc=codec] output_dir regname [cid2code.txt ...]' % argv[0]))
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'c:')
@@ -174,7 +175,7 @@ def main(argv):
 
     converter = CMapConverter(enc2codec)
     for path in args:
-        print ('reading: %r...' % path)
+        six.print_(('reading: %r...' % path))
         fp = file(path)
         converter.load(fp)
         fp.close()
@@ -182,14 +183,14 @@ def main(argv):
     for enc in converter.get_encs():
         fname = '%s.pickle.gz' % enc
         path = os.path.join(outdir, fname)
-        print ('writing: %r...' % path)
+        six.print_(('writing: %r...' % path))
         fp = gzip.open(path, 'wb')
         converter.dump_cmap(fp, enc)
         fp.close()
 
     fname = 'to-unicode-%s.pickle.gz' % regname
     path = os.path.join(outdir, fname)
-    print ('writing: %r...' % path)
+    six.print_(('writing: %r...' % path))
     fp = gzip.open(path, 'wb')
     converter.dump_unicodemap(fp)
     fp.close()
