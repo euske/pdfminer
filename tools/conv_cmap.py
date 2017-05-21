@@ -20,7 +20,7 @@ class CMapConverter(object):
         return
 
     def get_encs(self):
-        return self.code2cid.keys()
+        return list(self.code2cid.keys())
 
     def get_maps(self, enc):
         if enc.endswith('-H'):
@@ -84,7 +84,7 @@ class CMapConverter(object):
                 return
 
             def pick(unimap):
-                chars = unimap.items()
+                chars = list(unimap.items())
                 chars.sort(key=(lambda c_n:(c_n[1],-ord(c_n[0]))), reverse=True)
                 (c,_) = chars[0]
                 return c
