@@ -126,7 +126,7 @@ TODO
 Related Projects
 ----------------
 
- * <a href="http://pybrary.net/pyPdf/">pyPdf</a>
+ * <a href="https://mstamy2.github.io/PyPDF2/">PyPDF2</a>
  * <a href="http://www.foolabs.com/xpdf/">xpdf</a>
  * <a href="http://pdfbox.apache.org/">pdfbox</a>
  * <a href="http://mupdf.com/">mupdf</a>
