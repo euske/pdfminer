@@ -769,7 +769,7 @@ class PDFPageInterpreter(object):
             if settings.STRICT:
                 raise PDFInterpreterError('No font specified!')
             return
-        self.device.render_string(self.textstate, seq)
+        self.device.render_string(self.textstate, seq, self.graphicstate)
         return
 
     # show
