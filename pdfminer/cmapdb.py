@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 """ Adobe character mapping (CMap) support.
 
@@ -30,6 +30,10 @@ from .psparser import KWD
 from .encodingdb import name2unicode
 from .utils import choplist
 from .utils import nunpack
+
+import six  #Python 2+3 compatibility
+
+log = logging.getLogger(__name__)
 
 
 class CMapError(Exception):
@@ -76,7 +80,7 @@ class CMap(CMapBase):
         return '<CMap: %s>' % self.attrs.get('CMapName')
 
     def use_cmap(self, cmap):
-        assert isinstance(cmap, CMap)
+        assert isinstance(cmap, CMap), str(type(cmap))
 
         def copy(dst, src):
             for (k, v) in src.iteritems():
@@ -90,13 +94,11 @@ class CMap(CMapBase):
         return
 
     def decode(self, code):
-        if self.debug:
-            logging.debug('decode: %r, %r' % (self, code))
+        log.debug('decode: %r, %r', self, code)
         d = self.code2cid
-        for c in code:
-            c = ord(c)
-            if c in d:
-                d = d[c]
+        for i in six.iterbytes(code):
+            if i in d:
+                d = d[i]
                 if isinstance(d, int):
                     yield d
                     d = self.code2cid
@@ -142,8 +144,7 @@ class UnicodeMap(CMapBase):
         return '<UnicodeMap: %s>' % self.attrs.get('CMapName')
 
     def get_unichr(self, cid):
-        if self.debug:
-            logging.debug('get_unichr: %r, %r' % (self, cid))
+        log.debug('get_unichr: %r, %r', self, cid)
         return self.cid2unichr[cid]
 
     def dump(self, out=sys.stdout):
@@ -157,7 +158,7 @@ class UnicodeMap(CMapBase):
 class FileCMap(CMap):
 
     def add_code2cid(self, code, cid):
-        assert isinstance(code, str) and isinstance(cid, int)
+        assert isinstance(code, str) and isinstance(cid, int), str((type(code), type(cid)))
         d = self.code2cid
         for c in code[:-1]:
             c = ord(c)
@@ -177,15 +178,15 @@ class FileCMap(CMap):
 class FileUnicodeMap(UnicodeMap):
 
     def add_cid2unichr(self, cid, code):
-        assert isinstance(cid, int)
+        assert isinstance(cid, int), str(type(cid))
         if isinstance(code, PSLiteral):
             # Interpret as an Adobe glyph name.
             self.cid2unichr[cid] = name2unicode(code.name)
-        elif isinstance(code, str):
+        elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
-            self.cid2unichr[cid] = unicode(code, 'UTF-16BE', 'ignore')
+            self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
         elif isinstance(code, int):
-            self.cid2unichr[cid] = unichr(code)
+            self.cid2unichr[cid] = six.unichr(code)
         else:
             raise TypeError(code)
         return
@@ -229,8 +230,9 @@ class CMapDB(object):
 
     @classmethod
     def _load_data(klass, name):
+        name = name.replace("\0", "")
         filename = '%s.pickle.gz' % name
-        logging.info('loading: %r' % name)
+        log.info('loading: %r', name)
         cmap_paths = (os.environ.get('CMAP_PATH', '/usr/share/pdfminer/'),
                       os.path.join(os.path.dirname(__file__), 'cmap'),)
         for directory in cmap_paths:
@@ -303,7 +305,7 @@ class CMapParser(PSStackParser):
     KEYWORD_ENDBFCHAR = KWD(b'endbfchar')
     KEYWORD_BEGINNOTDEFRANGE = KWD(b'beginnotdefrange')
     KEYWORD_ENDNOTDEFRANGE = KWD(b'endnotdefrange')
-    
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_BEGINCMAP:
             self._in_cmap = True
@@ -358,8 +360,8 @@ class CMapParser(PSStackParser):
                 s1 = nunpack(svar)
                 e1 = nunpack(evar)
                 vlen = len(svar)
-                #assert s1 <= e1
-                for i in xrange(e1-s1+1):
+                #assert s1 <= e1, str((s1, e1))
+                for i in range(e1-s1+1):
                     x = sprefix+struct.pack('>L', s1+i)[-vlen:]
                     self.cmap.add_code2cid(x, cid+i)
             return
@@ -380,21 +382,21 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFRANGE:
             objs = [obj for (__, obj) in self.popall()]
             for (s, e, code) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                    len(s) != len(e)):
                         continue
                 s1 = nunpack(s)
                 e1 = nunpack(e)
-                #assert s1 <= e1
+                #assert s1 <= e1, str((s1, e1))
                 if isinstance(code, list):
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         self.cmap.add_cid2unichr(s1+i, code[i])
                 else:
                     var = code[-4:]
                     base = nunpack(var)
                     prefix = code[:-4]
                     vlen = len(var)
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         x = prefix+struct.pack('>L', base+i)[-vlen:]
                         self.cmap.add_cid2unichr(s1+i, x)
             return
@@ -405,7 +407,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFCHAR:
             objs = [obj for (__, obj) in self.popall()]
             for (cid, code) in choplist(2, objs):
-                if isinstance(cid, str) and isinstance(code, str):
+                if isinstance(cid, bytes) and isinstance(code, bytes):
                     self.cmap.add_cid2unichr(nunpack(cid), code)
             return
 

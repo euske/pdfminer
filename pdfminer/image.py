@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 import struct
 import os
 import os.path
@@ -34,9 +34,9 @@ class BMPWriter(object):
         self.datasize = self.linesize * self.height
         headersize = 14+40+ncols*4
         info = struct.pack('<IiiHHIIIIII', 40, self.width, self.height, 1, self.bits, 0, self.datasize, 0, 0, ncols, 0)
-        assert len(info) == 40, len(info)
+        assert len(info) == 40, str(len(info))
         header = struct.pack('<ccIHHI', b'B', b'M', headersize+self.datasize, 0, 0, headersize)
-        assert len(header) == 14, len(header)
+        assert len(header) == 14, str(len(header))
         self.fp.write(header)
         self.fp.write(info)
         if ncols == 2:
@@ -45,7 +45,7 @@ class BMPWriter(object):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         elif ncols == 256:
             # grayscale color table
-            for i in xrange(256):
+            for i in range(256):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         self.pos0 = self.fp.tell()
         self.pos1 = self.pos0 + self.datasize
@@ -80,7 +80,7 @@ class ImageWriter(object):
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
         name = image.name+ext
         path = os.path.join(self.outdir, name)
-        fp = file(path, 'wb')
+        fp=open(path, 'wb')
         if ext == '.jpg':
             raw_data = stream.get_rawdata()
             if LITERAL_DEVICE_CMYK in image.colorspace:
@@ -98,7 +98,7 @@ class ImageWriter(object):
             data = stream.get_data()
             i = 0
             width = (width+7)//8
-            for y in xrange(height):
+            for y in range(height):
                 bmp.write_line(y, data[i:i+width])
                 i += width
         elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_RGB:
@@ -106,14 +106,14 @@ class ImageWriter(object):
             data = stream.get_data()
             i = 0
             width = width*3
-            for y in xrange(height):
+            for y in range(height):
                 bmp.write_line(y, data[i:i+width])
                 i += width
         elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_GRAY:
             bmp = BMPWriter(fp, 8, width, height)
             data = stream.get_data()
             i = 0
-            for y in xrange(height):
+            for y in range(height):
                 bmp.write_line(y, data[i:i+width])
                 i += width
         else:
