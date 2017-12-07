@@ -248,8 +248,13 @@ class PDFContentParser(PSStackParser):
         return
 
     def fillbuf(self):
-        if self.charpos < len(self.buf):
-            return
+        if isinstance(self.charpos, tuple):  #somtimes charpos is tuple instead of int. if tuple, get correct pos data from tuple
+            if self.charpos[1] < len(self.buf): 
+                return 
+        else:
+            if self.charpos < len(self.buf): 
+                return 
+        #if self.charpos < len(self.buf):
         while 1:
             self.fillfp()
             self.bufpos = self.fp.tell()
