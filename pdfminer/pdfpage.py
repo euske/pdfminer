@@ -121,7 +121,7 @@ class PDFPage(object):
         # Create a PDF document object that stores the document structure.
         doc = PDFDocument(parser, password=password, caching=caching)
         # Check if the document allows text extraction. If not, abort.
-        if check_extractable and not doc.is_extractable:
+        if not check_extractable and not doc.is_extractable:
             raise PDFTextExtractionNotAllowed('Text extraction is not allowed: %r' % fp)
         # Process each page contained in the document.
         for (pageno, page) in enumerate(klass.create_pages(doc)):
