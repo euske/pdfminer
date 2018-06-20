@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 """ Python implementation of ASCII85/ASCIIHex decoder (Adobe version).
 
@@ -8,6 +8,8 @@ This code is in the public domain.
 
 import re
 import struct
+
+import six #Python 2+3 compatibility
 
 
 # ascii85decode(data)
@@ -21,17 +23,11 @@ def ascii85decode(data):
     The Adobe's ASCII85 implementation is slightly different from
     its original in handling the last characters.
 
-    The sample string is taken from:
-      http://en.wikipedia.org/w/index.php?title=Ascii85
-
-    >>> ascii85decode(b'9jqo^BlbD-BleB1DJ+*+F(f,q')
-    'Man is distinguished'
-    >>> ascii85decode(b'E,9)oF*2M7/c~>')
-    'pleasure.'
     """
     n = b = 0
     out = b''
-    for c in data:
+    for i in six.iterbytes(data):
+        c=six.int2byte(i)
         if b'!' <= c and c <= b'u':
             n += 1
             b = b*85+(ord(c)-33)
@@ -39,7 +35,7 @@ def ascii85decode(data):
                 out += struct.pack('>L', b)
                 n = b = 0
         elif c == b'z':
-            assert n == 0
+            assert n == 0, str(n)
             out += b'\0\0\0\0'
         elif c == b'~':
             if n:
@@ -50,8 +46,8 @@ def ascii85decode(data):
     return out
 
 # asciihexdecode(data)
-hex_re = re.compile(r'([a-f\d]{2})', re.IGNORECASE)
-trail_re = re.compile(r'^(?:[a-f\d]{2}|\s)*([a-f\d])[\s>]*$', re.IGNORECASE)
+hex_re = re.compile(b'([a-f\d]{2})', re.IGNORECASE)
+trail_re = re.compile(b'^(?:[a-f\d]{2}|\s)*([a-f\d])[\s>]*$', re.IGNORECASE)
 
 
 def asciihexdecode(data):
@@ -63,22 +59,16 @@ def asciihexdecode(data):
     EOD. Any other characters will cause an error. If the filter encounters
     the EOD marker after reading an odd number of hexadecimal digits, it
     will behave as if a 0 followed the last digit.
-
-    >>> asciihexdecode(b'61 62 2e6364   65')
-    'ab.cde'
-    >>> asciihexdecode(b'61 62 2e6364   657>')
-    'ab.cdep'
-    >>> asciihexdecode(b'7>')
-    'p'
     """
-    decode = (lambda hx: chr(int(hx, 16)))
-    out = map(decode, hex_re.findall(data))
+    def decode(x):
+        i=int(x,16)
+        return six.int2byte(i)
+
+    out=b''
+    for x in hex_re.findall(data):
+        out+=decode(x)
+
     m = trail_re.search(data)
     if m:
-        out.append(decode('%c0' % m.group(1)))
-    return b''.join(out)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+        out+=decode(m.group(1)+b'0')
+    return out

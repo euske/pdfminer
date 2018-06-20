@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/env python -O
 #
 # pdf2html.cgi - Gateway script for converting PDF into HTML.
 #
@@ -196,7 +196,7 @@ class WebApp(object):
             try:
                 convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
                         maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
-            except Exception, e:
+            except Exception as e:
                 self.put('<p>Sorry, an error has occurred: %s' % q(repr(e)))
                 self.logger.error('convert: %r: path=%r: %s' % (e, traceback.format_exc()))
         finally:

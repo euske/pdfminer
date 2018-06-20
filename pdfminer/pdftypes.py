@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+
 import zlib
+import logging
 from .lzw import lzwdecode
 from .ascii85 import ascii85decode
 from .ascii85 import asciihexdecode
@@ -8,10 +9,13 @@ from .ccitt import ccittfaxdecode
 from .psparser import PSException
 from .psparser import PSObject
 from .psparser import LIT
-from .psparser import STRICT
+from . import settings
 from .utils import apply_png_predictor
 from .utils import isnumber
 
+import six #Python 2+3 compatibility
+
+log = logging.getLogger(__name__)
 
 LITERAL_CRYPT = LIT('Crypt')
 
@@ -52,7 +56,7 @@ class PDFObjRef(PDFObject):
 
     def __init__(self, doc, objid, _):
         if objid == 0:
-            if STRICT:
+            if settings.STRICT:
                 raise PDFValueError('PDF object id cannot be 0.')
         self.doc = doc
         self.objid = objid
@@ -100,21 +104,21 @@ def resolve_all(x, default=None):
 def decipher_all(decipher, objid, genno, x):
     """Recursively deciphers the given object.
     """
-    if isinstance(x, str):
+    if isinstance(x, bytes):
         return decipher(objid, genno, x)
     if isinstance(x, list):
         x = [decipher_all(decipher, objid, genno, v) for v in x]
     elif isinstance(x, dict):
-        for (k, v) in x.iteritems():
+        for (k, v) in six.iteritems(x):
             x[k] = decipher_all(decipher, objid, genno, v)
     return x
 
 
-# Type checking
+# Type cheking
 def int_value(x):
     x = resolve1(x)
     if not isinstance(x, int):
-        if STRICT:
+        if settings.STRICT:
             raise PDFTypeError('Integer required: %r' % x)
         return 0
     return x
@@ -123,7 +127,7 @@ def int_value(x):
 def float_value(x):
     x = resolve1(x)
     if not isinstance(x, float):
-        if STRICT:
+        if settings.STRICT:
             raise PDFTypeError('Float required: %r' % x)
         return 0.0
     return x
@@ -132,7 +136,7 @@ def float_value(x):
 def num_value(x):
     x = resolve1(x)
     if not isnumber(x):
-        if STRICT:
+        if settings.STRICT:
             raise PDFTypeError('Int or Float required: %r' % x)
         return 0
     return x
@@ -140,8 +144,8 @@ def num_value(x):
 
 def str_value(x):
     x = resolve1(x)
-    if not isinstance(x, str):
-        if STRICT:
+    if not isinstance(x, six.binary_type):
+        if settings.STRICT:
             raise PDFTypeError('String required: %r' % x)
         return ''
     return x
@@ -150,7 +154,7 @@ def str_value(x):
 def list_value(x):
     x = resolve1(x)
     if not isinstance(x, (list, tuple)):
-        if STRICT:
+        if settings.STRICT:
             raise PDFTypeError('List required: %r' % x)
         return []
     return x
@@ -159,7 +163,8 @@ def list_value(x):
 def dict_value(x):
     x = resolve1(x)
     if not isinstance(x, dict):
-        if STRICT:
+        if settings.STRICT:
+            log.error('PDFTypeError : Dict required: %r', x)
             raise PDFTypeError('Dict required: %r' % x)
         return {}
     return x
@@ -168,9 +173,9 @@ def dict_value(x):
 def stream_value(x):
     x = resolve1(x)
     if not isinstance(x, PDFStream):
-        if STRICT:
+        if settings.STRICT:
             raise PDFTypeError('PDFStream required: %r' % x)
-        return PDFStream({}, '')
+        return PDFStream({}, b'')
     return x
 
 
@@ -179,7 +184,7 @@ def stream_value(x):
 class PDFStream(PDFObject):
 
     def __init__(self, attrs, rawdata, decipher=None):
-        assert isinstance(attrs, dict)
+        assert isinstance(attrs, dict), str(type(attrs))
         self.attrs = attrs
         self.rawdata = rawdata
         self.decipher = decipher
@@ -225,13 +230,19 @@ class PDFStream(PDFObject):
             filters = [filters]
         if not isinstance(params, list):
             # Make sure the parameters list is the same as filters.
-            params = [params]*len(filters)
-        if STRICT and len(params) != len(filters):
+            params = [params] * len(filters)
+        if settings.STRICT and len(params) != len(filters):
             raise PDFException("Parameters len filter mismatch")
-        return zip(filters, params)
+        # resolve filter if possible
+        _filters = []
+        for fltr in filters:
+            if hasattr(fltr, 'resolve'):
+                fltr = fltr.resolve()[0]
+            _filters.append(fltr)
+        return list(zip(_filters, params)) #solves https://github.com/pdfminer/pdfminer.six/issues/15
 
     def decode(self):
-        assert self.data is None and self.rawdata is not None
+        assert self.data is None and self.rawdata is not None, str((self.data, self.rawdata))
         data = self.rawdata
         if self.decipher:
             # Handle encryption
@@ -247,7 +258,7 @@ class PDFStream(PDFObject):
                 try:
                     data = zlib.decompress(data)
                 except zlib.error as e:
-                    if STRICT:
+                    if settings.STRICT:
                         raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
                     data = b''
             elif f in LITERALS_LZW_DECODE:
@@ -270,7 +281,7 @@ class PDFStream(PDFObject):
             else:
                 raise PDFNotImplementedError('Unsupported filter: %r' % f)
             # apply predictors
-            if 'Predictor' in params:
+            if params and 'Predictor' in params:
                 pred = int_value(params['Predictor'])
                 if pred == 1:
                     # no predictor

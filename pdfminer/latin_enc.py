@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 """ Standard encoding tables used in PDF.
 
@@ -162,7 +162,7 @@ ENCODING = [
   ('mu', None, 181, 181, 181),
   ('multiply', None, None, 215, 215),
   ('n', 110, 110, 110, 110),
-  ('nbspace',  None, 202, 160, None),
+  ('nbspace', None, 202, 160, None),
   ('nine', 57, 57, 57, 57),
   ('ntilde', None, 150, 241, 241),
   ('numbersign', 35, 35, 35, 35),
@@ -213,6 +213,8 @@ ENCODING = [
   ('six', 54, 54, 54, 54),
   ('slash', 47, 47, 47, 47),
   ('space', 32, 32, 32, 32),
+  ('space', None, 202, 160, None),
+  ('space', None, 202, 173, None),
   ('sterling', 163, 163, 163, 163),
   ('t', 116, 116, 116, 116),
   ('thorn', None, None, 254, 254),
