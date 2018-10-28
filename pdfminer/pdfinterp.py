@@ -140,7 +140,7 @@ class PDFResourceManager(object):
     """
 
     debug = False
-    
+
     def __init__(self, caching=True):
         self.caching = caching
         self._cached_fonts = {}
@@ -725,7 +725,7 @@ class PDFPageInterpreter(object):
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.linematrix = (0, 0)
-        #print >>sys.stderr, 'Td(%r,%r): %r' % (tx, ty, self.textstate)
+        logging.debug('Td(%r,%r): %r' % (tx, ty, self.textstate))
         return
 
     # text-move
@@ -734,7 +734,7 @@ class PDFPageInterpreter(object):
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.leading = ty
         self.textstate.linematrix = (0, 0)
-        #print >>sys.stderr, 'TD(%r,%r): %r' % (tx, ty, self.textstate)
+        logging.debug('TD(%r,%r): %r' % (tx, ty, self.textstate))
         return
 
     # textmatrix
@@ -752,7 +752,7 @@ class PDFPageInterpreter(object):
 
     # show-pos
     def do_TJ(self, seq):
-        #print >>sys.stderr, 'TJ(%r): %r' % (seq, self.textstate)
+        logging.debug('TJ(%r): %r' % (seq, self.textstate))
         if self.textstate.font is None:
             if STRICT:
                 raise PDFInterpreterError('No font specified!')

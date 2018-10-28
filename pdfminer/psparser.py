@@ -343,7 +343,7 @@ class PSBaseParser(object):
             self.hex = b''
             self._parse1 = self._parse_literal_hex
             return j+1
-        
+
         try:
             # Try to interpret the token as a utf-8 string
             utoken = self._curtoken.decode('utf-8')
