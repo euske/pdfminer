@@ -245,7 +245,7 @@ class PDFStream(PDFObject):
             if f in LITERALS_FLATE_DECODE:
                 # will get errors if the document is encrypted.
                 try:
-                    data = zlib.decompress(data)
+                    data = zlib.decompressobj().decompress(data)
                 except zlib.error as e:
                     if STRICT:
                         raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
