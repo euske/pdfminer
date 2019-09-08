@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 #
 # dumppdf.py - dump pdf contents in XML format.
 #
@@ -6,7 +7,7 @@
 #  options:
 #    -i objid : object id
 #
-import sys, os.path, re
+import sys, os.path, re, logging
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
@@ -18,7 +19,11 @@ from pdfminer.utils import isnumber
 
 ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 def e(s):
+    if six.PY3 and isinstance(s,six.binary_type):
+        s=str(s,'latin-1')
     return ESC_PAT.sub(lambda m:'&#%d;' % ord(m.group(0)), s)
+
+import six # Python 2+3 compatibility
 
 
 # dumpxml
@@ -29,7 +34,7 @@ def dumpxml(out, obj, codec=None):
 
     if isinstance(obj, dict):
         out.write('<dict size="%d">\n' % len(obj))
-        for (k,v) in obj.iteritems():
+        for (k,v) in six.iteritems(obj):
             out.write('<key>%s</key>\n' % k)
             out.write('<value>')
             dumpxml(out, v)
@@ -45,7 +50,7 @@ def dumpxml(out, obj, codec=None):
         out.write('</list>')
         return
 
-    if isinstance(obj, str):
+    if isinstance(obj, (six.string_types, six.binary_type)):
         out.write('<string size="%d">%s</string>' % (len(obj), e(obj)))
         return
 
@@ -113,11 +118,11 @@ def dumpallobjs(out, doc, codec=None):
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password='',
                 dumpall=False, codec=None, extractdir=None):
-    fp = file(fname, 'rb')
+    fp = open(fname, 'rb')
     parser = PDFParser(fp)
     doc = PDFDocument(parser, password)
     pages = dict( (page.pageid, pageno) for (pageno,page)
-                  in enumerate(PDFPage.create_pages(doc)) )
+                  in enumerate(PDFPage.create_pages(doc), 1) )
     def resolve_dest(dest):
         if isinstance(dest, str):
             dest = resolve1(doc.get_dest(dest))
@@ -125,6 +130,8 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
             dest = resolve1(doc.get_dest(dest.name))
         if isinstance(dest, dict):
             dest = dest['D']
+        if isinstance(dest, PDFObjRef):
+            dest = dest.resolve()
         return dest
     try:
         outlines = doc.get_outlines()
@@ -135,10 +142,10 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
                 dest = resolve_dest(dest)
                 pageno = pages[dest[0].objid]
             elif a:
-                action = a.resolve()
+                action = a
                 if isinstance(action, dict):
                     subtype = action.get('S')
-                    if subtype and repr(subtype) == '/GoTo' and action.get('D'):
+                    if subtype and repr(subtype) == '/\'GoTo\'' and action.get('D'):
                         dest = resolve_dest(action['D'])
                         pageno = pages[dest[0].objid]
             s = e(title).encode('utf-8', 'xmlcharrefreplace')
@@ -183,7 +190,7 @@ def extractembedded(outfp, fname, objids, pagenos, password='',
         out.close()
         return
 
-    fp = file(fname, 'rb')
+    fp = open(fname, 'rb')
     parser = PDFParser(fp)
     doc = PDFDocument(parser, password)
     for xref in doc.xrefs:
@@ -191,12 +198,13 @@ def extractembedded(outfp, fname, objids, pagenos, password='',
             obj = doc.getobj(objid)
             if isinstance(obj, dict) and obj.get('Type') is LITERAL_FILESPEC:
                 extract1(obj)
+    fp.close()
     return
 
 # dumppdf
 def dumppdf(outfp, fname, objids, pagenos, password='',
             dumpall=False, codec=None, extractdir=None):
-    fp = file(fname, 'rb')
+    fp = open(fname, 'rb')
     parser = PDFParser(fp)
     doc = PDFDocument(parser, password)
     if objids:
@@ -229,11 +237,10 @@ def main(argv):
         print ('usage: %s [-d] [-a] [-p pageid] [-P password] [-r|-b|-t] [-T] [-E directory] [-i objid] file ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dap:P:rbtTE:i:')
+        (opts, args) = getopt.getopt(argv[1:], 'dap:P:rbtTE:i:o:')
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
-    debug = 0
     objids = []
     pagenos = set()
     codec = None
@@ -243,8 +250,8 @@ def main(argv):
     outfp = sys.stdout
     extractdir = None
     for (k, v) in opts:
-        if k == '-d': debug += 1
-        elif k == '-o': outfp = file(v, 'wb')
+        if k == '-d': logging.getLogger().setLevel(logging.DEBUG)
+        elif k == '-o': outfp = open(v, 'w')
         elif k == '-i': objids.extend( int(x) for x in v.split(',') )
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-P': password = v
@@ -256,13 +263,13 @@ def main(argv):
         elif k == '-E':
             extractdir = v
             proc = extractembedded
-    #
-    PDFDocument.debug = debug
-    PDFParser.debug = debug
-    #
+
+    if six.PY2 and sys.stdin.encoding:
+        password = password.decode(sys.stdin.encoding)
+
     for fname in args:
         proc(outfp, fname, objids, pagenos, password=password,
              dumpall=dumpall, codec=codec, extractdir=extractdir)
-    return
+    outfp.close()
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

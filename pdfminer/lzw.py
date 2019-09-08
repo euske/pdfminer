@@ -1,6 +1,9 @@
-#!/usr/bin/env python
+
 from io import BytesIO
 
+import six  #Python 2+3 compatibility
+
+import logging
 
 class CorruptDataError(Exception):
     pass
@@ -47,7 +50,7 @@ class LZWDecoder(object):
     def feed(self, code):
         x = b''
         if code == 256:
-            self.table = [chr(c) for c in xrange(256)]  # 0-255
+            self.table = [six.int2byte(c) for c in range(256)]  # 0-255
             self.table.append(None)  # 256
             self.table.append(None)  # 257
             self.prevbuf = b''
@@ -87,20 +90,13 @@ class LZWDecoder(object):
                 # just ignore corrupt data and stop yielding there
                 break
             yield x
-            #logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
-            #              (self.nbits, code, x, self.table[258:]))
+            logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
+                          (self.nbits, code, x, self.table[258:]))
         return
 
 
 # lzwdecode
 def lzwdecode(data):
-    """
-    >>> lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01')
-    '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
-    """
     fp = BytesIO(data)
-    return b''.join(LZWDecoder(fp).run())
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    s=LZWDecoder(fp).run()
+    return b''.join(s)

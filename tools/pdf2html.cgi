@@ -1,4 +1,4 @@
-#!/usr/bin/python -O
+#!/usr/bin/env python -O
 #
 # pdf2html.cgi - Gateway script for converting PDF into HTML.
 #
@@ -48,7 +48,7 @@ def convert(infp, outfp, path, codec='utf-8',
             maxpages=0, maxfilesize=0, pagenos=None,
             html=True):
     # save the input file.
-    src = file(path, 'wb')
+    src = open(path, 'wb')
     nbytes = 0
     while 1:
         data = infp.read(4096)
@@ -68,7 +68,7 @@ def convert(infp, outfp, path, codec='utf-8',
                                layoutmode='exact')
     else:
         device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams)
-    fp = file(path, 'rb')
+    fp = open(path, 'rb')
     interpreter = PDFPageInterpreter(rsrcmgr, device)
     for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages):
         interpreter.process_page(page)
@@ -196,7 +196,7 @@ class WebApp(object):
             try:
                 convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
                         maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
-            except Exception, e:
+            except Exception as e:
                 self.put('<p>Sorry, an error has occurred: %s' % q(repr(e)))
                 self.logger.error('convert: %r: path=%r: %s' % (e, traceback.format_exc()))
         finally:
