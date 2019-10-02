@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-import struct
-import os
-import os.path
+import struct, os, os.path
 from io import BytesIO
 from .pdftypes import LITERALS_DCT_DECODE
 from .pdfcolor import LITERAL_DEVICE_GRAY
