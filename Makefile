@@ -3,7 +3,7 @@
 
 PACKAGE=pdfminer
 
-PYTHON=python2
+PYTHON=python
 GIT=git
 RM=rm -f
 CP=cp -f
@@ -55,12 +55,11 @@ $(CMAPDST)/to-unicode-Adobe-Korea1.pickle.gz: $(CMAPDST)
 		$(CMAPDST) Adobe-Korea1 $(CMAPSRC)/cid2code_Adobe_Korea1.txt
 
 test: cmap
-	$(PYTHON) -m doctest \
-		pdfminer/arcfour.py \
-		pdfminer/lzw.py \
-		pdfminer/ascii85.py \
-		pdfminer/runlength.py \
-		pdfminer/rijndael.py
+	$(PYTHON) -m pdfminer.arcfour
+	$(PYTHON) -m pdfminer.ascii85
+	$(PYTHON) -m pdfminer.lzw
+	$(PYTHON) -m pdfminer.rijndael
+	$(PYTHON) -m pdfminer.runlength
 	$(PYTHON) -m pdfminer.ccitt
 	$(PYTHON) -m pdfminer.psparser
 	cd samples && $(MAKE) test

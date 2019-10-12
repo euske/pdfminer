@@ -38,7 +38,7 @@ def main(argv):
     rotation = 0
     stripcontrol = False
     layoutmode = 'normal'
-    codec = 'utf-8'
+    encoding = 'utf-8'
     pageno = 1
     scale = 1
     caching = True
@@ -63,7 +63,7 @@ def main(argv):
         elif k == '-R': rotation = int(v)
         elif k == '-S': stripcontrol = True
         elif k == '-t': outtype = v
-        elif k == '-c': codec = v
+        elif k == '-c': encoding = v
         elif k == '-s': scale = float(v)
     #
     PDFDocument.debug = debug
@@ -82,33 +82,32 @@ def main(argv):
             elif outfile.endswith('.tag'):
                 outtype = 'tag'
     if outfile:
-        outfp = file(outfile, 'w')
+        outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
     if outtype == 'text':
-        device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+        device = TextConverter(rsrcmgr, outfp, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
-        device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+        device = XMLConverter(rsrcmgr, outfp, laparams=laparams,
                               imagewriter=imagewriter,
                               stripcontrol=stripcontrol)
     elif outtype == 'html':
-        device = HTMLConverter(rsrcmgr, outfp, codec=codec, scale=scale,
+        device = HTMLConverter(rsrcmgr, outfp, scale=scale,
                                layoutmode=layoutmode, laparams=laparams,
                                imagewriter=imagewriter, debug=debug)
     elif outtype == 'tag':
-        device = TagExtractor(rsrcmgr, outfp, codec=codec)
+        device = TagExtractor(rsrcmgr, outfp)
     else:
         return usage()
     for fname in args:
-        fp = file(fname, 'rb')
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        for page in PDFPage.get_pages(fp, pagenos,
-                                      maxpages=maxpages, password=password,
-                                      caching=caching, check_extractable=True):
-            page.rotate = (page.rotate+rotation) % 360
-            interpreter.process_page(page)
-        fp.close()
+        with open(fname, 'rb') as fp:
+            interpreter = PDFPageInterpreter(rsrcmgr, device)
+            for page in PDFPage.get_pages(fp, pagenos,
+                                          maxpages=maxpages, password=password,
+                                          caching=caching, check_extractable=True):
+                page.rotate = (page.rotate+rotation) % 360
+                interpreter.process_page(page)
     device.close()
     outfp.close()
     return

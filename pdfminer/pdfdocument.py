@@ -66,7 +66,7 @@ LITERAL_CATALOG = LIT('Catalog')
 class PDFBaseXRef(object):
 
     debug = False
-    
+
     def get_trailer(self):
         raise NotImplementedError
 
@@ -109,10 +109,10 @@ class PDFXRef(PDFBaseXRef):
             if len(f) != 2:
                 raise PDFNoValidXRef('Trailer not found: %r: line=%r' % (parser, line))
             try:
-                (start, nobjs) = map(long, f)
+                (start, nobjs) = map(int, f)
             except ValueError:
                 raise PDFNoValidXRef('Invalid line: %r: line=%r' % (parser, line))
-            for objid in xrange(start, start+nobjs):
+            for objid in range(start, start+nobjs):
                 try:
                     (_, line) = parser.nextline()
                 except PSEOF:
@@ -123,12 +123,12 @@ class PDFXRef(PDFBaseXRef):
                 (pos, genno, use) = f
                 if use != b'n':
                     continue
-                self.offsets[objid] = (None, long(pos), int(genno))
+                self.offsets[objid] = (None, int(pos), int(genno))
         if self.debug: logging.info('xref objects: %r' % self.offsets)
         self.load_trailer(parser)
         return
 
-    KEYWORD_TRAILER = KWD('trailer')
+    KEYWORD_TRAILER = KWD(b'trailer')
 
     def load_trailer(self, parser):
         try:
@@ -147,7 +147,7 @@ class PDFXRef(PDFBaseXRef):
         return self.trailer
 
     def get_objids(self):
-        return self.offsets.iterkeys()
+        return self.offsets.keys()
 
     def get_pos(self, objid):
         try:
@@ -163,7 +163,7 @@ class PDFXRefFallback(PDFXRef):
     def __repr__(self):
         return '<PDFXRefFallback: offsets=%r>' % (self.offsets.keys())
 
-    PDFOBJ_CUE = re.compile(r'^(\d+)\s+(\d+)\s+obj\b')
+    PDFOBJ_CUE = re.compile(br'^(\d+)\s+(\d+)\s+obj\b')
 
     def load(self, parser):
         parser.seek(0)
@@ -204,7 +204,7 @@ class PDFXRefFallback(PDFXRef):
                 except PSEOF:
                     pass
                 n = min(n, len(objs)//2)
-                for index in xrange(n):
+                for index in range(n):
                     objid1 = objs[index*2]
                     self.offsets[objid1] = (objid, index, 0)
         return
@@ -215,7 +215,7 @@ class PDFXRefFallback(PDFXRef):
 class PDFXRefStream(PDFBaseXRef):
 
     debug = False
-    
+
     def __init__(self):
         self.data = None
         self.entlen = None
@@ -253,7 +253,7 @@ class PDFXRefStream(PDFBaseXRef):
 
     def get_objids(self):
         for (start, nobjs) in self.ranges:
-            for i in xrange(nobjs):
+            for i in range(nobjs):
                 offset = self.entlen * i
                 ent = self.data[offset:offset+self.entlen]
                 f1 = nunpack(ent[:self.fl1], 1)
@@ -639,7 +639,7 @@ class PDFDocument(object):
             pass
         return (objs, n)
 
-    KEYWORD_OBJ = KWD('obj')
+    KEYWORD_OBJ = KWD(b'obj')
 
     def _getobj_parse(self, pos, objid):
         self._parser.seek(pos)
@@ -768,7 +768,7 @@ class PDFDocument(object):
             raise PDFNoValidXRef('Unexpected EOF')
         if self.debug:
             logging.info('xref found: pos=%r' % prev)
-        return long(prev)
+        return int(prev)
 
     # read xref table
     def read_xref_from(self, parser, start, xrefs):

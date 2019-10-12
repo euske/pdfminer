@@ -79,7 +79,7 @@ class CMap(CMapBase):
         assert isinstance(cmap, CMap)
 
         def copy(dst, src):
-            for (k, v) in src.iteritems():
+            for (k, v) in src.items():
                 if isinstance(v, dict):
                     d = {}
                     dst[k] = d
@@ -94,7 +94,6 @@ class CMap(CMapBase):
             logging.debug('decode: %r, %r' % (self, code))
         d = self.code2cid
         for c in code:
-            c = ord(c)
             if c in d:
                 d = d[c]
                 if isinstance(d, int):
@@ -108,7 +107,7 @@ class CMap(CMapBase):
         if code2cid is None:
             code2cid = self.code2cid
             code = ()
-        for (k, v) in sorted(code2cid.iteritems()):
+        for (k, v) in sorted(code2cid.items()):
             c = code+(k,)
             if isinstance(v, int):
                 out.write('code %r = cid %d\n' % (c, v))
@@ -147,7 +146,7 @@ class UnicodeMap(CMapBase):
         return self.cid2unichr[cid]
 
     def dump(self, out=sys.stdout):
-        for (k, v) in sorted(self.cid2unichr.iteritems()):
+        for (k, v) in sorted(self.cid2unichr.items()):
             out.write('cid %d = unicode %r\n' % (k, v))
         return
 
@@ -181,9 +180,9 @@ class FileUnicodeMap(UnicodeMap):
         if isinstance(code, PSLiteral):
             # Interpret as an Adobe glyph name.
             self.cid2unichr[cid] = name2unicode(code.name)
-        elif isinstance(code, str):
+        elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
-            self.cid2unichr[cid] = unicode(code, 'UTF-16BE', 'ignore')
+            self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
         elif isinstance(code, int):
             self.cid2unichr[cid] = unichr(code)
         else:
@@ -303,7 +302,7 @@ class CMapParser(PSStackParser):
     KEYWORD_ENDBFCHAR = KWD(b'endbfchar')
     KEYWORD_BEGINNOTDEFRANGE = KWD(b'beginnotdefrange')
     KEYWORD_ENDNOTDEFRANGE = KWD(b'endnotdefrange')
-    
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_BEGINCMAP:
             self._in_cmap = True
@@ -359,7 +358,7 @@ class CMapParser(PSStackParser):
                 e1 = nunpack(evar)
                 vlen = len(svar)
                 #assert s1 <= e1
-                for i in xrange(e1-s1+1):
+                for i in range(e1-s1+1):
                     x = sprefix+struct.pack('>L', s1+i)[-vlen:]
                     self.cmap.add_code2cid(x, cid+i)
             return
@@ -387,14 +386,14 @@ class CMapParser(PSStackParser):
                 e1 = nunpack(e)
                 #assert s1 <= e1
                 if isinstance(code, list):
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         self.cmap.add_cid2unichr(s1+i, code[i])
                 else:
                     var = code[-4:]
                     base = nunpack(var)
                     prefix = code[:-4]
                     vlen = len(var)
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         x = prefix+struct.pack('>L', base+i)[-vlen:]
                         self.cmap.add_cid2unichr(s1+i, x)
             return
@@ -424,12 +423,11 @@ class CMapParser(PSStackParser):
 def main(argv):
     args = argv[1:]
     for fname in args:
-        fp = file(fname, 'rb')
-        cmap = FileUnicodeMap()
-        #cmap = FileCMap()
-        CMapParser(cmap, fp).run()
-        fp.close()
-        cmap.dump()
+        with open(fname, 'rb') as fp:
+            cmap = FileUnicodeMap()
+            #cmap = FileCMap()
+            CMapParser(cmap, fp).run()
+            cmap.dump()
     return
 
 if __name__ == '__main__':

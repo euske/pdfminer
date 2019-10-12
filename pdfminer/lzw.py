@@ -40,14 +40,14 @@ class LZWDecoder(object):
                 x = self.fp.read(1)
                 if not x:
                     raise EOFError
-                self.buff = ord(x)
+                self.buff = x[0]
                 self.bpos = 0
         return v
 
     def feed(self, code):
         x = b''
         if code == 256:
-            self.table = [chr(c) for c in xrange(256)]  # 0-255
+            self.table = [bytes([c]) for c in range(256)]  # 0-255
             self.table.append(None)  # 256
             self.table.append(None)  # 257
             self.prevbuf = b''
@@ -95,12 +95,12 @@ class LZWDecoder(object):
 # lzwdecode
 def lzwdecode(data):
     """
-    >>> lzwdecode(b'\x80\x0b\x60\x50\x22\x0c\x0c\x85\x01')
-    '\x2d\x2d\x2d\x2d\x2d\x41\x2d\x2d\x2d\x42'
+    >>> lzwdecode(bytes.fromhex('800b6050220c0c8501'))
+    b'-----A---B'
     """
     fp = BytesIO(data)
     return b''.join(LZWDecoder(fp).run())
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod()
+    print('pdfminer.lzw', doctest.testmod())

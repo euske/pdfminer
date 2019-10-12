@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from .utils import mult_matrix
 from .utils import translate_matrix
-from .utils import enc
+from .utils import q
 from .utils import bbox2str
 from .utils import isnumber
 from .pdffont import PDFUnicodeNotDefined
@@ -128,10 +128,9 @@ class PDFTextDevice(PDFDevice):
 ##
 class TagExtractor(PDFDevice):
 
-    def __init__(self, rsrcmgr, outfp, codec='utf-8'):
+    def __init__(self, rsrcmgr, outfp):
         PDFDevice.__init__(self, rsrcmgr)
         self.outfp = outfp
-        self.codec = codec
         self.pageno = 0
         self._stack = []
         return
@@ -149,7 +148,7 @@ class TagExtractor(PDFDevice):
                     text += char
                 except PDFUnicodeNotDefined:
                     pass
-        self.outfp.write(enc(text, self.codec))
+        self.outfp.write(q(text))
         return
 
     def begin_page(self, page, ctm):
@@ -165,16 +164,16 @@ class TagExtractor(PDFDevice):
     def begin_tag(self, tag, props=None):
         s = ''
         if isinstance(props, dict):
-            s = ''.join(' %s="%s"' % (enc(k), enc(str(v))) for (k, v)
-                        in sorted(props.iteritems()))
-        self.outfp.write('<%s%s>' % (enc(tag.name), s))
+            s = ''.join(' %s="%s"' % (q(k), q(str(v))) for (k, v)
+                        in sorted(props.items()))
+        self.outfp.write('<%s%s>' % (q(tag.name), s))
         self._stack.append(tag)
         return
 
     def end_tag(self):
         assert self._stack
         tag = self._stack.pop(-1)
-        self.outfp.write('</%s>' % enc(tag.name))
+        self.outfp.write('</%s>' % q(tag.name))
         return
 
     def do_tag(self, tag, props=None):
