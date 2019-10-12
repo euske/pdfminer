@@ -256,12 +256,12 @@ class PDFContentParser(PSStackParser):
         while i <= len(target):
             self.fillbuf()
             if i:
-                c = self.buf[self.charpos]
+                c = self.buf[self.charpos:self.charpos+1]
                 data += c
                 self.charpos += 1
                 if len(target) <= i and c.isspace():
                     i += 1
-                elif i < len(target) and c == target[i]:
+                elif i < len(target) and c == target[i:i+1]:
                     i += 1
                 else:
                     i = 0

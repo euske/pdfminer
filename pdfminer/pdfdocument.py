@@ -24,7 +24,7 @@ from .pdftypes import PDFStream
 from .pdftypes import PDFObjectNotFound
 from .pdftypes import decipher_all
 from .pdftypes import int_value
-from .pdftypes import str_value
+from .pdftypes import bytes_value
 from .pdftypes import list_value
 from .pdftypes import dict_value
 from .pdftypes import stream_value
@@ -311,8 +311,8 @@ class PDFStandardSecurityHandler(object):
         self.v = int_value(self.param.get('V', 0))
         self.r = int_value(self.param['R'])
         self.p = int_value(self.param['P'])
-        self.o = str_value(self.param['O'])
-        self.u = str_value(self.param['U'])
+        self.o = bytes_value(self.param['O'])
+        self.u = bytes_value(self.param['U'])
         self.length = int_value(self.param.get('Length', 40))
         return
 
@@ -472,8 +472,8 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
     def init_params(self):
         super(PDFStandardSecurityHandlerV5, self).init_params()
         self.length = 256
-        self.oe = str_value(self.param['OE'])
-        self.ue = str_value(self.param['UE'])
+        self.oe = bytes_value(self.param['OE'])
+        self.ue = bytes_value(self.param['UE'])
         self.o_hash = self.o[:32]
         self.o_validation_salt = self.o[32:40]
         self.o_key_salt = self.o[40:]
@@ -698,7 +698,7 @@ class PDFDocument(object):
             entry = dict_value(entry)
             if 'Title' in entry:
                 if 'A' in entry or 'Dest' in entry:
-                    title = decode_text(str_value(entry['Title']))
+                    title = decode_text(bytes_value(entry['Title']))
                     dest = entry.get('Dest')
                     action = entry.get('A')
                     se = entry.get('SE')

@@ -138,12 +138,12 @@ def num_value(x):
     return x
 
 
-def str_value(x):
+def bytes_value(x):
     x = resolve1(x)
-    if not isinstance(x, str):
+    if not isinstance(x, bytes):
         if STRICT:
-            raise PDFTypeError('String required: %r' % x)
-        return ''
+            raise PDFTypeError('Bytes required: %r' % x)
+        return b''
     return x
 
 

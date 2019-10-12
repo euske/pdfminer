@@ -118,7 +118,7 @@ def dumpallobjs(out, doc, mode=None):
     return
 
 # dumpoutline
-def dumpoutline(outfp, fname, objids, pagenos, password='',
+def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                 dumpall=False, mode=None, extractdir=None):
     with open(fname, 'rb') as fp:
         parser = PDFParser(fp)
@@ -165,7 +165,7 @@ def dumpoutline(outfp, fname, objids, pagenos, password='',
 # extractembedded
 LITERAL_FILESPEC = LIT('Filespec')
 LITERAL_EMBEDDEDFILE = LIT('EmbeddedFile')
-def extractembedded(outfp, fname, objids, pagenos, password='',
+def extractembedded(outfp, fname, objids, pagenos, password=b'',
                     dumpall=False, mode=None, extractdir=None):
     def extract1(obj):
         filename = os.path.basename(obj['UF'] or obj['F'])
@@ -198,7 +198,7 @@ def extractembedded(outfp, fname, objids, pagenos, password='',
     return
 
 # dumppdf
-def dumppdf(outfp, fname, objids, pagenos, password='',
+def dumppdf(outfp, fname, objids, pagenos, password=b'',
             dumpall=False, mode=None, extractdir=None):
     with open(fname, 'rb') as fp:
         parser = PDFParser(fp)
@@ -240,7 +240,7 @@ def main(argv):
     objids = []
     pagenos = set()
     mode = None
-    password = ''
+    password = b''
     dumpall = False
     proc = dumppdf
     outfp = sys.stdout
@@ -250,7 +250,7 @@ def main(argv):
         elif k == '-o': outfp = open(v, 'wb')
         elif k == '-i': objids.extend( int(x) for x in v.split(',') )
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
-        elif k == '-P': password = v
+        elif k == '-P': password = v.encode('ascii')
         elif k == '-a': dumpall = True
         elif k == '-r': mode = 'raw'
         elif k == '-b': mode = 'binary'

@@ -28,7 +28,7 @@ def main(argv):
     # debug option
     debug = 0
     # input option
-    password = ''
+    password = b''
     pagenos = set()
     maxpages = 0
     # output option
@@ -48,7 +48,7 @@ def main(argv):
         if k == '-d': debug += 1
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-m': maxpages = int(v)
-        elif k == '-P': password = v
+        elif k == '-P': password = v.encode('ascii')
         elif k == '-o': outfile = v
         elif k == '-C': caching = False
         elif k == '-n': laparams = None

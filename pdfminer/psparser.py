@@ -228,7 +228,7 @@ class PSBaseParser(object):
         while 1:
             self.fillbuf()
             if eol:
-                c = self.buf[self.charpos]
+                c = self.buf[self.charpos:self.charpos+1]
                 # handle b'\r\n'
                 if c == b'\n':
                     linebuf += c
@@ -238,7 +238,7 @@ class PSBaseParser(object):
             if m:
                 linebuf += self.buf[self.charpos:m.end(0)]
                 self.charpos = m.end(0)
-                if linebuf[-1] == b'\r':
+                if linebuf[-1:] == b'\r':
                     eol = True
                 else:
                     break

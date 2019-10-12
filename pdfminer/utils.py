@@ -221,7 +221,7 @@ PDFDocEncoding = ''.join(chr(x) for x in (
 
 
 def decode_text(s):
-    """Decodes a PDFDocEncoding string to Unicode."""
+    """Decodes a PDFDocEncoding bytes to Unicode."""
     if s.startswith(b'\xfe\xff'):
         return s[2:].decode('utf-16be', 'ignore')
     else:
