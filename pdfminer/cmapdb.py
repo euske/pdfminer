@@ -15,10 +15,7 @@ import sys
 import os
 import os.path
 import gzip
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle as pickle
+import marshal
 import struct
 import logging
 from .psparser import PSStackParser
@@ -228,7 +225,7 @@ class CMapDB(object):
 
     @classmethod
     def _load_data(klass, name):
-        filename = '%s.pickle.gz' % name
+        filename = '%s.marshal.gz' % name
         logging.info('loading: %r' % name)
         cmap_paths = (os.environ.get('CMAP_PATH', '/usr/share/pdfminer/'),
                       os.path.join(os.path.dirname(__file__), 'cmap'),)
@@ -237,7 +234,7 @@ class CMapDB(object):
             if os.path.exists(path):
                 gzfile = gzip.open(path)
                 try:
-                    return type(str(name), (), pickle.loads(gzfile.read()))
+                    return type(str(name), (), marshal.loads(gzfile.read()))
                 finally:
                     gzfile.close()
         else:
