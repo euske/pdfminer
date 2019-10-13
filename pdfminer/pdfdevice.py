@@ -139,7 +139,7 @@ class TagExtractor(PDFDevice):
         font = textstate.font
         text = ''
         for obj in seq:
-            if not isinstance(obj, str):
+            if not isinstance(obj, bytes):
                 continue
             chars = font.decode(obj)
             for cid in chars:

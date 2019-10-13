@@ -156,7 +156,7 @@ class UnicodeMap(CMapBase):
 class FileCMap(CMap):
 
     def add_code2cid(self, code, cid):
-        assert isinstance(code, str) and isinstance(cid, int)
+        assert isinstance(code, bytes) and isinstance(cid, int)
         d = self.code2cid
         for c in code[:-1]:
             c = ord(c)
@@ -345,7 +345,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDCIDRANGE:
             objs = [obj for (__, obj) in self.popall()]
             for (s, e, cid) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                    not isinstance(cid, int) or len(s) != len(e)):
                     continue
                 sprefix = s[:-4]
@@ -369,7 +369,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDCIDCHAR:
             objs = [obj for (__, obj) in self.popall()]
             for (cid, code) in choplist(2, objs):
-                if isinstance(code, str) and isinstance(cid, str):
+                if isinstance(code, bytes) and isinstance(cid, bytes):
                     self.cmap.add_code2cid(code, nunpack(cid))
             return
 
@@ -379,7 +379,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFRANGE:
             objs = [obj for (__, obj) in self.popall()]
             for (s, e, code) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                    len(s) != len(e)):
                         continue
                 s1 = nunpack(s)
@@ -404,7 +404,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFCHAR:
             objs = [obj for (__, obj) in self.popall()]
             for (cid, code) in choplist(2, objs):
-                if isinstance(cid, str) and isinstance(code, str):
+                if isinstance(cid, bytes) and isinstance(code, bytes):
                     self.cmap.add_cid2unichr(nunpack(cid), code)
             return
 

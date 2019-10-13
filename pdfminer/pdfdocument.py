@@ -341,7 +341,7 @@ class PDFStandardSecurityHandler(object):
             hash.update(self.docid[0])  # 3
             result = ARC4.new(key).encrypt(hash.digest())  # 4
             for i in range(1, 20):  # 5
-                k = b''.join(chr(ord(c) ^ i) for c in key)
+                k = bytes( (c ^ i) for c in key )
                 result = ARC4.new(k).encrypt(result)
             result += result  # 6
             return result
@@ -400,7 +400,7 @@ class PDFStandardSecurityHandler(object):
         else:
             user_password = self.o
             for i in range(19, -1, -1):
-                k = b''.join(chr(ord(c) ^ i) for c in key)
+                k = bytes( (c ^ i) for c in key )
                 user_password = ARC4.new(k).decrypt(user_password)
         return self.authenticate_user_password(user_password)
 
@@ -489,7 +489,7 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
             return None
 
     def authenticate(self, password):
-        password = password.encode('utf-8')[:127]
+        password = password[:127]
         hash = SHA256.new(password)
         hash.update(self.o_validation_salt)
         hash.update(self.u)
