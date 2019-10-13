@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 from pdfminer import __version__
 
 setup(
@@ -24,6 +24,9 @@ PDF parser that can be used for other purposes instead of text analysis.''',
     package_data={
         'pdfminer': ['cmap/*.marshal.gz']
     },
+    install_requires = [
+        'pycryptdome',
+    ],
     scripts=[
         'tools/pdf2txt.py',
         'tools/dumppdf.py',
