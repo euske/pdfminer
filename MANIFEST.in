@@ -2,6 +2,7 @@ include Makefile
 include LICENSE
 include *.txt
 include *.py
+include *.md
 graft cmaprsrc
 graft docs
 graft pdfminer

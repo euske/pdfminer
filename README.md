@@ -4,9 +4,9 @@ PDFMiner
 [![Build Status](https://travis-ci.org/euske/pdfminer.svg?branch=master)](https://travis-ci.org/euske/pdfminer)
 
 PDFMiner is a tool for extracting information from PDF documents.
-Unlike other PDF-related tools, it focuses entirely on getting 
+Unlike other PDF-related tools, it focuses entirely on getting
 and analyzing text data. PDFMiner allows one to obtain
-the exact location of text in a page, as well as 
+the exact location of text in a page, as well as
 other information such as fonts or lines.
 It includes a PDF converter that can transform PDF files
 into other text formats (such as HTML). It has an extensible
@@ -34,7 +34,8 @@ Features
 How to Install
 --------------
 
- * Install Python 2.6 or newer. (**For Python 3 support have a look at [pdfminer.six](https://github.com/goulu/pdfminer)**).
+ * Install Python 3.7 or newer.
+ * Install PyCryptodome.
  * Download the source code.
  * Unpack it.
  * Run `setup.py`:
@@ -59,7 +60,7 @@ running setup.py install:
     ...
     $ python setup.py install
 
-On Windows machines which don't have `make` command, 
+On Windows machines which don't have `make` command,
 paste the following commands on a command line prompt:
 
     mkdir pdfminer\cmap
@@ -91,7 +92,7 @@ You cannot extract any text from a PDF document which does not have extraction p
 
 **dumppdf.py**
 
-dumppdf.py dumps the internal contents of a PDF file in pseudo-XML format. 
+dumppdf.py dumps the internal contents of a PDF file in pseudo-XML format.
 This program is primarily for debugging purposes,
 but it's also possible to extract some meaningful contents (e.g. images).
 
@@ -137,7 +138,7 @@ Terms and Conditions
 
 (This is so-called MIT/X License)
 
-Copyright (c) 2004-2016  Yusuke Shinyama <yusuke at shinyama dot jp>
+Copyright (c) 2004-2019  Yusuke Shinyama <yusuke at shinyama dot jp>
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
