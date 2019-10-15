@@ -229,10 +229,11 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
 def main(argv):
     import getopt
     def usage():
-        print ('usage: %s [-d] [-a] [-p pageid] [-P password] [-r|-b|-t] [-T] [-E directory] [-i objid] file ...' % argv[0])
+        print ('usage: %s [-P password] [-a] [-p pageid] [-i objid] [-o output] '
+               '[-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dap:P:rbtTE:i:')
+        (opts, args) = getopt.getopt(argv[1:], 'dP:ap:i:o:rbtTO:')
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
@@ -247,16 +248,16 @@ def main(argv):
     extractdir = None
     for (k, v) in opts:
         if k == '-d': debug += 1
-        elif k == '-o': outfp = open(v, 'wb')
-        elif k == '-i': objids.extend( int(x) for x in v.split(',') )
-        elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-P': password = v.encode('ascii')
         elif k == '-a': dumpall = True
+        elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
+        elif k == '-i': objids.extend( int(x) for x in v.split(',') )
+        elif k == '-o': outfp = open(v, 'wb')
         elif k == '-r': mode = 'raw'
         elif k == '-b': mode = 'binary'
         elif k == '-t': mode = 'text'
         elif k == '-T': proc = dumpoutline
-        elif k == '-E':
+        elif k == '-O':
             extractdir = v
             proc = extractembedded
     #
