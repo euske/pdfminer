@@ -8,7 +8,7 @@ class CorruptDataError(Exception):
 
 ##  LZWDecoder
 ##
-class LZWDecoder(object):
+class LZWDecoder:
 
     def __init__(self, fp):
         self.fp = fp

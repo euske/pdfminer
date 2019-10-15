@@ -251,7 +251,7 @@ def matrix2str(m):
 ##  It maintains two parallel lists of objects, each of
 ##  which is sorted by its x or y coordinate.
 ##
-class Plane(object):
+class Plane:
 
     def __init__(self, bbox, gridsize=50):
         self._seq = []          # preserve the object order.

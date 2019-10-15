@@ -16,7 +16,7 @@ import array
 
 ##  BitParser
 ##
-class BitParser(object):
+class BitParser:
 
     def __init__(self):
         self._pos = 0

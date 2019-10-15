@@ -35,7 +35,7 @@ class CMapError(Exception):
 
 ##  CMapBase
 ##
-class CMapBase(object):
+class CMapBase:
 
     debug = 0
 
@@ -215,7 +215,7 @@ class PyUnicodeMap(UnicodeMap):
 
 ##  CMapDB
 ##
-class CMapDB(object):
+class CMapDB:
 
     _cmap_cache = {}
     _umap_cache = {}

@@ -1039,7 +1039,7 @@ def rijndaelDecrypt(rk, nrounds, ciphertext):
 
 
 # decrypt(key, fin, fout, keybits=256)
-class RijndaelDecryptor(object):
+class RijndaelDecryptor:
 
     """
     >>> key = bytes.fromhex('00010203050607080a0b0c0d0f101112')
@@ -1061,7 +1061,7 @@ class RijndaelDecryptor(object):
 
 
 # encrypt(key, fin, fout, keybits=256)
-class RijndaelEncryptor(object):
+class RijndaelEncryptor:
 
     """
     >>> key = bytes.fromhex('00010203050607080a0b0c0d0f101112')

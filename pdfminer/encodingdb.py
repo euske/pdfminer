@@ -22,7 +22,7 @@ def name2unicode(name):
 
 ##  EncodingDB
 ##
-class EncodingDB(object):
+class EncodingDB:
 
     std2unicode = {}
     mac2unicode = {}

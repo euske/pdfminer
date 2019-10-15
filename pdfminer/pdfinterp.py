@@ -52,7 +52,7 @@ LITERAL_IMAGE = LIT('Image')
 
 ##  PDFTextState
 ##
-class PDFTextState(object):
+class PDFTextState:
 
     def __init__(self):
         self.font = None
@@ -98,7 +98,7 @@ class PDFTextState(object):
 
 ##  PDFGraphicState
 ##
-class PDFGraphicState(object):
+class PDFGraphicState:
 
     def __init__(self):
         self.linewidth = 0
@@ -130,7 +130,7 @@ class PDFGraphicState(object):
 
 ##  Resource Manager
 ##
-class PDFResourceManager(object):
+class PDFResourceManager:
 
     """Repository of shared resources.
 
@@ -311,7 +311,7 @@ class PDFContentParser(PSStackParser):
 
 ##  Interpreter
 ##
-class PDFPageInterpreter(object):
+class PDFPageInterpreter:
 
     debug = 0
 

@@ -17,7 +17,7 @@ LITERAL_PAGES = LIT('Pages')
 
 ##  PDFPage
 ##
-class PDFPage(object):
+class PDFPage:
 
     """An object that holds the information about a page.
 

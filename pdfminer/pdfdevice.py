@@ -9,7 +9,7 @@ from .pdffont import PDFUnicodeNotDefined
 
 ##  PDFDevice
 ##
-class PDFDevice(object):
+class PDFDevice:
 
     def __init__(self, rsrcmgr):
         self.rsrcmgr = rsrcmgr

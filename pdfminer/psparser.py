@@ -33,7 +33,7 @@ class PSValueError(PSException):
 
 ##  PSObject
 ##
-class PSObject(object):
+class PSObject:
 
     """Base class for all PS or PDF-related data types."""
 
@@ -87,7 +87,7 @@ class PSKeyword(PSObject):
 
 ##  PSSymbolTable
 ##
-class PSSymbolTable(object):
+class PSSymbolTable:
 
     """A utility class for storing PSLiteral/PSKeyword objects.
 
@@ -156,7 +156,7 @@ ESC_STRING = {
 }
 
 
-class PSBaseParser(object):
+class PSBaseParser:
 
     """Most basic PostScript parser that performs only tokenization.
     """

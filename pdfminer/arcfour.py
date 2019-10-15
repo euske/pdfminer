@@ -9,7 +9,7 @@ This code is in the public domain.
 
 ##  Arcfour
 ##
-class Arcfour(object):
+class Arcfour:
 
     """
     >>> Arcfour(b'Key').process(b'Plaintext').hex()

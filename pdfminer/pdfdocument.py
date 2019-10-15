@@ -63,7 +63,7 @@ LITERAL_CATALOG = LIT('Catalog')
 
 ##  XRefs
 ##
-class PDFBaseXRef(object):
+class PDFBaseXRef:
 
     debug = False
 
@@ -287,7 +287,7 @@ class PDFXRefStream(PDFBaseXRef):
 
 ##  PDFSecurityHandler
 ##
-class PDFStandardSecurityHandler(object):
+class PDFStandardSecurityHandler:
 
     PASSWORD_PADDING = (b'(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08'
                         b'..\x00\xb6\xd0h>\x80/\x0c\xa9\xfedSiz')
@@ -512,7 +512,7 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
 
 ##  PDFDocument
 ##
-class PDFDocument(object):
+class PDFDocument:
 
     """PDFDocument object represents a PDF document.
 

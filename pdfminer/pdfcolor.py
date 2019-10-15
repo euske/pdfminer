@@ -9,7 +9,7 @@ LITERAL_DEVICE_RGB = LIT('DeviceRGB')
 LITERAL_DEVICE_CMYK = LIT('DeviceCMYK')
 
 
-class PDFColorSpace(object):
+class PDFColorSpace:
 
     def __init__(self, name, ncomponents):
         self.name = name
