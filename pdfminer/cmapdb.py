@@ -569,19 +569,22 @@ def convert_cmap(outdir, regname, enc2codec, paths):
         with open(path) as fp:
             converter.load(fp)
 
+    files = []
     for enc in converter.get_encs():
         fname = '%s.marshal.gz' % enc
         path = os.path.join(outdir, fname)
         print('writing: %r...' % path)
         with gzip.open(path, 'wb') as fp:
             converter.dump_cmap(fp, enc)
+        files.append(path)
 
     fname = 'to-unicode-%s.marshal.gz' % regname
     path = os.path.join(outdir, fname)
     print ('writing: %r...' % path)
     with gzip.open(path, 'wb') as fp:
         converter.dump_unicodemap(fp)
-    return
+    files.append(path)
+    return files
 
 
 # test

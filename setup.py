@@ -1,8 +1,39 @@
 #!/usr/bin/env python
 from setuptools import setup
+from setuptools.command.install import install
 from pdfminer import __version__
 
+class install_cmap(install):
+
+    def run(self):
+        import os.path
+        import pdfminer
+        from pdfminer.cmapdb import convert_cmap
+        outdir = os.path.join(os.path.join(self.install_lib, 'pdfminer'), 'cmap')
+        print('installing cmap: %r...' % outdir)
+        os.makedirs(outdir, exist_ok=True)
+        convert_cmap(
+            outdir, 'Adobe-CNS1',
+            {'B5':'cp950', 'UniCNS-UTF8':'utf-8'},
+            ['cmaprsrc/cid2code_Adobe_CNS1.txt'])
+        convert_cmap(
+            outdir, 'Adobe-GB1',
+            {'GBK-EUC':'cp936', 'UniGB-UTF8':'utf-8'},
+            ['cmaprsrc/cid2code_Adobe_GB1.txt'])
+        convert_cmap(
+            outdir, 'Adobe-Japan1',
+            {'RKSJ':'cp932', 'EUC':'euc-jp', 'UniJIS-UTF8':'utf-8'},
+            ['cmaprsrc/cid2code_Adobe_Japan1.txt'])
+        convert_cmap(
+            outdir, 'Adobe-Korea1',
+            {'KSC-EUC':'euc-kr', 'KSC-Johab':'johab', 'KSCms-UHC':'cp949',
+             'UniKS-UTF8':'utf-8'},
+            ['cmaprsrc/cid2code_Adobe_Korea1.txt'])
+        install.run(self)
+        return
+
 setup(
+    cmdclass = { 'install': install_cmap },
     name = 'pdfminer',
     version = __version__,
     description = 'PDF parser and analyzer',
@@ -21,16 +52,12 @@ PDF parser that can be used for other purposes instead of text analysis.''',
     packages = [
         'pdfminer',
     ],
-    package_data={
-        'pdfminer': ['cmap/*.marshal.gz']
-    },
     install_requires = [
         'pycryptdome',
     ],
     scripts=[
         'tools/pdf2txt.py',
         'tools/dumppdf.py',
-        'tools/latin2ascii.py',
     ],
     keywords=[
         'pdf parser',
