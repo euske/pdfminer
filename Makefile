@@ -16,7 +16,7 @@ install:
 
 clean:
 	-$(PYTHON) setup.py clean
-	-$(RM) -r build dist MANIFEST
+	-$(RM) -r build dist MANIFEST pdfminer.egg-info
 	-cd $(PACKAGE) && $(MAKE) clean
 	-cd tools && $(MAKE) clean
 	-cd samples && $(MAKE) clean
@@ -25,10 +25,11 @@ distclean: clean cmap_clean
 
 sdist: distclean MANIFEST.in
 	$(PYTHON) setup.py sdist
-register: distclean MANIFEST.in
-	$(PYTHON) setup.py sdist upload register
+upload: sdist
+	$(TWINE) check dist/*.tar.gz
+	$(TWINE) upload dist/*.tar.gz
 
-WEBDIR=../euske.github.io/$(PACKAGE)
+WEBDIR=../github.io/$(PACKAGE)
 publish:
 	$(CP) docs/*.html docs/*.png docs/*.css $(WEBDIR)
 
