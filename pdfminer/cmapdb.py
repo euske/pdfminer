@@ -15,6 +15,7 @@ import sys
 import os
 import os.path
 import gzip
+import codecs
 import marshal
 import struct
 import logging
@@ -414,6 +415,173 @@ class CMapParser(PSStackParser):
 
         self.push((pos, token))
         return
+
+
+##  CMapConverter
+##
+class CMapConverter:
+
+    def __init__(self, enc2codec={}):
+        self.enc2codec = enc2codec
+        self.code2cid = {} # {'cmapname': ...}
+        self.is_vertical = {}
+        self.cid2unichr_h = {} # {cid: unichr}
+        self.cid2unichr_v = {} # {cid: unichr}
+        return
+
+    def get_encs(self):
+        return self.code2cid.keys()
+
+    def get_maps(self, enc):
+        if enc.endswith('-H'):
+            (hmapenc, vmapenc) = (enc, None)
+        elif enc == 'H':
+            (hmapenc, vmapenc) = ('H', 'V')
+        else:
+            (hmapenc, vmapenc) = (enc+'-H', enc+'-V')
+        if hmapenc in self.code2cid:
+            hmap = self.code2cid[hmapenc]
+        else:
+            hmap = {}
+            self.code2cid[hmapenc] = hmap
+        vmap = None
+        if vmapenc:
+            self.is_vertical[vmapenc] = True
+            if vmapenc in self.code2cid:
+                vmap = self.code2cid[vmapenc]
+            else:
+                vmap = {}
+                self.code2cid[vmapenc] = vmap
+        return (hmap, vmap)
+
+    def load(self, fp):
+        encs = None
+        for line in fp:
+            (line,_,_) = line.strip().partition('#')
+            if not line: continue
+            values = line.split('\t')
+            if encs is None:
+                assert values[0] == 'CID'
+                encs = values
+                continue
+
+            def put(dmap, code, cid, force=False):
+                for b in code[:-1]:
+                    if b in dmap:
+                        dmap = dmap[b]
+                    else:
+                        d = {}
+                        dmap[b] = d
+                        dmap = d
+                b = code[-1]
+                if force or ((b not in dmap) or dmap[b] == cid):
+                    dmap[b] = cid
+                return
+
+            def add(unimap, enc, code):
+                try:
+                    codec = self.enc2codec[enc]
+                    c = code.decode(codec, 'strict')
+                    if len(c) == 1:
+                        if c not in unimap:
+                            unimap[c] = 0
+                        unimap[c] += 1
+                except KeyError:
+                    pass
+                except UnicodeError:
+                    pass
+                return
+
+            def pick(unimap):
+                chars = sorted(
+                    unimap.items(),
+                    key=(lambda x:(x[1],-ord(x[0]))), reverse=True)
+                (c,_) = chars[0]
+                return c
+
+            cid = int(values[0])
+            unimap_h = {}
+            unimap_v = {}
+            for (enc,value) in zip(encs, values):
+                if enc == 'CID': continue
+                if value == '*': continue
+
+                # hcodes, vcodes: encoded bytes for each writing mode.
+                hcodes = []
+                vcodes = []
+                for code in value.split(','):
+                    vertical = code.endswith('v')
+                    if vertical:
+                        code = code[:-1]
+                    try:
+                        code = codecs.decode(code, 'hex')
+                    except:
+                        code = bytes([int(code, 16)])
+                    if vertical:
+                        vcodes.append(code)
+                        add(unimap_v, enc, code)
+                    else:
+                        hcodes.append(code)
+                        add(unimap_h, enc, code)
+                # add cid to each map.
+                (hmap, vmap) = self.get_maps(enc)
+                if vcodes:
+                    assert vmap is not None
+                    for code in vcodes:
+                        put(vmap, code, cid, True)
+                    for code in hcodes:
+                        put(hmap, code, cid, True)
+                else:
+                    for code in hcodes:
+                        put(hmap, code, cid)
+                        put(vmap, code, cid)
+
+            # Determine the "most popular" candidate.
+            if unimap_h:
+                self.cid2unichr_h[cid] = pick(unimap_h)
+            if unimap_v or unimap_h:
+                self.cid2unichr_v[cid] = pick(unimap_v or unimap_h)
+
+        return
+
+    def dump_cmap(self, fp, enc):
+        data = dict(
+            IS_VERTICAL=self.is_vertical.get(enc, False),
+            CODE2CID=self.code2cid.get(enc),
+        )
+        fp.write(marshal.dumps(data))
+        return
+
+    def dump_unicodemap(self, fp):
+        data = dict(
+            CID2UNICHR_H=self.cid2unichr_h,
+            CID2UNICHR_V=self.cid2unichr_v,
+        )
+        fp.write(marshal.dumps(data))
+        return
+
+# convert_cmap
+def convert_cmap(outdir, regname, enc2codec, paths):
+    converter = CMapConverter(enc2codec)
+
+    for path in paths:
+        print('reading: %r...' % path)
+        with open(path) as fp:
+            converter.load(fp)
+
+    for enc in converter.get_encs():
+        fname = '%s.marshal.gz' % enc
+        path = os.path.join(outdir, fname)
+        print('writing: %r...' % path)
+        with gzip.open(path, 'wb') as fp:
+            converter.dump_cmap(fp, enc)
+
+    fname = 'to-unicode-%s.marshal.gz' % regname
+    path = os.path.join(outdir, fname)
+    print ('writing: %r...' % path)
+    with gzip.open(path, 'wb') as fp:
+        converter.dump_unicodemap(fp)
+    return
 
 
 # test
