@@ -23,6 +23,7 @@ def main(argv):
     if not args: return usage()
     regname = args.pop(0)
 
-    return convert_cmap(outdir, regname, enc2codec, args)
+    convert_cmap(outdir, regname, enc2codec, args)
+    return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
