@@ -4,7 +4,7 @@
 PACKAGE=pdfminer
 
 PYTHON=python -E -B
-GIT=git
+TWINE=twine
 RM=rm -f
 CP=cp -f
 MKDIR=mkdir
