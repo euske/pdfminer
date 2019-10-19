@@ -4,4 +4,4 @@ python:
 install:
   - pip install pycryptodome
 script:
-  - PYTHONPATH=. make test
+  - env PYTHONPATH=. make test
