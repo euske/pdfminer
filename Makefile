@@ -3,7 +3,7 @@
 
 PACKAGE=pdfminer
 
-PYTHON=python -E -B
+PYTHON=python -B
 TWINE=twine
 RM=rm -f
 CP=cp -f
@@ -33,7 +33,7 @@ WEBDIR=../github.io/$(PACKAGE)
 publish:
 	$(CP) docs/*.html docs/*.png docs/*.css $(WEBDIR)
 
-CONV_CMAP=$(PYTHON) tools/conv_cmap.py
+CONV_CMAP=env PYTHONPATH=. $(PYTHON) tools/conv_cmap.py
 CMAPSRC=cmaprsrc
 CMAPDST=pdfminer/cmap
 cmap: $(CMAPDST)/to-unicode-Adobe-CNS1.marshal.gz $(CMAPDST)/to-unicode-Adobe-GB1.marshal.gz \
