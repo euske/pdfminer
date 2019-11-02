@@ -29,18 +29,18 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
             c = 0
             for b in line1:
                 c = (c+b) & 255
-                line2 += bytes(c)
+                line2 += bytes([c])
         elif ft == b'\x02':
             # PNG up
             for (a, b) in zip(line0, line1):
                 c = (a+b) & 255
-                line2 += bytes(c)
+                line2 += bytes([c])
         elif ft == b'\x03':
             # PNG average (UNTESTED)
             c = 0
             for (a, b) in zip(line0, line1):
                 c = ((c+a+b)//2) & 255
-                line2 += bytes(c)
+                line2 += bytes([c])
         else:
             # unsupported
             raise ValueError("Unsupported predictor value: %d"%ft)
