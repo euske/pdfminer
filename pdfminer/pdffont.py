@@ -19,6 +19,7 @@ from .pdftypes import PDFException
 from .pdftypes import resolve1
 from .pdftypes import int_value
 from .pdftypes import num_value
+from .pdftypes import bytes_value
 from .pdftypes import list_value
 from .pdftypes import dict_value
 from .pdftypes import stream_value
@@ -638,8 +639,9 @@ class PDFCIDFont(PDFFont):
                 raise PDFFontError('BaseFont is missing')
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
-        self.cidcoding = (self.cidsysteminfo.get('Registry', 'unknown') + b'-' +
-                          self.cidsysteminfo.get('Ordering', 'unknown')).decode('ascii')
+        registry = bytes_value(self.cidsysteminfo.get('Registry', b'unknown'))
+        ordering = bytes_value(self.cidsysteminfo.get('Ordering', b'unknown'))
+        self.cidcoding = (registry + b'-' + ordering).decode('ascii')
         try:
             name = literal_name(spec['Encoding'])
         except KeyError:

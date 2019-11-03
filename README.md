@@ -3,6 +3,7 @@
 PDFMiner is a text extraction tool for PDF documents.
 
 [![Build Status](https://travis-ci.org/euske/pdfminer.svg?branch=master)](https://travis-ci.org/euske/pdfminer)
+![PyPI](https://img.shields.io/pypi/v/pdfminer)
 
 **Warning**: Starting from version 20191010, PDFMiner supports **Python 3 only**.
 
