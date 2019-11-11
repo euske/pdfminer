@@ -2,4 +2,7 @@
 __version__ = '20191103'
 
 if __name__ == '__main__':
-    print (__version__)
+    try:
+        print (__version__)
+    except:
+        print(__version__)
