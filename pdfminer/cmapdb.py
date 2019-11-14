@@ -15,10 +15,8 @@ import sys
 import os
 import os.path
 import gzip
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle as pickle
+import codecs
+import marshal
 import struct
 import logging
 from .psparser import PSStackParser
@@ -38,7 +36,7 @@ class CMapError(Exception):
 
 ##  CMapBase
 ##
-class CMapBase(object):
+class CMapBase:
 
     debug = 0
 
@@ -79,7 +77,7 @@ class CMap(CMapBase):
         assert isinstance(cmap, CMap)
 
         def copy(dst, src):
-            for (k, v) in src.iteritems():
+            for (k, v) in src.items():
                 if isinstance(v, dict):
                     d = {}
                     dst[k] = d
@@ -94,7 +92,6 @@ class CMap(CMapBase):
             logging.debug('decode: %r, %r' % (self, code))
         d = self.code2cid
         for c in code:
-            c = ord(c)
             if c in d:
                 d = d[c]
                 if isinstance(d, int):
@@ -108,7 +105,7 @@ class CMap(CMapBase):
         if code2cid is None:
             code2cid = self.code2cid
             code = ()
-        for (k, v) in sorted(code2cid.iteritems()):
+        for (k, v) in sorted(code2cid.items()):
             c = code+(k,)
             if isinstance(v, int):
                 out.write('code %r = cid %d\n' % (c, v))
@@ -150,7 +147,7 @@ class UnicodeMap(CMapBase):
         return self.cid2unichr[cid]
 
     def dump(self, out=sys.stdout):
-        for (k, v) in sorted(self.cid2unichr.iteritems()):
+        for (k, v) in sorted(self.cid2unichr.items()):
             out.write('cid %d = unicode %r\n' % (k, v))
         return
 
@@ -160,7 +157,7 @@ class UnicodeMap(CMapBase):
 class FileCMap(CMap):
 
     def add_code2cid(self, code, cid):
-        assert isinstance(code, str) and isinstance(cid, int)
+        assert isinstance(code, bytes) and isinstance(cid, int)
         d = self.code2cid
         for c in code[:-1]:
             c = ord(c)
@@ -184,11 +181,11 @@ class FileUnicodeMap(UnicodeMap):
         if isinstance(code, PSLiteral):
             # Interpret as an Adobe glyph name.
             self.cid2unichr[cid] = name2unicode(code.name)
-        elif isinstance(code, str):
+        elif isinstance(code, bytes):
             # Interpret as UTF-16BE.
-            self.cid2unichr[cid] = unicode(code, 'UTF-16BE', 'ignore')
+            self.cid2unichr[cid] = code.decode('UTF-16BE', 'ignore')
         elif isinstance(code, int):
-            self.cid2unichr[cid] = unichr(code)
+            self.cid2unichr[cid] = chr(code)
         else:
             raise TypeError(code)
         return
@@ -222,7 +219,7 @@ class PyUnicodeMap(UnicodeMap):
 
 ##  CMapDB
 ##
-class CMapDB(object):
+class CMapDB:
 
     _cmap_cache = {}
     _umap_cache = {}
@@ -232,7 +229,7 @@ class CMapDB(object):
 
     @classmethod
     def _load_data(klass, name):
-        filename = '%s.pickle.gz' % name
+        filename = '%s.marshal.gz' % name
         logging.info('loading: %r' % name)
         cmap_paths = (os.environ.get('CMAP_PATH', '/usr/share/pdfminer/'),
                       os.path.join(os.path.dirname(__file__), 'cmap'),)
@@ -241,7 +238,7 @@ class CMapDB(object):
             if os.path.exists(path):
                 gzfile = gzip.open(path)
                 try:
-                    return type(str(name), (), pickle.loads(gzfile.read()))
+                    return type(str(name), (), marshal.loads(gzfile.read()))
                 finally:
                     gzfile.close()
         else:
@@ -306,7 +303,7 @@ class CMapParser(PSStackParser):
     KEYWORD_ENDBFCHAR = KWD(b'endbfchar')
     KEYWORD_BEGINNOTDEFRANGE = KWD(b'beginnotdefrange')
     KEYWORD_ENDNOTDEFRANGE = KWD(b'endnotdefrange')
-    
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_BEGINCMAP:
             self._in_cmap = True
@@ -349,7 +346,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDCIDRANGE:
             objs = [obj for (__, obj) in self.popall()]
             for (s, e, cid) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                    not isinstance(cid, int) or len(s) != len(e)):
                     continue
                 sprefix = s[:-4]
@@ -362,7 +359,7 @@ class CMapParser(PSStackParser):
                 e1 = nunpack(evar)
                 vlen = len(svar)
                 #assert s1 <= e1
-                for i in xrange(e1-s1+1):
+                for i in range(e1-s1+1):
                     x = sprefix+struct.pack('>L', s1+i)[-vlen:]
                     self.cmap.add_code2cid(x, cid+i)
             return
@@ -373,7 +370,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDCIDCHAR:
             objs = [obj for (__, obj) in self.popall()]
             for (cid, code) in choplist(2, objs):
-                if isinstance(code, str) and isinstance(cid, str):
+                if isinstance(code, bytes) and isinstance(cid, bytes):
                     self.cmap.add_code2cid(code, nunpack(cid))
             return
 
@@ -383,21 +380,21 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFRANGE:
             objs = [obj for (__, obj) in self.popall()]
             for (s, e, code) in choplist(3, objs):
-                if (not isinstance(s, str) or not isinstance(e, str) or
+                if (not isinstance(s, bytes) or not isinstance(e, bytes) or
                    len(s) != len(e)):
                         continue
                 s1 = nunpack(s)
                 e1 = nunpack(e)
                 #assert s1 <= e1
                 if isinstance(code, list):
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         self.cmap.add_cid2unichr(s1+i, code[i])
                 else:
                     var = code[-4:]
                     base = nunpack(var)
                     prefix = code[:-4]
                     vlen = len(var)
-                    for i in xrange(e1-s1+1):
+                    for i in range(e1-s1+1):
                         x = prefix+struct.pack('>L', base+i)[-vlen:]
                         self.cmap.add_cid2unichr(s1+i, x)
             return
@@ -408,7 +405,7 @@ class CMapParser(PSStackParser):
         if token is self.KEYWORD_ENDBFCHAR:
             objs = [obj for (__, obj) in self.popall()]
             for (cid, code) in choplist(2, objs):
-                if isinstance(cid, str) and isinstance(code, str):
+                if isinstance(cid, bytes) and isinstance(code, bytes):
                     self.cmap.add_cid2unichr(nunpack(cid), code)
             return
 
@@ -423,16 +420,185 @@ class CMapParser(PSStackParser):
         return
 
 
+##  CMapConverter
+##
+class CMapConverter:
+
+    def __init__(self, enc2codec={}):
+        self.enc2codec = enc2codec
+        self.code2cid = {} # {'cmapname': ...}
+        self.is_vertical = {}
+        self.cid2unichr_h = {} # {cid: unichr}
+        self.cid2unichr_v = {} # {cid: unichr}
+        return
+
+    def get_encs(self):
+        return self.code2cid.keys()
+
+    def get_maps(self, enc):
+        if enc.endswith('-H'):
+            (hmapenc, vmapenc) = (enc, None)
+        elif enc == 'H':
+            (hmapenc, vmapenc) = ('H', 'V')
+        else:
+            (hmapenc, vmapenc) = (enc+'-H', enc+'-V')
+        if hmapenc in self.code2cid:
+            hmap = self.code2cid[hmapenc]
+        else:
+            hmap = {}
+            self.code2cid[hmapenc] = hmap
+        vmap = None
+        if vmapenc:
+            self.is_vertical[vmapenc] = True
+            if vmapenc in self.code2cid:
+                vmap = self.code2cid[vmapenc]
+            else:
+                vmap = {}
+                self.code2cid[vmapenc] = vmap
+        return (hmap, vmap)
+
+    def load(self, fp):
+        encs = None
+        for line in fp:
+            (line,_,_) = line.strip().partition('#')
+            if not line: continue
+            values = line.split('\t')
+            if encs is None:
+                assert values[0] == 'CID'
+                encs = values
+                continue
+
+            def put(dmap, code, cid, force=False):
+                for b in code[:-1]:
+                    if b in dmap:
+                        dmap = dmap[b]
+                    else:
+                        d = {}
+                        dmap[b] = d
+                        dmap = d
+                b = code[-1]
+                if force or ((b not in dmap) or dmap[b] == cid):
+                    dmap[b] = cid
+                return
+
+            def add(unimap, enc, code):
+                try:
+                    codec = self.enc2codec[enc]
+                    c = code.decode(codec, 'strict')
+                    if len(c) == 1:
+                        if c not in unimap:
+                            unimap[c] = 0
+                        unimap[c] += 1
+                except KeyError:
+                    pass
+                except UnicodeError:
+                    pass
+                return
+
+            def pick(unimap):
+                chars = sorted(
+                    unimap.items(),
+                    key=(lambda x:(x[1],-ord(x[0]))), reverse=True)
+                (c,_) = chars[0]
+                return c
+
+            cid = int(values[0])
+            unimap_h = {}
+            unimap_v = {}
+            for (enc,value) in zip(encs, values):
+                if enc == 'CID': continue
+                if value == '*': continue
+
+                # hcodes, vcodes: encoded bytes for each writing mode.
+                hcodes = []
+                vcodes = []
+                for code in value.split(','):
+                    vertical = code.endswith('v')
+                    if vertical:
+                        code = code[:-1]
+                    try:
+                        code = codecs.decode(code, 'hex')
+                    except:
+                        code = bytes([int(code, 16)])
+                    if vertical:
+                        vcodes.append(code)
+                        add(unimap_v, enc, code)
+                    else:
+                        hcodes.append(code)
+                        add(unimap_h, enc, code)
+                # add cid to each map.
+                (hmap, vmap) = self.get_maps(enc)
+                if vcodes:
+                    assert vmap is not None
+                    for code in vcodes:
+                        put(vmap, code, cid, True)
+                    for code in hcodes:
+                        put(hmap, code, cid, True)
+                else:
+                    for code in hcodes:
+                        put(hmap, code, cid)
+                        put(vmap, code, cid)
+
+            # Determine the "most popular" candidate.
+            if unimap_h:
+                self.cid2unichr_h[cid] = pick(unimap_h)
+            if unimap_v or unimap_h:
+                self.cid2unichr_v[cid] = pick(unimap_v or unimap_h)
+
+        return
+
+    def dump_cmap(self, fp, enc):
+        data = dict(
+            IS_VERTICAL=self.is_vertical.get(enc, False),
+            CODE2CID=self.code2cid.get(enc),
+        )
+        fp.write(marshal.dumps(data))
+        return
+
+    def dump_unicodemap(self, fp):
+        data = dict(
+            CID2UNICHR_H=self.cid2unichr_h,
+            CID2UNICHR_V=self.cid2unichr_v,
+        )
+        fp.write(marshal.dumps(data))
+        return
+
+# convert_cmap
+def convert_cmap(outdir, regname, enc2codec, paths):
+    converter = CMapConverter(enc2codec)
+
+    for path in paths:
+        print('reading: %r...' % path)
+        with open(path) as fp:
+            converter.load(fp)
+
+    files = []
+    for enc in converter.get_encs():
+        fname = '%s.marshal.gz' % enc
+        path = os.path.join(outdir, fname)
+        print('writing: %r...' % path)
+        with gzip.open(path, 'wb') as fp:
+            converter.dump_cmap(fp, enc)
+        files.append(path)
+
+    fname = 'to-unicode-%s.marshal.gz' % regname
+    path = os.path.join(outdir, fname)
+    print ('writing: %r...' % path)
+    with gzip.open(path, 'wb') as fp:
+        converter.dump_unicodemap(fp)
+    files.append(path)
+    return files
+
+
 # test
 def main(argv):
     args = argv[1:]
     for fname in args:
-        fp = file(fname, 'rb')
-        cmap = FileUnicodeMap()
-        #cmap = FileCMap()
-        CMapParser(cmap, fp).run()
-        fp.close()
-        cmap.dump()
+        with open(fname, 'rb') as fp:
+            cmap = FileUnicodeMap()
+            #cmap = FileCMap()
+            CMapParser(cmap, fp).run()
+            cmap.dump()
     return
 
 if __name__ == '__main__':

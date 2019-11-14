@@ -14,21 +14,21 @@ from pdfminer.image import ImageWriter
 def main(argv):
     import getopt
     def usage():
-        print ('usage: %s [-d] [-p pagenos] [-m maxpages] [-P password] [-o output]'
-               ' [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin] [-W word_margin]'
-               ' [-F boxes_flow] [-Y layout_mode] [-O output_dir] [-R rotation] [-S]'
-               ' [-t text|html|xml|tag] [-c codec] [-s scale]'
-               ' file ...' % argv[0])
+        print ('usage: %s [-P password] [-o output] [-t text|html|xml|tag]'
+               ' [-O output_dir] [-c encoding] [-s scale] [-R rotation]'
+               ' [-Y normal|loose|exact] [-p pagenos] [-m maxpages]'
+               ' [-S] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin]'
+               ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dp:m:P:o:CnAVM:L:W:F:Y:O:R:St:c:s:')
+        (opts, args) = getopt.getopt(argv[1:], 'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
     except getopt.GetoptError:
         return usage()
     if not args: return usage()
     # debug option
     debug = 0
     # input option
-    password = ''
+    password = b''
     pagenos = set()
     maxpages = 0
     # output option
@@ -38,7 +38,7 @@ def main(argv):
     rotation = 0
     stripcontrol = False
     layoutmode = 'normal'
-    codec = 'utf-8'
+    encoding = 'utf-8'
     pageno = 1
     scale = 1
     caching = True
@@ -46,25 +46,25 @@ def main(argv):
     laparams = LAParams()
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-P': password = v.encode('ascii')
+        elif k == '-o': outfile = v
+        elif k == '-t': outtype = v
+        elif k == '-O': imagewriter = ImageWriter(v)
+        elif k == '-c': encoding = v
+        elif k == '-s': scale = float(v)
+        elif k == '-R': rotation = int(v)
+        elif k == '-Y': layoutmode = v
         elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
         elif k == '-m': maxpages = int(v)
-        elif k == '-P': password = v
-        elif k == '-o': outfile = v
+        elif k == '-S': stripcontrol = True
         elif k == '-C': caching = False
         elif k == '-n': laparams = None
         elif k == '-A': laparams.all_texts = True
         elif k == '-V': laparams.detect_vertical = True
         elif k == '-M': laparams.char_margin = float(v)
-        elif k == '-L': laparams.line_margin = float(v)
         elif k == '-W': laparams.word_margin = float(v)
+        elif k == '-L': laparams.line_margin = float(v)
         elif k == '-F': laparams.boxes_flow = float(v)
-        elif k == '-Y': layoutmode = v
-        elif k == '-O': imagewriter = ImageWriter(v)
-        elif k == '-R': rotation = int(v)
-        elif k == '-S': stripcontrol = True
-        elif k == '-t': outtype = v
-        elif k == '-c': codec = v
-        elif k == '-s': scale = float(v)
     #
     PDFDocument.debug = debug
     PDFParser.debug = debug
@@ -82,33 +82,32 @@ def main(argv):
             elif outfile.endswith('.tag'):
                 outtype = 'tag'
     if outfile:
-        outfp = file(outfile, 'w')
+        outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
     if outtype == 'text':
-        device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+        device = TextConverter(rsrcmgr, outfp, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
-        device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
+        device = XMLConverter(rsrcmgr, outfp, laparams=laparams,
                               imagewriter=imagewriter,
                               stripcontrol=stripcontrol)
     elif outtype == 'html':
-        device = HTMLConverter(rsrcmgr, outfp, codec=codec, scale=scale,
+        device = HTMLConverter(rsrcmgr, outfp, scale=scale,
                                layoutmode=layoutmode, laparams=laparams,
                                imagewriter=imagewriter, debug=debug)
     elif outtype == 'tag':
-        device = TagExtractor(rsrcmgr, outfp, codec=codec)
+        device = TagExtractor(rsrcmgr, outfp)
     else:
         return usage()
     for fname in args:
-        fp = file(fname, 'rb')
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        for page in PDFPage.get_pages(fp, pagenos,
-                                      maxpages=maxpages, password=password,
-                                      caching=caching, check_extractable=True):
-            page.rotate = (page.rotate+rotation) % 360
-            interpreter.process_page(page)
-        fp.close()
+        with open(fname, 'rb') as fp:
+            interpreter = PDFPageInterpreter(rsrcmgr, device)
+            for page in PDFPage.get_pages(fp, pagenos,
+                                          maxpages=maxpages, password=password,
+                                          caching=caching, check_extractable=True):
+                page.rotate = (page.rotate+rotation) % 360
+                interpreter.process_page(page)
     device.close()
     outfp.close()
     return

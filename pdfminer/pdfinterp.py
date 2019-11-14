@@ -52,7 +52,7 @@ LITERAL_IMAGE = LIT('Image')
 
 ##  PDFTextState
 ##
-class PDFTextState(object):
+class PDFTextState:
 
     def __init__(self):
         self.font = None
@@ -98,7 +98,7 @@ class PDFTextState(object):
 
 ##  PDFGraphicState
 ##
-class PDFGraphicState(object):
+class PDFGraphicState:
 
     def __init__(self):
         self.linewidth = 0
@@ -130,7 +130,7 @@ class PDFGraphicState(object):
 
 ##  Resource Manager
 ##
-class PDFResourceManager(object):
+class PDFResourceManager:
 
     """Repository of shared resources.
 
@@ -140,7 +140,7 @@ class PDFResourceManager(object):
     """
 
     debug = False
-    
+
     def __init__(self, caching=True):
         self.caching = caching
         self._cached_fonts = {}
@@ -256,12 +256,12 @@ class PDFContentParser(PSStackParser):
         while i <= len(target):
             self.fillbuf()
             if i:
-                c = self.buf[self.charpos]
+                c = self.buf[self.charpos:self.charpos+1]
                 data += c
                 self.charpos += 1
                 if len(target) <= i and c.isspace():
                     i += 1
-                elif i < len(target) and c == target[i]:
+                elif i < len(target) and c == target[i:i+1]:
                     i += 1
                 else:
                     i = 0
@@ -311,7 +311,7 @@ class PDFContentParser(PSStackParser):
 
 ##  Interpreter
 ##
-class PDFPageInterpreter(object):
+class PDFPageInterpreter:
 
     debug = 0
 
@@ -344,23 +344,23 @@ class PDFPageInterpreter(object):
                 return PDFColorSpace(name, len(list_value(spec[1])))
             else:
                 return PREDEFINED_COLORSPACE.get(name)
-        for (k, v) in dict_value(resources).iteritems():
+        for (k, v) in dict_value(resources).items():
             if self.debug:
                 logging.debug('Resource: %r: %r' % (k, v))
             if k == 'Font':
-                for (fontid, spec) in dict_value(v).iteritems():
+                for (fontid, spec) in dict_value(v).items():
                     objid = None
                     if isinstance(spec, PDFObjRef):
                         objid = spec.objid
                     spec = dict_value(spec)
                     self.fontmap[fontid] = self.rsrcmgr.get_font(objid, spec)
             elif k == 'ColorSpace':
-                for (csid, spec) in dict_value(v).iteritems():
+                for (csid, spec) in dict_value(v).items():
                     self.csmap[csid] = get_colorspace(resolve1(spec))
             elif k == 'ProcSet':
                 self.rsrcmgr.get_procset(list_value(v))
             elif k == 'XObject':
-                for (xobjid, xobjstrm) in dict_value(v).iteritems():
+                for (xobjid, xobjstrm) in dict_value(v).items():
                     self.xobjmap[xobjid] = xobjstrm
         return
 
@@ -379,7 +379,9 @@ class PDFPageInterpreter(object):
         # set some global states.
         self.scs = self.ncs = None
         if self.csmap:
-            self.scs = self.ncs = self.csmap.values()[0]
+            for v in self.csmap.values():
+                self.scs = self.ncs = v
+                break
         return
 
     def push(self, obj):
@@ -864,11 +866,11 @@ class PDFPageInterpreter(object):
             except PSEOF:
                 break
             if isinstance(obj, PSKeyword):
-                name = keyword_name(obj)
+                name = keyword_name(obj).decode('ascii')
                 method = 'do_%s' % name.replace('*', '_a').replace('"', '_w').replace("'", '_q')
                 if hasattr(self, method):
                     func = getattr(self, method)
-                    nargs = func.func_code.co_argcount-1
+                    nargs = func.__code__.co_argcount-1
                     if nargs:
                         args = self.pop(nargs)
                         if self.debug:

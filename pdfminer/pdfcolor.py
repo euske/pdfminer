@@ -9,7 +9,7 @@ LITERAL_DEVICE_RGB = LIT('DeviceRGB')
 LITERAL_DEVICE_CMYK = LIT('DeviceCMYK')
 
 
-class PDFColorSpace(object):
+class PDFColorSpace:
 
     def __init__(self, name, ncomponents):
         self.name = name
@@ -31,4 +31,4 @@ PREDEFINED_COLORSPACE = dict(
         'Separation': 1,
         'Indexed': 1,
         'Pattern': 1,
-    }.iteritems())
+    }.items())

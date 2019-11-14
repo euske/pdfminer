@@ -24,7 +24,7 @@ from .pdftypes import PDFStream
 from .pdftypes import PDFObjectNotFound
 from .pdftypes import decipher_all
 from .pdftypes import int_value
-from .pdftypes import str_value
+from .pdftypes import bytes_value
 from .pdftypes import list_value
 from .pdftypes import dict_value
 from .pdftypes import stream_value
@@ -63,10 +63,10 @@ LITERAL_CATALOG = LIT('Catalog')
 
 ##  XRefs
 ##
-class PDFBaseXRef(object):
+class PDFBaseXRef:
 
     debug = False
-    
+
     def get_trailer(self):
         raise NotImplementedError
 
@@ -109,10 +109,10 @@ class PDFXRef(PDFBaseXRef):
             if len(f) != 2:
                 raise PDFNoValidXRef('Trailer not found: %r: line=%r' % (parser, line))
             try:
-                (start, nobjs) = map(long, f)
+                (start, nobjs) = map(int, f)
             except ValueError:
                 raise PDFNoValidXRef('Invalid line: %r: line=%r' % (parser, line))
-            for objid in xrange(start, start+nobjs):
+            for objid in range(start, start+nobjs):
                 try:
                     (_, line) = parser.nextline()
                 except PSEOF:
@@ -123,12 +123,12 @@ class PDFXRef(PDFBaseXRef):
                 (pos, genno, use) = f
                 if use != b'n':
                     continue
-                self.offsets[objid] = (None, long(pos), int(genno))
+                self.offsets[objid] = (None, int(pos), int(genno))
         if self.debug: logging.info('xref objects: %r' % self.offsets)
         self.load_trailer(parser)
         return
 
-    KEYWORD_TRAILER = KWD('trailer')
+    KEYWORD_TRAILER = KWD(b'trailer')
 
     def load_trailer(self, parser):
         try:
@@ -147,7 +147,7 @@ class PDFXRef(PDFBaseXRef):
         return self.trailer
 
     def get_objids(self):
-        return self.offsets.iterkeys()
+        return self.offsets.keys()
 
     def get_pos(self, objid):
         try:
@@ -163,7 +163,7 @@ class PDFXRefFallback(PDFXRef):
     def __repr__(self):
         return '<PDFXRefFallback: offsets=%r>' % (self.offsets.keys())
 
-    PDFOBJ_CUE = re.compile(r'^(\d+)\s+(\d+)\s+obj\b')
+    PDFOBJ_CUE = re.compile(br'^(\d+)\s+(\d+)\s+obj\b')
 
     def load(self, parser):
         parser.seek(0)
@@ -204,7 +204,7 @@ class PDFXRefFallback(PDFXRef):
                 except PSEOF:
                     pass
                 n = min(n, len(objs)//2)
-                for index in xrange(n):
+                for index in range(n):
                     objid1 = objs[index*2]
                     self.offsets[objid1] = (objid, index, 0)
         return
@@ -215,7 +215,7 @@ class PDFXRefFallback(PDFXRef):
 class PDFXRefStream(PDFBaseXRef):
 
     debug = False
-    
+
     def __init__(self):
         self.data = None
         self.entlen = None
@@ -253,7 +253,7 @@ class PDFXRefStream(PDFBaseXRef):
 
     def get_objids(self):
         for (start, nobjs) in self.ranges:
-            for i in xrange(nobjs):
+            for i in range(nobjs):
                 offset = self.entlen * i
                 ent = self.data[offset:offset+self.entlen]
                 f1 = nunpack(ent[:self.fl1], 1)
@@ -287,7 +287,7 @@ class PDFXRefStream(PDFBaseXRef):
 
 ##  PDFSecurityHandler
 ##
-class PDFStandardSecurityHandler(object):
+class PDFStandardSecurityHandler:
 
     PASSWORD_PADDING = (b'(\xbfN^Nu\x8aAd\x00NV\xff\xfa\x01\x08'
                         b'..\x00\xb6\xd0h>\x80/\x0c\xa9\xfedSiz')
@@ -311,8 +311,8 @@ class PDFStandardSecurityHandler(object):
         self.v = int_value(self.param.get('V', 0))
         self.r = int_value(self.param['R'])
         self.p = int_value(self.param['P'])
-        self.o = str_value(self.param['O'])
-        self.u = str_value(self.param['U'])
+        self.o = bytes_value(self.param['O'])
+        self.u = bytes_value(self.param['U'])
         self.length = int_value(self.param.get('Length', 40))
         return
 
@@ -341,7 +341,7 @@ class PDFStandardSecurityHandler(object):
             hash.update(self.docid[0])  # 3
             result = ARC4.new(key).encrypt(hash.digest())  # 4
             for i in range(1, 20):  # 5
-                k = b''.join(chr(ord(c) ^ i) for c in key)
+                k = bytes( (c ^ i) for c in key )
                 result = ARC4.new(k).encrypt(result)
             result += result  # 6
             return result
@@ -400,7 +400,7 @@ class PDFStandardSecurityHandler(object):
         else:
             user_password = self.o
             for i in range(19, -1, -1):
-                k = b''.join(chr(ord(c) ^ i) for c in key)
+                k = bytes( (c ^ i) for c in key )
                 user_password = ARC4.new(k).decrypt(user_password)
         return self.authenticate_user_password(user_password)
 
@@ -472,8 +472,8 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
     def init_params(self):
         super(PDFStandardSecurityHandlerV5, self).init_params()
         self.length = 256
-        self.oe = str_value(self.param['OE'])
-        self.ue = str_value(self.param['UE'])
+        self.oe = bytes_value(self.param['OE'])
+        self.ue = bytes_value(self.param['UE'])
         self.o_hash = self.o[:32]
         self.o_validation_salt = self.o[32:40]
         self.o_key_salt = self.o[40:]
@@ -489,7 +489,7 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
             return None
 
     def authenticate(self, password):
-        password = password.encode('utf-8')[:127]
+        password = password[:127]
         hash = SHA256.new(password)
         hash.update(self.o_validation_salt)
         hash.update(self.u)
@@ -512,7 +512,7 @@ class PDFStandardSecurityHandlerV5(PDFStandardSecurityHandlerV4):
 
 ##  PDFDocument
 ##
-class PDFDocument(object):
+class PDFDocument:
 
     """PDFDocument object represents a PDF document.
 
@@ -639,7 +639,7 @@ class PDFDocument(object):
             pass
         return (objs, n)
 
-    KEYWORD_OBJ = KWD('obj')
+    KEYWORD_OBJ = KWD(b'obj')
 
     def _getobj_parse(self, pos, objid):
         self._parser.seek(pos)
@@ -698,7 +698,7 @@ class PDFDocument(object):
             entry = dict_value(entry)
             if 'Title' in entry:
                 if 'A' in entry or 'Dest' in entry:
-                    title = decode_text(str_value(entry['Title']))
+                    title = decode_text(bytes_value(entry['Title']))
                     dest = entry.get('Dest')
                     action = entry.get('A')
                     se = entry.get('SE')
@@ -768,7 +768,7 @@ class PDFDocument(object):
             raise PDFNoValidXRef('Unexpected EOF')
         if self.debug:
             logging.info('xref found: pos=%r' % prev)
-        return long(prev)
+        return int(prev)
 
     # read xref table
     def read_xref_from(self, parser, start, xrefs):

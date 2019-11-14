@@ -15,7 +15,7 @@ def align32(x):
 
 ##  BMPWriter
 ##
-class BMPWriter(object):
+class BMPWriter:
 
     def __init__(self, fp, bits, width, height):
         self.fp = fp
@@ -45,7 +45,7 @@ class BMPWriter(object):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         elif ncols == 256:
             # grayscale color table
-            for i in xrange(256):
+            for i in range(256):
                 self.fp.write(struct.pack('BBBx', i, i, i))
         self.pos0 = self.fp.tell()
         self.pos1 = self.pos0 + self.datasize
@@ -59,7 +59,7 @@ class BMPWriter(object):
 
 ##  ImageWriter
 ##
-class ImageWriter(object):
+class ImageWriter:
 
     def __init__(self, outdir):
         self.outdir = outdir
@@ -80,43 +80,42 @@ class ImageWriter(object):
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
         name = image.name+ext
         path = os.path.join(self.outdir, name)
-        fp = file(path, 'wb')
-        if ext == '.jpg':
-            raw_data = stream.get_rawdata()
-            if LITERAL_DEVICE_CMYK in image.colorspace:
-                from PIL import Image
-                from PIL import ImageChops
-                ifp = BytesIO(raw_data)
-                i = Image.open(ifp)
-                i = ImageChops.invert(i)
-                i = i.convert('RGB')
-                i.save(fp, 'JPEG')
+        with open(path, 'wb') as fp:
+            if ext == '.jpg':
+                raw_data = stream.get_rawdata()
+                if LITERAL_DEVICE_CMYK in image.colorspace:
+                    from PIL import Image
+                    from PIL import ImageChops
+                    ifp = BytesIO(raw_data)
+                    i = Image.open(ifp)
+                    i = ImageChops.invert(i)
+                    i = i.convert('RGB')
+                    i.save(fp, 'JPEG')
+                else:
+                    fp.write(raw_data)
+            elif image.bits == 1:
+                bmp = BMPWriter(fp, 1, width, height)
+                data = stream.get_data()
+                i = 0
+                width = (width+7)//8
+                for y in range(height):
+                    bmp.write_line(y, data[i:i+width])
+                    i += width
+            elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_RGB:
+                bmp = BMPWriter(fp, 24, width, height)
+                data = stream.get_data()
+                i = 0
+                width = width*3
+                for y in range(height):
+                    bmp.write_line(y, data[i:i+width])
+                    i += width
+            elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_GRAY:
+                bmp = BMPWriter(fp, 8, width, height)
+                data = stream.get_data()
+                i = 0
+                for y in range(height):
+                    bmp.write_line(y, data[i:i+width])
+                    i += width
             else:
-                fp.write(raw_data)
-        elif image.bits == 1:
-            bmp = BMPWriter(fp, 1, width, height)
-            data = stream.get_data()
-            i = 0
-            width = (width+7)//8
-            for y in xrange(height):
-                bmp.write_line(y, data[i:i+width])
-                i += width
-        elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_RGB:
-            bmp = BMPWriter(fp, 24, width, height)
-            data = stream.get_data()
-            i = 0
-            width = width*3
-            for y in xrange(height):
-                bmp.write_line(y, data[i:i+width])
-                i += width
-        elif image.bits == 8 and image.colorspace is LITERAL_DEVICE_GRAY:
-            bmp = BMPWriter(fp, 8, width, height)
-            data = stream.get_data()
-            i = 0
-            for y in xrange(height):
-                bmp.write_line(y, data[i:i+width])
-                i += width
-        else:
-            fp.write(stream.get_data())
-        fp.close()
+                fp.write(stream.get_data())
         return name

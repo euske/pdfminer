@@ -19,6 +19,7 @@ from .pdftypes import PDFException
 from .pdftypes import resolve1
 from .pdftypes import int_value
 from .pdftypes import num_value
+from .pdftypes import bytes_value
 from .pdftypes import list_value
 from .pdftypes import dict_value
 from .pdftypes import stream_value
@@ -43,7 +44,7 @@ def get_widths(seq):
             r.append(v)
             if len(r) == 3:
                 (char1, char2, w) = r
-                for i in xrange(char1, char2+1):
+                for i in range(char1, char2+1):
                     widths[i] = w
                 r = []
     return widths
@@ -66,7 +67,7 @@ def get_widths2(seq):
             r.append(v)
             if len(r) == 5:
                 (char1, char2, w, vx, vy) = r
-                for i in xrange(char1, char2+1):
+                for i in range(char1, char2+1):
                     widths[i] = (w, (vx, vy))
                 r = []
     return widths
@@ -77,7 +78,7 @@ def get_widths2(seq):
 
 ##  FontMetricsDB
 ##
-class FontMetricsDB(object):
+class FontMetricsDB:
 
     @classmethod
     def get_metrics(klass, fontname):
@@ -175,7 +176,7 @@ def getdict(data):
     return d
 
 
-class CFFFont(object):
+class CFFFont:
 
     STANDARD_STRINGS = (
       '.notdef', 'space', 'exclam', 'quotedbl', 'numbersign',
@@ -258,13 +259,13 @@ class CFFFont(object):
       'Light', 'Medium', 'Regular', 'Roman', 'Semibold',
     )
 
-    class INDEX(object):
+    class INDEX:
 
         def __init__(self, fp):
             self.fp = fp
             self.offsets = []
             (count, offsize) = struct.unpack('>HB', self.fp.read(3))
-            for i in xrange(count+1):
+            for i in range(count+1):
                 self.offsets.append(nunpack(self.fp.read(offsize)))
             self.base = self.fp.tell()-1
             self.fp.seek(self.base+self.offsets[-1])
@@ -281,7 +282,7 @@ class CFFFont(object):
             return self.fp.read(self.offsets[i+1]-self.offsets[i])
 
         def __iter__(self):
-            return iter(self[i] for i in xrange(len(self)))
+            return iter(self[i] for i in range(len(self)))
 
     def __init__(self, name, fp):
         self.name = name
@@ -321,9 +322,9 @@ class CFFFont(object):
             # Format 1
             (n,) = struct.unpack('B', self.fp.read(1))
             code = 0
-            for i in xrange(n):
+            for i in range(n):
                 (first, nleft) = struct.unpack('BB', self.fp.read(2))
-                for gid in xrange(first, first+nleft+1):
+                for gid in range(first, first+nleft+1):
                     self.code2gid[code] = gid
                     self.gid2code[gid] = code
                     code += 1
@@ -346,9 +347,9 @@ class CFFFont(object):
             # Format 1
             (n,) = struct.unpack('B', self.fp.read(1))
             sid = 0
-            for i in xrange(n):
+            for i in range(n):
                 (first, nleft) = struct.unpack('BB', self.fp.read(2))
-                for gid in xrange(first, first+nleft+1):
+                for gid in range(first, first+nleft+1):
                     name = self.getstr(sid)
                     self.name2gid[name] = gid
                     self.gid2name[gid] = name
@@ -371,7 +372,7 @@ class CFFFont(object):
 
 ##  TrueTypeFont
 ##
-class TrueTypeFont(object):
+class TrueTypeFont:
 
     class CMapNotFound(Exception):
         pass
@@ -382,7 +383,7 @@ class TrueTypeFont(object):
         self.tables = {}
         self.fonttype = fp.read(4)
         (ntables, _1, _2, _3) = struct.unpack('>HHHH', fp.read(8))
-        for _ in xrange(ntables):
+        for _ in range(ntables):
             (name, tsum, offset, length) = struct.unpack('>4sLLL', fp.read(16))
             self.tables[name] = (offset, length)
         return
@@ -395,7 +396,7 @@ class TrueTypeFont(object):
         fp.seek(base_offset)
         (version, nsubtables) = struct.unpack('>HH', fp.read(4))
         subtables = []
-        for i in xrange(nsubtables):
+        for i in range(nsubtables):
             subtables.append(struct.unpack('>HHL', fp.read(8)))
         char2gid = {}
         # Only supports subtable type 0, 2 and 4.
@@ -411,7 +412,7 @@ class TrueTypeFont(object):
                     firstbytes[k//8] = i
                 nhdrs = max(subheaderkeys)//8 + 1
                 hdrs = []
-                for i in xrange(nhdrs):
+                for i in range(nhdrs):
                     (firstcode, entcount, delta, offset) = struct.unpack('>HHhH', fp.read(8))
                     hdrs.append((i, firstcode, entcount, delta, fp.tell()-2+offset))
                 for (i, firstcode, entcount, delta, pos) in hdrs:
@@ -419,7 +420,7 @@ class TrueTypeFont(object):
                         continue
                     first = firstcode + (firstbytes[i] << 8)
                     fp.seek(pos)
-                    for c in xrange(entcount):
+                    for c in range(entcount):
                         gid = struct.unpack('>H', fp.read(2))
                         if gid:
                             gid += delta
@@ -436,16 +437,16 @@ class TrueTypeFont(object):
                 for (ec, sc, idd, idr) in zip(ecs, scs, idds, idrs):
                     if idr:
                         fp.seek(pos+idr)
-                        for c in xrange(sc, ec+1):
+                        for c in range(sc, ec+1):
                             char2gid[c] = (struct.unpack('>H', fp.read(2))[0] + idd) & 0xffff
                     else:
-                        for c in xrange(sc, ec+1):
+                        for c in range(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
             else:
                 assert 0
         # create unicode map
         unicode_map = FileUnicodeMap()
-        for (char, gid) in char2gid.iteritems():
+        for (char, gid) in char2gid.items():
             unicode_map.add_cid2unichr(gid, char)
         return unicode_map
 
@@ -464,7 +465,7 @@ LITERAL_TYPE1C = LIT('Type1C')
 
 
 # PDFFont
-class PDFFont(object):
+class PDFFont:
 
     def __init__(self, descriptor, widths, default_width=None):
         self.descriptor = descriptor
@@ -491,8 +492,8 @@ class PDFFont(object):
     def is_multibyte(self):
         return False
 
-    def decode(self, bytes):
-        return map(ord, bytes)
+    def decode(self, data):
+        return list(data)
 
     def get_ascent(self):
         return self.ascent * self.vscale
@@ -638,8 +639,9 @@ class PDFCIDFont(PDFFont):
                 raise PDFFontError('BaseFont is missing')
             self.basefont = 'unknown'
         self.cidsysteminfo = dict_value(spec.get('CIDSystemInfo', {}))
-        self.cidcoding = '%s-%s' % (self.cidsysteminfo.get('Registry', 'unknown'),
-                                    self.cidsysteminfo.get('Ordering', 'unknown'))
+        registry = bytes_value(self.cidsysteminfo.get('Registry', b'unknown'))
+        ordering = bytes_value(self.cidsysteminfo.get('Ordering', b'unknown'))
+        self.cidcoding = (registry + b'-' + ordering).decode('ascii')
         try:
             name = literal_name(spec['Encoding'])
         except KeyError:
@@ -684,10 +686,10 @@ class PDFCIDFont(PDFFont):
         if self.vertical:
             # writing mode: vertical
             widths = get_widths2(list_value(spec.get('W2', [])))
-            self.disps = dict((cid, (vx, vy)) for (cid, (_, (vx, vy))) in widths.iteritems())
+            self.disps = dict((cid, (vx, vy)) for (cid, (_, (vx, vy))) in widths.items())
             (vy, w) = spec.get('DW2', [880, -1000])
             self.default_disp = (None, vy)
-            widths = dict((cid, w) for (cid, (w, _)) in widths.iteritems())
+            widths = dict((cid, w) for (cid, (w, _)) in widths.items())
             default_width = w
         else:
             # writing mode: horizontal
@@ -707,8 +709,8 @@ class PDFCIDFont(PDFFont):
     def is_multibyte(self):
         return True
 
-    def decode(self, bytes):
-        return self.cmap.decode(bytes)
+    def decode(self, data):
+        return self.cmap.decode(data)
 
     def char_disp(self, cid):
         "Returns an integer for horizontal fonts, a tuple for vertical fonts."
@@ -726,11 +728,10 @@ class PDFCIDFont(PDFFont):
 # main
 def main(argv):
     for fname in argv[1:]:
-        fp = file(fname, 'rb')
-        #font = TrueTypeFont(fname, fp)
-        font = CFFFont(fname, fp)
-        print (font)
-        fp.close()
+        with open(fname, 'rb') as fp:
+            #font = TrueTypeFont(fname, fp)
+            font = CFFFont(fname, fp)
+            print (font)
     return
 
 if __name__ == '__main__':

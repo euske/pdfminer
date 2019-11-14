@@ -92,7 +92,7 @@ def resolve_all(x, default=None):
     if isinstance(x, list):
         x = [resolve_all(v, default=default) for v in x]
     elif isinstance(x, dict):
-        for (k, v) in x.iteritems():
+        for (k, v) in x.items():
             x[k] = resolve_all(v, default=default)
     return x
 
@@ -100,12 +100,12 @@ def resolve_all(x, default=None):
 def decipher_all(decipher, objid, genno, x):
     """Recursively deciphers the given object.
     """
-    if isinstance(x, str):
+    if isinstance(x, bytes):
         return decipher(objid, genno, x)
     if isinstance(x, list):
         x = [decipher_all(decipher, objid, genno, v) for v in x]
     elif isinstance(x, dict):
-        for (k, v) in x.iteritems():
+        for (k, v) in x.items():
             x[k] = decipher_all(decipher, objid, genno, v)
     return x
 
@@ -138,12 +138,12 @@ def num_value(x):
     return x
 
 
-def str_value(x):
+def bytes_value(x):
     x = resolve1(x)
-    if not isinstance(x, str):
+    if not isinstance(x, bytes):
         if STRICT:
-            raise PDFTypeError('String required: %r' % x)
-        return ''
+            raise PDFTypeError('Bytes required: %r' % x)
+        return b''
     return x
 
 

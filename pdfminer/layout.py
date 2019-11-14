@@ -12,7 +12,7 @@ from .utils import apply_matrix_pt
 
 ##  IndexAssigner
 ##
-class IndexAssigner(object):
+class IndexAssigner:
 
     def __init__(self, index=0):
         self.index = index
@@ -30,7 +30,7 @@ class IndexAssigner(object):
 
 ##  LAParams
 ##
-class LAParams(object):
+class LAParams:
 
     def __init__(self,
                  line_overlap=0.5,
@@ -56,7 +56,7 @@ class LAParams(object):
 
 ##  LTItem
 ##
-class LTItem(object):
+class LTItem:
 
     def analyze(self, laparams):
         """Perform the layout analysis."""
@@ -65,7 +65,7 @@ class LTItem(object):
 
 ##  LTText
 ##
-class LTText(object):
+class LTText:
 
     def __repr__(self):
         return ('<%s %r>' %
@@ -514,7 +514,7 @@ class LTLayoutContainer(LTContainer):
                            obj0.voverlap(obj1)) and
                           (obj0.hdistance(obj1) <
                            max(obj0.width, obj1.width) * laparams.char_margin))
-                
+
                 # valign: obj0 and obj1 is vertically aligned.
                 #
                 #   +------+
@@ -536,7 +536,7 @@ class LTLayoutContainer(LTContainer):
                            obj0.hoverlap(obj1)) and
                           (obj0.vdistance(obj1) <
                            max(obj0.height, obj1.height) * laparams.char_margin))
-                
+
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
                     (valign and isinstance(line, LTTextLineVertical))):
                     line.add(obj1)
@@ -630,12 +630,12 @@ class LTLayoutContainer(LTContainer):
         def key_obj(t):
             (c,d,_,_) = t
             return (c,d)
-        
+
         # XXX this still takes O(n^2)  :(
         dists = []
-        for i in xrange(len(boxes)):
+        for i in range(len(boxes)):
             obj1 = boxes[i]
-            for j in xrange(i+1, len(boxes)):
+            for j in range(i+1, len(boxes)):
                 obj2 = boxes[j]
                 dists.append((0, dist(obj1, obj2), obj1, obj2))
         # We could use dists.sort(), but it would randomize the test result.

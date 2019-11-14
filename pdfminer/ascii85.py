@@ -25,23 +25,23 @@ def ascii85decode(data):
       http://en.wikipedia.org/w/index.php?title=Ascii85
 
     >>> ascii85decode(b'9jqo^BlbD-BleB1DJ+*+F(f,q')
-    'Man is distinguished'
+    b'Man is distinguished'
     >>> ascii85decode(b'E,9)oF*2M7/c~>')
-    'pleasure.'
+    b'pleasure.'
     """
     n = b = 0
     out = b''
     for c in data:
-        if b'!' <= c and c <= b'u':
+        if 33 <= c and c <= 117: # b'!' <= c and c <= b'u'
             n += 1
-            b = b*85+(ord(c)-33)
+            b = b*85+(c-33)
             if n == 5:
                 out += struct.pack('>L', b)
                 n = b = 0
-        elif c == b'z':
+        elif c == 122: # b'z'
             assert n == 0
             out += b'\0\0\0\0'
-        elif c == b'~':
+        elif c == 126: # b'~'
             if n:
                 for _ in range(5-n):
                     b = b*85+84
@@ -65,20 +65,20 @@ def asciihexdecode(data):
     will behave as if a 0 followed the last digit.
 
     >>> asciihexdecode(b'61 62 2e6364   65')
-    'ab.cde'
+    b'ab.cde'
     >>> asciihexdecode(b'61 62 2e6364   657>')
-    'ab.cdep'
+    b'ab.cdep'
     >>> asciihexdecode(b'7>')
-    'p'
+    b'p'
     """
-    decode = (lambda hx: chr(int(hx, 16)))
-    out = map(decode, hex_re.findall(data))
+    data = data.decode('latin1')
+    out = [ int(hx,16) for hx in  hex_re.findall(data) ]
     m = trail_re.search(data)
     if m:
-        out.append(decode('%c0' % m.group(1)))
-    return b''.join(out)
+        out.append(int(m.group(1),16) << 4)
+    return bytes(out)
 
 
 if __name__ == '__main__':
     import doctest
-    doctest.testmod()
+    print('pdfminer.ascii85', doctest.testmod())

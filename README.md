@@ -1,161 +1,108 @@
-PDFMiner
-========
+# PDFMiner
+
+PDFMiner is a text extraction tool for PDF documents.
 
 [![Build Status](https://travis-ci.org/euske/pdfminer.svg?branch=master)](https://travis-ci.org/euske/pdfminer)
+[![PyPI](https://img.shields.io/pypi/v/pdfminer)](https://pypi.org/project/pdfminer/)
 
-PDFMiner is a tool for extracting information from PDF documents.
-Unlike other PDF-related tools, it focuses entirely on getting 
-and analyzing text data. PDFMiner allows one to obtain
-the exact location of text in a page, as well as 
-other information such as fonts or lines.
-It includes a PDF converter that can transform PDF files
-into other text formats (such as HTML). It has an extensible
-PDF parser that can be used for other purposes than text analysis.
+**Warning**: Starting from version 20191010, PDFMiner supports **Python 3 only**.
+For Python 2 support, check out
+<a href="https://github.com/pdfminer/pdfminer.six">pdfminer.six</a>.
 
- * Webpage: https://euske.github.io/pdfminer/
- * Download (PyPI): https://pypi.python.org/pypi/pdfminer/
- * Demo WebApp: http://pdf2html.tabesugi.net:8080/
+## Features:
 
-
-Features
---------
-
- * Written entirely in Python.
- * Parse, analyze, and convert PDF documents.
- * PDF-1.7 specification support. (well, almost)
- * CJK languages and vertical writing scripts support.
- * Various font types (Type1, TrueType, Type3, and CID) support.
- * Basic encryption (RC4) support.
- * Outline (TOC) extraction.
- * Tagged contents extraction.
- * Automatic layout analysis.
+  * Pure Python (3.6 or above).
+  * Supports PDF-1.7. (well, almost)
+  * Obtains the exact location of text as well as other layout information (fonts, etc.).
+  * Performs automatic layout analysis.
+  * Can convert PDF into other formats (HTML/XML).
+  * Can extract an outline (TOC).
+  * Can extract tagged contents.
+  * Supports basic encryption (RC4 and AES).
+  * Supports various font types (Type1, TrueType, Type3, and CID).
+  * Supports CJK languages and vertical writing scripts.
+  * Has an extensible PDF parser that can be used for other purposes.
 
 
-How to Install
---------------
+## How to Use:
 
- * Install Python 2.6 or newer. (**For Python 3 support have a look at [pdfminer.six](https://github.com/goulu/pdfminer)**).
- * Download the source code.
- * Unpack it.
- * Run `setup.py`:
-
-    $ python setup.py install
-
- * Do the following test:
-
-    $ pdf2txt.py samples/simple1.pdf
+  1. `> pip install pdfminer`
+  1. `> pdf2txt.py samples/simple1.pdf`
 
 
-For CJK Languages
------------------
+## Command Line Syntax:
 
-In order to process CJK languages, do the following before
-running setup.py install:
+### pdf2txt.py
 
-    $ make cmap
-    python tools/conv_cmap.py pdfminer/cmap Adobe-CNS1 cmaprsrc/cid2code_Adobe_CNS1.txt
-    reading 'cmaprsrc/cid2code_Adobe_CNS1.txt'...
-    writing 'CNS1_H.py'...
-    ...
-    $ python setup.py install
+pdf2txt.py extracts all the texts that are rendered programmatically.
+It also extracts the corresponding locations, font names, font sizes,
+writing direction (horizontal or vertical) for each text segment.  It
+does not recognize text in images. A password needs to be provided for
+restricted PDF documents.
 
-On Windows machines which don't have `make` command, 
-paste the following commands on a command line prompt:
+    > pdf2txt.py [-P password] [-o output] [-t text|html|xml|tag]
+                 [-O output_dir] [-c encoding] [-s scale] [-R rotation]
+                 [-Y normal|loose|exact] [-p pagenos] [-m maxpages]
+                 [-S] [-C] [-n] [-A] [-V]
+                 [-M char_margin] [-L line_margin] [-W word_margin]
+                 [-F boxes_flow] [-d]
+                 input.pdf ...
 
-    mkdir pdfminer\cmap
-    python tools\conv_cmap.py -c B5=cp950 -c UniCNS-UTF8=utf-8 pdfminer\cmap Adobe-CNS1 cmaprsrc\cid2code_Adobe_CNS1.txt
-    python tools\conv_cmap.py -c GBK-EUC=cp936 -c UniGB-UTF8=utf-8 pdfminer\cmap Adobe-GB1 cmaprsrc\cid2code_Adobe_GB1.txt
-    python tools\conv_cmap.py -c RKSJ=cp932 -c EUC=euc-jp -c UniJIS-UTF8=utf-8 pdfminer\cmap Adobe-Japan1 cmaprsrc\cid2code_Adobe_Japan1.txt
-    python tools\conv_cmap.py -c KSC-EUC=euc-kr -c KSC-Johab=johab -c KSCms-UHC=cp949 -c UniKS-UTF8=utf-8 pdfminer\cmap Adobe-Korea1 cmaprsrc\cid2code_Adobe_Korea1.txt
-    python setup.py install
+  * `-P password` : PDF password.
+  * `-o output` : Output file name.
+  * `-t text|html|xml|tag` : Output type. (default: automatically inferred from the output file name.)
+  * `-O output_dir` : Output directory for extracted images.
+  * `-c encoding` : Output encoding. (default: utf-8)
+  * `-s scale` : Output scale.
+  * `-R rotation` : Rotates the page in degree.
+  * `-Y normal|loose|exact` : Specifies the layout mode. (only for HTML output.)
+  * `-p pagenos` : Processes certain pages only.
+  * `-m maxpages` : Limits the number of maximum pages to process.
+  * `-S` : Strips control characters.
+  * `-C` : Disables resource caching.
+  * `-n` : Disables layout analysis.
+  * `-A` : Applies layout analysis for all texts including figures.
+  * `-V` : Automatically detects vertical writing.
+  * `-M char_margin` : Speficies the char margin.
+  * `-W word_margin` : Speficies the word margin.
+  * `-L line_margin` : Speficies the line margin.
+  * `-F boxes_flow` : Speficies the box flow ratio.
+  * `-d` : Turns on Debug output.
 
+### dumppdf.py
 
-Command Line Tools
-------------------
+dumppdf.py is used for debugging PDFs.
+It dumps all the internal contents in pseudo-XML format.
 
-PDFMiner comes with two handy tools:
-pdf2txt.py and dumppdf.py.
+    > dumppdf.py [-P password] [-a] [-p pageid] [-i objid]
+                 [-o output] [-r|-b|-t] [-T] [-O directory] [-d]
+                 input.pdf ...
 
-**pdf2txt.py**
+  * `-P password` : PDF password.
+  * `-a` : Extracts all objects.
+  * `-p pageid` : Extracts a Page object.
+  * `-i objid` : Extracts a certain object.
+  * `-o output` : Output file name.
+  * `-r` : Raw mode. Dumps the raw compressed/encoded streams.
+  * `-b` : Binary mode. Dumps the uncompressed/decoded streams.
+  * `-t` : Text mode. Dumps the streams in text format.
+  * `-T` : Tagged mode. Dumps the tagged contents.
+  * `-O output_dir` : Output directory for extracted streams.
 
-pdf2txt.py extracts text contents from a PDF file.
-It extracts all the text that are to be rendered programmatically,
-i.e. text represented as ASCII or Unicode strings.
-It cannot recognize text drawn as images that would require optical character recognition.
-It also extracts the corresponding locations, font names, font sizes, writing
-direction (horizontal or vertical) for each text portion.
-You need to provide a password for protected PDF documents when its access is restricted.
-You cannot extract any text from a PDF document which does not have extraction permission.
+## TODO
 
-(For details, refer to the html document.)
-
-**dumppdf.py**
-
-dumppdf.py dumps the internal contents of a PDF file in pseudo-XML format. 
-This program is primarily for debugging purposes,
-but it's also possible to extract some meaningful contents (e.g. images).
-
-(For details, refer to the html document.)
-
-
-API Changes
------------
-
-As of November 2013, there were a few changes made to the PDFMiner API
-prior to October 2013. This is the result of code restructuring.  Here
-is a list of the changes:
-
- * PDFDocument class is moved to pdfdocument.py.
- * PDFDocument class now takes a PDFParser object as an argument.
-   PDFDocument.set_parser() and PDFParser.set_document() is removed.
- * PDFPage class is moved to pdfpage.py
- * process_pdf function is implemented as a class method PDFPage.get_pages.
-
-
-TODO
-----
-
- * Replace STRICT variable with something better.
- * Use logging module instead of sys.stderr.
- * Proper test cases.
- * PEP-8 and PEP-257 conformance.
- * Better documentation.
- * Crypt stream filter support.
+  * Replace STRICT variable with something better.
+  * Improve the debugging functions.
+  * Use logging module instead of sys.stderr.
+  * Proper test cases.
+  * PEP-8 and PEP-257 conformance.
+  * Better documentation.
+  * Crypto stream filter support.
 
 
-Related Projects
-----------------
+## Related Projects
 
- * <a href="http://pybrary.net/pyPdf/">pyPdf</a>
- * <a href="http://www.foolabs.com/xpdf/">xpdf</a>
- * <a href="http://pdfbox.apache.org/">pdfbox</a>
- * <a href="http://mupdf.com/">mupdf</a>
-
-
-Terms and Conditions
---------------------
-
-(This is so-called MIT/X License)
-
-Copyright (c) 2004-2016  Yusuke Shinyama <yusuke at shinyama dot jp>
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
-KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  * <a href="http://pybrary.net/pyPdf/">pyPdf</a>
+  * <a href="http://www.foolabs.com/xpdf/">xpdf</a>
+  * <a href="http://pdfbox.apache.org/">pdfbox</a>
+  * <a href="http://mupdf.com/">mupdf</a>

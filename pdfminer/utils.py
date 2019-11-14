@@ -3,7 +3,7 @@
 Miscellaneous Routines.
 """
 import struct
-from sys import maxint as INF
+from sys import maxsize as INF
 
 
 ##  PNG Predictor
@@ -16,8 +16,8 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     i = 0
     buf = b''
     line0 = b'\x00' * columns
-    for i in xrange(0, len(data), nbytes+1):
-        ft = data[i]
+    for i in range(0, len(data), nbytes+1):
+        ft = data[i:i+1]
         i += 1
         line1 = data[i:i+nbytes]
         line2 = b''
@@ -28,19 +28,19 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
             # PNG sub (UNTESTED)
             c = 0
             for b in line1:
-                c = (c+ord(b)) & 255
-                line2 += chr(c)
+                c = (c+b) & 255
+                line2 += bytes([c])
         elif ft == b'\x02':
             # PNG up
             for (a, b) in zip(line0, line1):
-                c = (ord(a)+ord(b)) & 255
-                line2 += chr(c)
+                c = (a+b) & 255
+                line2 += bytes([c])
         elif ft == b'\x03':
             # PNG average (UNTESTED)
             c = 0
             for (a, b) in zip(line0, line1):
-                c = ((c+ord(a)+ord(b))//2) & 255
-                line2 += chr(c)
+                c = ((c+a+b)//2) & 255
+                line2 += bytes([c])
         else:
             # unsupported
             raise ValueError("Unsupported predictor value: %d"%ft)
@@ -89,7 +89,7 @@ def apply_matrix_norm(m, v):
 
 # isnumber
 def isnumber(x):
-    return isinstance(x, (int, long, float))
+    return isinstance(x, (int, float))
 
 # uniq
 def uniq(objs):
@@ -106,7 +106,7 @@ def uniq(objs):
 # csort
 def csort(objs, key):
     """Order-preserving sorting function."""
-    idxs = dict((obj, i) for (i, obj) in enumerate(objs))
+    idxs = { obj:i for (i, obj) in enumerate(objs) }
     return sorted(objs, key=lambda obj: (key(obj), idxs[obj]))
 
 
@@ -127,7 +127,7 @@ def fsplit(pred, objs):
 def drange(v0, v1, d):
     """Returns a discrete range."""
     assert v0 < v1
-    return xrange(int(v0)//d, int(v1+d)//d)
+    return range(int(v0)//d, int(v1+d)//d)
 
 
 # get_bound
@@ -172,7 +172,7 @@ def nunpack(s, default=0):
     if not l:
         return default
     elif l == 1:
-        return ord(s)
+        return s[0]
     elif l == 2:
         return struct.unpack('>H', s)[0]
     elif l == 3:
@@ -184,7 +184,7 @@ def nunpack(s, default=0):
 
 
 # decode_text
-PDFDocEncoding = ''.join(unichr(x) for x in (
+PDFDocEncoding = ''.join(chr(x) for x in (
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
     0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x000f,
     0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015, 0x0017, 0x0017,
@@ -221,19 +221,18 @@ PDFDocEncoding = ''.join(unichr(x) for x in (
 
 
 def decode_text(s):
-    """Decodes a PDFDocEncoding string to Unicode."""
+    """Decodes a PDFDocEncoding bytes to Unicode."""
     if s.startswith(b'\xfe\xff'):
-        return unicode(s[2:], 'utf-16be', 'ignore')
+        return s[2:].decode('utf-16be', 'ignore')
     else:
-        return ''.join(PDFDocEncoding[ord(c)] for c in s)
+        return ''.join(PDFDocEncoding[c] for c in s)
 
-
-# enc
-def enc(x, codec='ascii'):
-    """Encodes a string for SGML/XML/HTML"""
-    x = x.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
-    return x.encode(codec, 'xmlcharrefreplace')
-
+def q(s):
+    """Quotes html string."""
+    return (s.replace('&','&amp;')
+            .replace('<','&lt;')
+            .replace('>','&gt;')
+            .replace('"','&quot;'))
 
 def bbox2str(bbox):
     (x0, y0, x1, y1) = bbox
@@ -252,7 +251,7 @@ def matrix2str(m):
 ##  It maintains two parallel lists of objects, each of
 ##  which is sorted by its x or y coordinate.
 ##
-class Plane(object):
+class Plane:
 
     def __init__(self, bbox, gridsize=50):
         self._seq = []          # preserve the object order.
