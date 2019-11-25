@@ -359,8 +359,8 @@ class CFFFont:
             assert 0
         else:
             raise ValueError('unsupported charset format: %r' % format)
-        #print self.code2gid
-        #print self.name2gid
+        #print(self.code2gid)
+        #print(self.name2gid)
         #assert 0
         return
 
@@ -731,7 +731,7 @@ def main(argv):
         with open(fname, 'rb') as fp:
             #font = TrueTypeFont(fname, fp)
             font = CFFFont(fname, fp)
-            print (font)
+            print(font)
     return
 
 if __name__ == '__main__':

@@ -580,7 +580,7 @@ def convert_cmap(outdir, regname, enc2codec, paths):
 
     fname = 'to-unicode-%s.marshal.gz' % regname
     path = os.path.join(outdir, fname)
-    print ('writing: %r...' % path)
+    print('writing: %r...' % path)
     with gzip.open(path, 'wb') as fp:
         converter.dump_unicodemap(fp)
     files.append(path)

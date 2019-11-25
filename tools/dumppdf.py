@@ -112,7 +112,7 @@ def dumpallobjs(out, doc, mode=None):
                 dumpxml(out, obj, mode=mode)
                 out.write('\n</object>\n\n')
             except PDFObjectNotFound as e:
-                print >>sys.stderr, 'not found: %r' % e
+                print(f'not found: {e!r}', file=sys.stderr)
     dumptrailers(out, doc)
     out.write('</pdf>')
     return
@@ -182,7 +182,7 @@ def extractembedded(outfp, fname, objids, pagenos, password=b'',
         path = os.path.join(extractdir, filename)
         if os.path.exists(path):
             raise IOError('file exists: %r' % path)
-        print >>sys.stderr, 'extracting: %r' % path
+        print(f'extracting: {path!r}', file=sys.stderr)
         with open(path, 'wb') as out:
             out.write(fileobj.get_data())
         return
@@ -229,8 +229,8 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
 def main(argv):
     import getopt
     def usage():
-        print ('usage: %s [-P password] [-a] [-p pageid] [-i objid] [-o output] '
-               '[-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...' % argv[0])
+        print(f'usage: {argv[0]} [-P password] [-a] [-p pageid] [-i objid] [-o output] '
+               '[-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dP:ap:i:o:rbtTO:')

@@ -268,7 +268,7 @@ class PDFContentParser(PSStackParser):
             else:
                 try:
                     j = self.buf.index(target[0], self.charpos)
-                    #print 'found', (0, self.buf[j:j+10])
+                    #print('found', (0, self.buf[j:j+10]))
                     data += self.buf[self.charpos:j+1]
                     self.charpos = j+1
                     i = 1
@@ -727,7 +727,7 @@ class PDFPageInterpreter:
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.linematrix = (0, 0)
-        #print >>sys.stderr, 'Td(%r,%r): %r' % (tx, ty, self.textstate)
+        #print('Td(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
         return
 
     # text-move
@@ -736,7 +736,7 @@ class PDFPageInterpreter:
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.leading = ty
         self.textstate.linematrix = (0, 0)
-        #print >>sys.stderr, 'TD(%r,%r): %r' % (tx, ty, self.textstate)
+        #print('TD(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
         return
 
     # textmatrix
@@ -754,7 +754,7 @@ class PDFPageInterpreter:
 
     # show-pos
     def do_TJ(self, seq):
-        #print >>sys.stderr, 'TJ(%r): %r' % (seq, self.textstate)
+        #print('TJ(%r): %r' % (seq, self.textstate), file=sys.stderr)
         if self.textstate.font is None:
             if STRICT:
                 raise PDFInterpreterError('No font specified!')

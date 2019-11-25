@@ -14,11 +14,11 @@ from pdfminer.image import ImageWriter
 def main(argv):
     import getopt
     def usage():
-        print ('usage: %s [-P password] [-o output] [-t text|html|xml|tag]'
+        print(f'usage: {argv[0]} [-P password] [-o output] [-t text|html|xml|tag]'
                ' [-O output_dir] [-c encoding] [-s scale] [-R rotation]'
                ' [-Y normal|loose|exact] [-p pagenos] [-m maxpages]'
                ' [-S] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin]'
-               ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...' % argv[0])
+               ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
