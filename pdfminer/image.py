@@ -82,7 +82,7 @@ class ImageWriter:
         path = os.path.join(self.outdir, name)
         with open(path, 'wb') as fp:
             if ext == '.jpg':
-                raw_data = stream.get_rawdata()
+                raw_data = stream.get_data()
                 if LITERAL_DEVICE_CMYK in image.colorspace:
                     from PIL import Image
                     from PIL import ImageChops
