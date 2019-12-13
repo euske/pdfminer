@@ -348,7 +348,7 @@ class PDFStandardSecurityHandler:
 
     def compute_encryption_key(self, password):
         # Algorithm 3.2
-        password = (bytes(password, 'ascii') + self.PASSWORD_PADDING)[:32]  # 1
+        password = (password.encode('ascii') + self.PASSWORD_PADDING)[:32]  # 1
         hash = md5.md5(password)  # 2
         hash.update(self.o)  # 3
         hash.update(struct.pack('<l', self.p))  # 4
