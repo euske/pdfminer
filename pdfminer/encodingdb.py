@@ -4,7 +4,9 @@ from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
 
+# turn on logging
 
+STRIP_PARTAFTERDOT = re.compile(r'[a-z]*')
 STRIP_NAME = re.compile(r'[0-9]+')
 
 
@@ -14,6 +16,9 @@ def name2unicode(name):
     """Converts Adobe glyph names to Unicode numbers."""
     if name in glyphname2unicode:
         return glyphname2unicode[name]
+    m = STRIP_PARTAFTERDOT.search(name) [0]
+    if m:
+        return glyphname2unicode[m]
     m = STRIP_NAME.search(name)
     if not m:
         raise KeyError(name)
