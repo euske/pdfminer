@@ -4,7 +4,6 @@ from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
 
-# turn on logging
 
 STRIP_PARTAFTERDOT = re.compile(r'[a-z]*')
 STRIP_NAME = re.compile(r'[0-9]+')
