@@ -8,7 +8,7 @@ from .utils import fsplit
 from .utils import bbox2str
 from .utils import matrix2str
 from .utils import apply_matrix_pt
-
+import locale
 
 ##  IndexAssigner
 ##
@@ -73,6 +73,7 @@ class LTText:
 
     def get_text(self):
         raise NotImplementedError
+
 
 
 ##  LTComponent
@@ -226,7 +227,9 @@ class LTChar(LTComponent, LTText):
         LTText.__init__(self)
         self._text = text
         self.matrix = matrix
+        self.font = font
         self.fontname = font.fontname
+        self.fontsize = fontsize
         self.adv = textwidth * fontsize * scaling
         # compute the boundary rectangle.
         if font.is_vertical():
@@ -276,6 +279,40 @@ class LTChar(LTComponent, LTText):
     def is_compatible(self, obj):
         """Returns True if two characters can coexist in the same line."""
         return True
+
+    def convert(self):
+        if self._text.isalpha():
+            obj = self
+        elif self._text in [' ', '\t', '\n']:
+            obj = LTAnno(self._text)
+        elif self._text.isdigit():
+            obj = LTDigit(self)
+        else:
+            obj = LTSpecialCharacter(self)
+        return obj
+
+## LTSpecialCharacter
+##
+class LTSpecialCharacter(LTChar):
+
+    def __init__(self, LTCharObj = None, **kwargs):
+        if LTCharObj:
+            return self.add(LTCharObj)
+        else:
+            LTChar.__init__(self, **kwargs)
+
+    def add(self, obj):
+        assert isinstance(obj, LTChar)
+        attrGenerator = (attr for attr in dir(obj) if not attr.startswith('__') and not callable(getattr(obj, attr)))
+        for attr in attrGenerator:
+            self.__setattr__(attr, obj.__getattribute__(attr))
+
+## LTDigit:
+##
+class LTDigit(LTSpecialCharacter):
+
+    def __init__(self, *args, **kwargs):
+        LTSpecialCharacter.__init__(self, *args, **kwargs)
 
 
 ##  LTContainer
@@ -334,6 +371,54 @@ class LTTextContainer(LTExpandableContainer, LTText):
 
     def get_text(self):
         return ''.join(obj.get_text() for obj in self if isinstance(obj, LTText))
+
+class LTWord(LTTextContainer):
+    def __init__(self):
+        LTTextContainer.__init__(self)
+        self.fontname = ''
+        self.fontsize = 0
+        return
+
+    def add(self, obj):
+        assert isinstance(obj, LTChar)
+        if not self.fontname and not self.fontsize:
+            self.fontname = obj.fontname
+            self.fontsize = obj.fontsize
+        else:
+            if self.fontname != obj.fontname or self.fontsize != obj.fontsize:
+                return
+        LTTextContainer.add(self, obj)
+        return
+
+    def __repr__(self):
+        return ('<%s %s %r>' %
+                (self.__class__.__name__, bbox2str(self.bbox),
+                 self.get_text()))
+
+    def analyze(self, laparams):
+        LTTextContainer.analyze(self, laparams)
+        return
+
+    # def convertToNumber(self, encoding = 'en_US.UTF-8'):
+    #     locale.setlocale(locale.LC_ALL, encoding)
+    #     try:
+    #         self.
+
+
+class LTNumber(LTWord):
+
+    def __init__(self, LTWordObj = None):
+        LTWord.__init__(self)
+        if LTWordObj:
+            return LTWordObj.convertToNumber()
+
+    def string2number(self, encoding = 'en_US.UTF-8'):
+        locale.setlocale(locale.LC_ALL, encoding)
+        try:
+            number = locale.atoi(self._text)
+        except ValueError:
+            number = locale.atof(self._text)
+        return number
 
 
 ##  LTTextLine
@@ -481,6 +566,7 @@ class LTTextGroupTBRL(LTTextGroup):
                            -(1+laparams.boxes_flow)*(obj.x0+obj.x1)
                            - (1-laparams.boxes_flow)*(obj.y1))
         return
+
 
 
 ##  LTLayoutContainer
@@ -663,6 +749,57 @@ class LTLayoutContainer(LTContainer):
         assert len(plane) == 1
         return list(plane)
 
+    def group_words(self, lines):
+        word = LTWord()
+        number = LTNumber()
+        lastObjWasNumber = False
+        def addObjToWord(LTWordObj, obj):
+            return word.add(obj)
+
+        def addObjToNumber(LTNumberObj, obj):
+            return LTNumberObj.add(obj)
+
+        def _dummy(foo, bar):
+            # this function is not supposed to do anything
+            return None
+
+
+        def switcher(obj):
+            cases = {LTChar : (addObjToWord, False),
+                     LTDigit : (addObjToNumber, True),
+                     LTAnno : (_dummy, False),
+                     LTSpecialCharacter : (, False)}
+            argument = argList[lastObjWasNumber]
+            func, lastObjWasNumber = cases.get(type(obj))
+            return func(argument, obj)
+        for line in lines:
+            for obj in line:
+                if isinstance(obj, LTDigit):
+                    number.add(obj)
+                    lastObjWasNumber = True
+                elif lastObjWasNumber and obj._text in ['.', ',']: # floating point notation/thousand
+                    number.add(obj)
+                    lastObjWasNumber = False
+                elif type(obj) == LTChar:
+                    lastObjWasNumber = False
+                    word.add(obj)
+                else:
+                    if word:
+                        yield word
+                    elif number:
+                        if not lastObjWasNumber:
+                            number._objs.pop()
+                        if len(number._objs) != 0:
+                            yield number
+                    lastObjWasNumber = False
+                    word = LTWord()
+                    number = LTNumber()
+            if word:
+                yield word
+            if number:
+                yield number
+
+
     def analyze(self, laparams):
         # textobjs is a list of LTChar objects, i.e.
         # it has all the individual characters in the page.
@@ -671,7 +808,11 @@ class LTLayoutContainer(LTContainer):
             obj.analyze(laparams)
         if not textobjs:
             return
+        textobjs = (obj.convert() for obj in textobjs)
+        textobjs = [obj for obj in textobjs if not isinstance(obj, LTAnno)]
         textlines = list(self.group_objects(laparams, textobjs))
+        words = list(self.group_words(textlines))
+        print(words)
         (empties, textlines) = fsplit(lambda obj: obj.is_empty(), textlines)
         for obj in empties:
             obj.analyze(laparams)
