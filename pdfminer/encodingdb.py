@@ -58,7 +58,7 @@ class EncodingDB:
                 elif isinstance(x, PSLiteral):
                     try:
                         cid2unicode[cid] = name2unicode(x.name)
-                    except KeyError:
+                    except (KeyError, OverflowError):
                         pass
                     cid += 1
         return cid2unicode
