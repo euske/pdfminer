@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages>
+<page id="1" bbox="0.000,0.000,595.280,841.890" rotate="0">
+<textbox id="0" bbox="30.000,653.550,138.990,730.270">
+<textline bbox="30.000,653.550,138.990,730.270">
+<text font="VGOQEA+SegoeUI" bbox="30.000,653.550,65.630,730.270" size="76.720">a</text>
+<text font="VGOQEA+SegoeUI" bbox="65.560,653.550,106.720,730.270" size="76.720">b</text>
+<text font="VGOQEA+SegoeUI" bbox="106.650,653.550,138.990,730.270" size="76.720">c</text>
+<text>
+</text>
+</textline>
+</textbox>
+<layout>
+<textbox id="0" bbox="30.000,653.550,138.990,730.270" />
+</layout>
+</page>
+</pages>
