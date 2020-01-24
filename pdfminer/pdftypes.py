@@ -228,7 +228,7 @@ class PDFStream(PDFObject):
             params = [params]*len(filters)
         if STRICT and len(params) != len(filters):
             raise PDFException("Parameters len filter mismatch")
-        return zip(filters, params)
+        return list(zip(filters, params))
 
     def decode(self):
         assert self.data is None and self.rawdata is not None
