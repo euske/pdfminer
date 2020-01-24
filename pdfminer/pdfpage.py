@@ -53,7 +53,7 @@ class PDFPage:
         self.attrs = dict_value(attrs)
         self.lastmod = resolve1(self.attrs.get('LastModified'))
         self.resources = resolve1(self.attrs.get('Resources', dict()))
-        self.mediabox = resolve1(self.attrs['MediaBox'])
+        self.mediabox = resolve1(self.attrs.get('MediaBox', (0,0,0,0)))
         if 'CropBox' in self.attrs:
             self.cropbox = resolve1(self.attrs['CropBox'])
         else:
