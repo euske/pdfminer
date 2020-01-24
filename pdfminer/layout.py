@@ -382,7 +382,8 @@ class LTTextLineHorizontal(LTTextLine):
                 if (isinstance(obj, LTTextLineHorizontal) and
                     abs(obj.height-self.height) < d and
                     (abs(obj.x0-self.x0) < d or
-                     abs(obj.x1-self.x1) < d))]
+                     abs(obj.x1-self.x1) < d or
+                     (obj.x0 > self.x0 and obj.x1 < self.x1)))]
 
 
 class LTTextLineVertical(LTTextLine):
