@@ -52,6 +52,7 @@ class PDFParser(PSStackParser):
 
     KEYWORD_R = KWD(b'R')
     KEYWORD_NULL = KWD(b'null')
+    KEYWORD_OBJ = KWD(b'obj')
     KEYWORD_ENDOBJ = KWD(b'endobj')
     KEYWORD_STREAM = KWD(b'stream')
     KEYWORD_XREF = KWD(b'xref')
@@ -62,6 +63,14 @@ class PDFParser(PSStackParser):
 
         if token in (self.KEYWORD_XREF, self.KEYWORD_STARTXREF):
             self.add_results(*self.pop(1))
+
+        elif token is self.KEYWORD_OBJ:
+            # Handle implicit endobj in some bugged PDFs
+            if len(self.curstack) > 2:
+                stack = self.popall()
+                self.add_results(*stack[0:-2])
+                self.push(*stack[-2:])
+            self.push((pos, token))
 
         elif token is self.KEYWORD_ENDOBJ:
             self.add_results(*self.pop(4))
