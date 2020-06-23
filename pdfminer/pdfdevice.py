@@ -33,6 +33,7 @@ class PDFDevice:
         return
 
     def do_tag(self, tag, props=None):
+        self.render_tag(q(tag.name))
         return
 
     def begin_page(self, page, ctm):

@@ -16,6 +16,7 @@ from .layout import LTTextLine
 from .layout import LTTextBox
 from .layout import LTTextBoxVertical
 from .layout import LTTextGroup
+from .layout import LTTag
 from .utils import apply_matrix_pt
 from .utils import mult_matrix
 from .utils import q
@@ -69,6 +70,12 @@ class PDFLayoutAnalyzer(PDFTextDevice):
                         self.cur_item.x1, self.cur_item.y1))
         self.cur_item.add(item)
         return
+
+    def render_tag(self,tag):
+        item = LTTag(tag)
+        self.cur_item._objs[-1].tag = tag
+        self.cur_item.add(item)
+
 
     def paint_path(self, gstate, stroke, fill, evenodd, path):
         shape = ''.join(x[0] for x in path)

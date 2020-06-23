@@ -148,6 +148,16 @@ class LTComponent(LTItem):
         else:
             return 0
 
+## LT Tag
+class LTTag(LTItem, LTText):
+
+    def __init__(self, text):
+        self._text = text
+        return
+
+    def get_text(self):
+        return self._text
+
 
 ##  LTCurve
 ##
@@ -228,6 +238,7 @@ class LTChar(LTComponent, LTText):
         self.matrix = matrix
         self.fontname = font.fontname
         self.adv = textwidth * fontsize * scaling
+        self.tag = None
         # compute the boundary rectangle.
         if font.is_vertical():
             # vertical
@@ -343,6 +354,7 @@ class LTTextLine(LTTextContainer):
     def __init__(self, word_margin):
         LTTextContainer.__init__(self)
         self.word_margin = word_margin
+        self.tag = list()
         return
 
     def __repr__(self):
@@ -540,6 +552,8 @@ class LTLayoutContainer(LTContainer):
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
                     (valign and isinstance(line, LTTextLineVertical))):
                     line.add(obj1)
+                    if obj1.tag and obj1.tag not in line.tag:
+                        line.tag.append(obj1.tag)
                 elif line is not None:
                     yield line
                     line = None
@@ -548,19 +562,31 @@ class LTLayoutContainer(LTContainer):
                         line = LTTextLineVertical(laparams.word_margin)
                         line.add(obj0)
                         line.add(obj1)
+                        if obj0.tag and obj0.tag not in line.tag:
+                            line.tag.append(obj0.tag)
+                        if obj1.tag and obj1.tag not in line.tag:
+                            line.tag.append(obj1.tag)
                     elif halign and not valign:
                         line = LTTextLineHorizontal(laparams.word_margin)
                         line.add(obj0)
                         line.add(obj1)
+                        if obj0.tag and obj0.tag not in line.tag:
+                            line.tag.append(obj0.tag)
+                        if obj1.tag and obj1.tag not in line.tag:
+                            line.tag.append(obj1.tag)
                     else:
                         line = LTTextLineHorizontal(laparams.word_margin)
                         line.add(obj0)
+                        if obj0.tag and obj0.tag not in line.tag:
+                            line.tag.append(obj0.tag)
                         yield line
                         line = None
             obj0 = obj1
         if line is None:
             line = LTTextLineHorizontal(laparams.word_margin)
             line.add(obj0)
+            if obj0.tag and obj0.tag not in line.tag:
+                line.tag.append(obj0.tag)
         yield line
         return
 
