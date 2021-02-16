@@ -270,7 +270,7 @@ class PDFStream(PDFObject):
             else:
                 raise PDFNotImplementedError('Unsupported filter: %r' % f)
             # apply predictors
-            if 'Predictor' in params:
+            if params is not None and  'Predictor' in params:
                 pred = int_value(params['Predictor'])
                 if pred == 1:
                     # no predictor
