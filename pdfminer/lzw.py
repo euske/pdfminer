@@ -94,13 +94,5 @@ class LZWDecoder:
 
 # lzwdecode
 def lzwdecode(data):
-    """
-    >>> lzwdecode(bytes.fromhex('800b6050220c0c8501'))
-    b'-----A---B'
-    """
     fp = BytesIO(data)
     return b''.join(LZWDecoder(fp).run())
-
-if __name__ == '__main__':
-    import doctest
-    print('pdfminer.lzw', doctest.testmod())
