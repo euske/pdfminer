@@ -18,7 +18,7 @@
 import sys, os, os.path, re, time
 import cgi, logging, traceback, random
 # comment out at this at runtime.
-#import cgitb; cgitb.enable()
+import cgitb; cgitb.enable()
 import pdfminer
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfpage import PDFPage
@@ -36,7 +36,7 @@ Q = re.compile(r'[^a-zA-Z0-9_.-=]')
 def url(base, **kw):
     r = []
     for (k,v) in kw.iteritems():
-        v = Q.sub(lambda m: '%%%02X' % ord(m.group(0)), encoder(q(v), 'replace')[0])
+        v = Q.sub(lambda m: '%%%02X' % ord(m.group(0)), q(v).encode("utf-8", 'replace')[0])
         r.append('%s=%s' % (k, v))
     return base+'&'.join(r)
 
@@ -48,7 +48,7 @@ def convert(infp, outfp, path, codec='utf-8',
             maxpages=0, maxfilesize=0, pagenos=None,
             html=True):
     # save the input file.
-    src = file(path, 'wb')
+    src = open(path, 'wb')
     nbytes = 0
     while 1:
         data = infp.read(4096)
@@ -68,7 +68,7 @@ def convert(infp, outfp, path, codec='utf-8',
                                layoutmode='exact')
     else:
         device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams)
-    fp = file(path, 'rb')
+    fp = open(path, 'rb')
     interpreter = PDFPageInterpreter(rsrcmgr, device)
     for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages):
         interpreter.process_page(page)
@@ -103,27 +103,28 @@ class WebApp(object):
 
     def put(self, *args):
         for x in args:
-            if isinstance(x, str):
-                self.outfp.write(x)
-            elif isinstance(x, unicode):
+            # if isinstance(x, str):
+            #     self.outfp.write(x)
+            # elif isinstance(x, bytes):
                 self.outfp.write(x.encode(self.codec, 'xmlcharrefreplace'))
         return
 
     def response_200(self):
         if self.server.startswith('cgi-httpd'):
             # required for cgi-httpd
-            self.outfp.write('HTTP/1.0 200 OK\r\n')
-        self.outfp.write('Content-type: %s\r\n' % self.content_type)
-        self.outfp.write('Connection: close\r\n\r\n')
+            self.outfp.write(b'HTTP/1.0 200 OK\r\n')
+        content_type = 'Content-type: %s\r\n' % self.content_type
+        self.outfp.write(content_type.encode())
+        self.outfp.write(b'Connection: close\r\n\r\n')
         return
 
     def response_404(self):
         if self.server.startswith('cgi-httpd'):
             # required for cgi-httpd
             self.outfp.write('HTTP/1.0 404 Not Found\r\n')
-        self.outfp.write('Content-type: text/html\r\n')
-        self.outfp.write('Connection: close\r\n\r\n')
-        self.outfp.write('<html><body>page does not exist</body></body>\n')
+        self.outfp.write(b'Content-type: text/html\r\n')
+        self.outfp.write(b'Connection: close\r\n\r\n')
+        self.outfp.write(b'<html><body>page does not exist</body></body>\n')
         return
 
     def response_301(self, url):
@@ -196,7 +197,7 @@ class WebApp(object):
             try:
                 convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
                         maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
-            except Exception, e:
+            except Exception as e:
                 self.put('<p>Sorry, an error has occurred: %s' % q(repr(e)))
                 self.logger.error('convert: %r: path=%r: %s' % (e, traceback.format_exc()))
         finally:
