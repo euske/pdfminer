@@ -10,6 +10,7 @@ options:
 import sys
 import os.path
 from io import StringIO
+from unittest import result
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
@@ -17,6 +18,7 @@ from pdfminer.pdftypes import PDFObjectNotFound, PDFValueError
 from pdfminer.pdftypes import PDFStream, PDFObjRef, resolve1, stream_value
 from pdfminer.pdfpage import PDFPage
 from pdfminer.utils import isnumber, q
+import re
 
 ESCAPE = set(map(ord, '&<>"'))
 _EMBEDDED_FILE_ERROR = 'unable to process PDF: ' \
@@ -129,7 +131,6 @@ def dumpallobjs(out, doc, mode=None):
     out.write('</pdf>')
     return
 
-
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                 dumpall=False, mode=None, extractdir=None):
@@ -149,6 +150,7 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
             return dest
 
         try:
+            result_output = ''
             outlines = doc.get_outlines()
             outfp.write('<outlines>\n')
             for (level, title, dest, a, se) in outlines:
@@ -165,8 +167,9 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                                 action.get('D'):
                             dest = resolve_dest(action['D'])
                             pageno = pages[dest[0].objid]
-                outfp.write('<outline level="%r" title="%s">\n' %
-                            (level, q(s)))
+                s = q(title)
+                outfp.write('<outline level="%r" title="%s">\n' % (level, s))
+                result_output += s
                 if dest is not None:
                     outfp.write('<dest>')
                     dumpxml(outfp, dest)
@@ -178,7 +181,7 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
         except PDFNoOutlines:
             pass
         parser.close()
-    return
+    return result_output
 
 
 # extractembedded
@@ -310,6 +313,7 @@ def main(argv):
     PDFParser.debug = debug
     #
     for fname in args:
+        print(fname)
         proc(outfp, fname, objids, pagenos, password=password,
              dumpall=dumpall, mode=mode, extractdir=extractdir)
     return
