@@ -327,7 +327,7 @@ class Plane:
                     continue
                 done.add(obj)
                 if (obj.x1 <= x0 or x1 <= obj.x0 or
-                    obj.y1 <= y0 or y1 <= obj.y0):
+                   obj.y1 <= y0 or y1 <= obj.y0):
                     continue
                 yield obj
         return

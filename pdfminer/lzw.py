@@ -6,8 +6,8 @@ class CorruptDataError(Exception):
     pass
 
 
-##  LZWDecoder
-##
+#  LZWDecoder
+#
 class LZWDecoder:
 
     def __init__(self, fp):
@@ -65,12 +65,12 @@ class LZWDecoder:
                 x = self.table[code]
             else:
                 raise CorruptDataError
-            l = len(self.table)
-            if l == 511:
+            l1 = len(self.table)
+            if l1 == 511:
                 self.nbits = 10
-            elif l == 1023:
+            elif l1 == 1023:
                 self.nbits = 11
-            elif l == 2047:
+            elif l1 == 2047:
                 self.nbits = 12
             self.prevbuf = x
         return x
@@ -87,7 +87,7 @@ class LZWDecoder:
                 # just ignore corrupt data and stop yielding there
                 break
             yield x
-            #logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
+            # logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
             #              (self.nbits, code, x, self.table[258:]))
         return
 
@@ -100,6 +100,7 @@ def lzwdecode(data):
     """
     fp = BytesIO(data)
     return b''.join(LZWDecoder(fp).run())
+
 
 if __name__ == '__main__':
     import doctest
