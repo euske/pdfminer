@@ -5,6 +5,8 @@ from pdfminer.psparser import PSStackParser
 from pdfminer.psparser import PSSymbolTable
 from pdfminer.psparser import PSLiteral
 from pdfminer.psparser import PSKeyword
+from pdfminer.psparser import KWD
+from pdfminer.psparser import LIT
 
 
 #  Simplistic Test cases
@@ -32,14 +34,14 @@ func/a/b{(c)do*}def
 '''
     PSLiteralTable = PSSymbolTable(PSLiteral)
     PSKeywordTable = PSSymbolTable(PSKeyword)
-    LIT = PSLiteralTable.intern
-    KWD = PSKeywordTable.intern
-    KEYWORD_PROC_BEGIN = KWD(b'{')
-    KEYWORD_PROC_END = KWD(b'}')
-    KEYWORD_ARRAY_BEGIN = KWD(b'[')
-    KEYWORD_ARRAY_END = KWD(b']')
-    KEYWORD_DICT_BEGIN = KWD(b'<<')
-    KEYWORD_DICT_END = KWD(b'>>')
+    # LIT = PSLiteralTable.intern
+    # KWD = PSKeywordTable.intern
+    # KEYWORD_PROC_BEGIN = KWD(b'{')
+    # KEYWORD_PROC_END = KWD(b'}')
+    # KEYWORD_ARRAY_BEGIN = KWD(b'[')
+    # KEYWORD_ARRAY_END = KWD(b']')
+    # KEYWORD_DICT_BEGIN = KWD(b'<<')
+    # KEYWORD_DICT_END = KWD(b'>>')
 
     TOKENS = [
       (5, KWD(b'begin')), (11, KWD(b'end')), (16, KWD(b'"')), (19, KWD(b'@')),
