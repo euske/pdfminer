@@ -3,7 +3,7 @@ name: Unittest
 on: [push]
 
 jobs:
-  flake8:
+  unittest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout out repository
