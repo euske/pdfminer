@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-#
-# dumppdf.py - dump pdf contents in XML format.
-#
-#  usage: dumppdf.py [options] [files ...]
-#  options:
-#    -i objid : object id
-#
-import sys, os.path, re
+"""
+dumppdf.py - dump pdf contents in XML format.
+
+usage:
+  dumppdf.py [options] [files ...]
+options:
+  -i objid : object id
+"""
+import sys
+import os.path
 from io import StringIO
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
 from pdfminer.pdfparser import PDFParser
@@ -16,8 +18,13 @@ from pdfminer.pdftypes import PDFStream, PDFObjRef, resolve1, stream_value
 from pdfminer.pdfpage import PDFPage
 from pdfminer.utils import isnumber, q
 
-
 ESCAPE = set(map(ord, '&<>"'))
+_EMBEDDED_FILE_ERROR = 'unable to process PDF: ' \
+                       'reference for %r is not an EmbeddedFile'
+_PDF_STREAM_ERROR = 'unable to process PDF: ' \
+                    'reference for %r is not a PDFStream'
+
+
 def encode(data):
     buf = StringIO()
     for b in data:
@@ -36,7 +43,7 @@ def dumpxml(out, obj, mode=None):
 
     if isinstance(obj, dict):
         out.write('<dict size="%d">\n' % len(obj))
-        for (k,v) in obj.items():
+        for (k, v) in obj.items():
             out.write('<key>%s</key>\n' % k)
             out.write('<value>')
             dumpxml(out, v)
@@ -67,7 +74,8 @@ def dumpxml(out, obj, mode=None):
             out.write('\n</props>\n')
             if mode == 'text':
                 data = obj.get_data()
-                out.write('<data size="%d">%s</data>\n' % (len(data), encode(data)))
+                out.write('<data size="%d">%s</data>\n' %
+                          (len(data), encode(data)))
             out.write('</stream>')
         return
 
@@ -89,6 +97,7 @@ def dumpxml(out, obj, mode=None):
 
     raise TypeError(obj)
 
+
 # dumptrailers
 def dumptrailers(out, doc):
     for xref in doc.xrefs:
@@ -97,17 +106,20 @@ def dumptrailers(out, doc):
         out.write('\n</trailer>\n\n')
     return
 
+
 # dumpallobjs
 def dumpallobjs(out, doc, mode=None):
     visited = set()
     out.write('<pdf>')
     for xref in doc.xrefs:
         for objid in xref.get_objids():
-            if objid in visited: continue
+            if objid in visited:
+                continue
             visited.add(objid)
             try:
                 obj = doc.getobj(objid)
-                if obj is None: continue
+                if obj is None:
+                    continue
                 out.write('<object id="%d">\n' % objid)
                 dumpxml(out, obj, mode=mode)
                 out.write('\n</object>\n\n')
@@ -117,14 +129,16 @@ def dumpallobjs(out, doc, mode=None):
     out.write('</pdf>')
     return
 
+
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                 dumpall=False, mode=None, extractdir=None):
     with open(fname, 'rb') as fp:
         parser = PDFParser(fp)
         doc = PDFDocument(parser, password)
-        pages = dict( (page.pageid, pageno) for (pageno,page)
-                      in enumerate(PDFPage.create_pages(doc)) )
+        pages = dict((page.pageid, pageno) for (pageno, page)
+                     in enumerate(PDFPage.create_pages(doc)))
+
         def resolve_dest(dest):
             if isinstance(dest, str):
                 dest = resolve1(doc.get_dest(dest))
@@ -133,10 +147,11 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
             if isinstance(dest, dict):
                 dest = dest['D']
             return dest
+
         try:
             outlines = doc.get_outlines()
             outfp.write('<outlines>\n')
-            for (level,title,dest,a,se) in outlines:
+            for (level, title, dest, a, se) in outlines:
                 pageno = None
                 if dest:
                     dest = resolve_dest(dest)
@@ -145,10 +160,13 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                     action = a.resolve()
                     if isinstance(action, dict):
                         subtype = action.get('S')
-                        if subtype and repr(subtype) == '/GoTo' and action.get('D'):
+                        if subtype and \
+                                repr(subtype) == '/GoTo' and \
+                                action.get('D'):
                             dest = resolve_dest(action['D'])
                             pageno = pages[dest[0].objid]
-                outfp.write('<outline level="%r" title="%s">\n' % (level, q(s)))
+                outfp.write('<outline level="%r" title="%s">\n' %
+                            (level, q(s)))
                 if dest is not None:
                     outfp.write('<dest>')
                     dumpxml(outfp, dest)
@@ -162,9 +180,12 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
         parser.close()
     return
 
+
 # extractembedded
 LITERAL_FILESPEC = LIT('Filespec')
 LITERAL_EMBEDDEDFILE = LIT('EmbeddedFile')
+
+
 def extractembedded(outfp, fname, objids, pagenos, password=b'',
                     dumpall=False, mode=None, extractdir=None):
     def extract1(obj):
@@ -173,12 +194,12 @@ def extractembedded(outfp, fname, objids, pagenos, password=b'',
         fileobj = doc.getobj(fileref.objid)
         if not isinstance(fileobj, PDFStream):
             raise PDFValueError(
-                'unable to process PDF: reference for %r is not a PDFStream' %
-                (filename))
+                _PDF_STREAM_ERROR %
+                filename)
         if fileobj.get('Type') is not LITERAL_EMBEDDEDFILE:
             raise PDFValueError(
-                'unable to process PDF: reference for %r is not an EmbeddedFile' %
-                (filename))
+                _EMBEDDED_FILE_ERROR %
+                filename)
         path = os.path.join(extractdir, filename)
         if os.path.exists(path):
             raise IOError('file exists: %r' % path)
@@ -193,9 +214,11 @@ def extractembedded(outfp, fname, objids, pagenos, password=b'',
         for xref in doc.xrefs:
             for objid in xref.get_objids():
                 obj = doc.getobj(objid)
-                if isinstance(obj, dict) and obj.get('Type') is LITERAL_FILESPEC:
+                if isinstance(obj, dict) and \
+                        obj.get('Type') is LITERAL_FILESPEC:
                     extract1(obj)
     return
+
 
 # dumppdf
 def dumppdf(outfp, fname, objids, pagenos, password=b'',
@@ -208,7 +231,7 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
                 obj = doc.getobj(objid)
                 dumpxml(outfp, obj, mode=mode)
         if pagenos:
-            for (pageno,page) in enumerate(PDFPage.create_pages(doc)):
+            for (pageno, page) in enumerate(PDFPage.create_pages(doc)):
                 if pageno in pagenos:
                     if mode is not None:
                         for obj in page.contents:
@@ -220,7 +243,7 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
             dumpallobjs(outfp, doc, mode=mode)
         if (not objids) and (not pagenos) and (not dumpall):
             dumptrailers(outfp, doc)
-        if mode not in ('raw','binary'):
+        if mode not in ('raw', 'binary'):
             outfp.write('\n')
     return
 
@@ -228,15 +251,27 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
 # main
 def main(argv):
     import getopt
+
     def usage():
-        print(f'usage: {argv[0]} [-P password] [-a] [-p pageid] [-i objid] [-o output] '
-               '[-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...')
+        print(f'usage: {argv[0]} '
+              f'[-P password] '
+              f'[-a] '
+              f'[-p pageid] '
+              f'[-i objid] '
+              f'[-o output] '
+              '[-r|-b|-t] '
+              '[-T] '
+              '[-O output_dir] '
+              '[-d] '
+              'input.pdf ...')
         return 100
+
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dP:ap:i:o:rbtTO:')
     except getopt.GetoptError:
         return usage()
-    if not args: return usage()
+    if not args:
+        return usage()
     debug = 0
     objids = []
     pagenos = set()
@@ -247,16 +282,26 @@ def main(argv):
     outfp = sys.stdout
     extractdir = None
     for (k, v) in opts:
-        if k == '-d': debug += 1
-        elif k == '-P': password = v.encode('ascii')
-        elif k == '-a': dumpall = True
-        elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
-        elif k == '-i': objids.extend( int(x) for x in v.split(',') )
-        elif k == '-o': outfp = open(v, 'wb')
-        elif k == '-r': mode = 'raw'
-        elif k == '-b': mode = 'binary'
-        elif k == '-t': mode = 'text'
-        elif k == '-T': proc = dumpoutline
+        if k == '-d':
+            debug += 1
+        elif k == '-P':
+            password = v.encode('ascii')
+        elif k == '-a':
+            dumpall = True
+        elif k == '-p':
+            pagenos.update(int(x) - 1 for x in v.split(','))
+        elif k == '-i':
+            objids.extend(int(x) for x in v.split(','))
+        elif k == '-o':
+            outfp = open(v, 'wb')
+        elif k == '-r':
+            mode = 'raw'
+        elif k == '-b':
+            mode = 'binary'
+        elif k == '-t':
+            mode = 'text'
+        elif k == '-T':
+            proc = dumpoutline
         elif k == '-O':
             extractdir = v
             proc = extractembedded
@@ -269,4 +314,6 @@ def main(argv):
              dumpall=dumpall, mode=mode, extractdir=extractdir)
     return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
