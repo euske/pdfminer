@@ -61,6 +61,6 @@ test: cmap
 	$(PYTHON) -m tests.test_lzw
 	$(PYTHON) -m pdfminer.rijndael
 	$(PYTHON) -m pdfminer.runlength
-	$(PYTHON) -m pdfminer.ccitt
-	$(PYTHON) -m pdfminer.psparser
+	$(PYTHON) -m tests.test_ccitt
+	$(PYTHON) -m tests.test_psparser
 	cd samples && $(MAKE) test
