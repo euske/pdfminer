@@ -4,7 +4,6 @@ from .psparser import PSLiteral
 from .glyphlist import glyphname2unicode
 from .latin_enc import ENCODING
 
-
 STRIP_NAME = re.compile(r'[0-9]+')
 
 
@@ -23,7 +22,6 @@ def name2unicode(name):
 ##  EncodingDB
 ##
 class EncodingDB:
-
     std2unicode = {}
     mac2unicode = {}
     win2unicode = {}

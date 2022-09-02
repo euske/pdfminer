@@ -88,7 +88,7 @@ class PDFTextDevice(PDFDevice):
         needcharspace = False
         for obj in seq:
             if isnumber(obj):
-                x -= obj*dxscale
+                x -= obj * dxscale
                 needcharspace = True
             else:
                 for cid in font.decode(obj):
@@ -107,7 +107,7 @@ class PDFTextDevice(PDFDevice):
         needcharspace = False
         for obj in seq:
             if isnumber(obj):
-                y -= obj*dxscale
+                y -= obj * dxscale
                 needcharspace = True
             else:
                 for cid in font.decode(obj):

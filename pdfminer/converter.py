@@ -37,7 +37,7 @@ class PDFLayoutAnalyzer(PDFTextDevice):
         (x0, y0, x1, y1) = page.mediabox
         (x0, y0) = apply_matrix_pt(ctm, (x0, y0))
         (x1, y1) = apply_matrix_pt(ctm, (x1, y1))
-        mediabox = (0, 0, abs(x0-x1), abs(y0-y1))
+        mediabox = (0, 0, abs(x0 - x1), abs(y0 - y1))
         self.cur_item = LTPage(self.pageno, mediabox)
         return
 
@@ -92,14 +92,14 @@ class PDFLayoutAnalyzer(PDFTextDevice):
             (x2, y2) = apply_matrix_pt(self.ctm, (x2, y2))
             (x3, y3) = apply_matrix_pt(self.ctm, (x3, y3))
             if ((x0 == x1 and y1 == y2 and x2 == x3 and y3 == y0) or
-                (y0 == y1 and x1 == x2 and y2 == y3 and x3 == x0)):
+                    (y0 == y1 and x1 == x2 and y2 == y3 and x3 == x0)):
                 self.cur_item.add(LTRect(gstate.linewidth, (x0, y0, x2, y2)))
                 return
         # other shapes
         pts = []
         for p in path:
             for i in range(1, len(p), 2):
-                pts.append(apply_matrix_pt(self.ctm, (p[i], p[i+1])))
+                pts.append(apply_matrix_pt(self.ctm, (p[i], p[i + 1])))
         self.cur_item.add(LTCurve(gstate.linewidth, pts))
         return
 
@@ -177,6 +177,7 @@ class TextConverter(PDFConverter):
             elif isinstance(item, LTImage):
                 if self.imagewriter is not None:
                     self.imagewriter.export_image(item)
+
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)
         render(ltpage)
@@ -199,9 +200,8 @@ class TextConverter(PDFConverter):
 ##  HTMLConverter
 ##
 class HTMLConverter(PDFConverter):
-
     RECT_COLORS = {
-        #'char': 'green',
+        # 'char': 'green',
         'figure': 'yellow',
         'textline': 'magenta',
         'textbox': 'cyan',
@@ -264,8 +264,8 @@ class HTMLConverter(PDFConverter):
             self.write('<span style="position:absolute; border: %s %dpx solid; '
                        'left:%dpx; top:%dpx; width:%dpx; height:%dpx;"></span>\n' %
                        (color, borderwidth,
-                        x*self.scale, (self._yoffset-y)*self.scale,
-                        w*self.scale, h*self.scale))
+                        x * self.scale, (self._yoffset - y) * self.scale,
+                        w * self.scale, h * self.scale))
         return
 
     def place_border(self, color, borderwidth, item):
@@ -278,15 +278,15 @@ class HTMLConverter(PDFConverter):
             self.write('<img src="%s" border="%d" style="position:absolute; left:%dpx; top:%dpx;" '
                        'width="%d" height="%d" />\n' %
                        (q(name), borderwidth,
-                        x*self.scale, (self._yoffset-y)*self.scale,
-                        w*self.scale, h*self.scale))
+                        x * self.scale, (self._yoffset - y) * self.scale,
+                        w * self.scale, h * self.scale))
         return
 
     def place_text(self, color, text, x, y, size):
         color = self.text_colors.get(color)
         if color is not None:
             self.write('<span style="position:absolute; color:%s; left:%dpx; top:%dpx; font-size:%dpx;">' %
-                       (color, x*self.scale, (self._yoffset-y)*self.scale, size*self.scale*self.fontscale))
+                       (color, x * self.scale, (self._yoffset - y) * self.scale, size * self.scale * self.fontscale))
             self.write_text(text)
             self.write('</span>\n')
         return
@@ -297,8 +297,8 @@ class HTMLConverter(PDFConverter):
         self.write('<div style="position:absolute; border: %s %dpx solid; writing-mode:%s; '
                    'left:%dpx; top:%dpx; width:%dpx; height:%dpx;">' %
                    (color, borderwidth, writing_mode,
-                    x*self.scale, (self._yoffset-y)*self.scale,
-                    w*self.scale, h*self.scale))
+                    x * self.scale, (self._yoffset - y) * self.scale,
+                    w * self.scale, h * self.scale))
         return
 
     def end_div(self, color):
@@ -337,7 +337,7 @@ class HTMLConverter(PDFConverter):
                 self.place_border('page', 1, item)
                 if self.showpageno:
                     self.write('<div style="position:absolute; top:%dpx;">' %
-                               ((self._yoffset-item.y1)*self.scale))
+                               ((self._yoffset - item.y1) * self.scale))
                     self.write('<a name="%s">Page %s</a></div>\n' % (item.pageid, item.pageid))
                 for child in item:
                     render(child)
@@ -361,7 +361,7 @@ class HTMLConverter(PDFConverter):
                             render(child)
                     elif isinstance(item, LTTextBox):
                         self.place_border('textbox', 1, item)
-                        self.place_text('textbox', str(item.index+1), item.x0, item.y1, 20)
+                        self.place_text('textbox', str(item.index + 1), item.x0, item.y1, 20)
                         for child in item:
                             render(child)
                     elif isinstance(item, LTChar):
@@ -384,6 +384,7 @@ class HTMLConverter(PDFConverter):
                     elif isinstance(item, LTText):
                         self.write_text(item.get_text())
             return
+
         render(ltpage)
         self._yoffset += self.pagemargin
         return
@@ -396,7 +397,6 @@ class HTMLConverter(PDFConverter):
 ##  XMLConverter
 ##
 class XMLConverter(PDFConverter):
-
     CONTROL = re.compile(r'[\x00-\x08\x0b-\x0c\x0e-\x1f]')
 
     def __init__(self, rsrcmgr, outfp, pageno=1,
@@ -493,6 +493,7 @@ class XMLConverter(PDFConverter):
             else:
                 assert 0, item
             return
+
         render(ltpage)
         return
 

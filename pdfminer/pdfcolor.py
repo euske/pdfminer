@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from .psparser import LIT
 
-
 ##  PDFColorSpace
 ##
 LITERAL_DEVICE_GRAY = LIT('DeviceGray')
