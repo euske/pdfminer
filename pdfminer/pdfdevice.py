@@ -7,8 +7,8 @@ from .utils import isnumber
 from .pdffont import PDFUnicodeNotDefined
 
 
-##  PDFDevice
-##
+#  PDFDevice
+#
 class PDFDevice:
 
     def __init__(self, rsrcmgr):
@@ -57,8 +57,8 @@ class PDFDevice:
         return
 
 
-##  PDFTextDevice
-##
+#  PDFTextDevice
+#
 class PDFTextDevice(PDFDevice):
 
     def render_string(self, textstate, seq):
@@ -83,7 +83,8 @@ class PDFTextDevice(PDFDevice):
         return
 
     def render_string_horizontal(self, seq, matrix, pos,
-                                 font, fontsize, scaling, charspace, wordspace, rise, dxscale):
+                                 font, fontsize, scaling, charspace, wordspace,
+                                 rise, dxscale):
         (x, y) = pos
         needcharspace = False
         for obj in seq:
@@ -102,7 +103,8 @@ class PDFTextDevice(PDFDevice):
         return (x, y)
 
     def render_string_vertical(self, seq, matrix, pos,
-                               font, fontsize, scaling, charspace, wordspace, rise, dxscale):
+                               font, fontsize, scaling, charspace, wordspace,
+                               rise, dxscale):
         (x, y) = pos
         needcharspace = False
         for obj in seq:
@@ -124,8 +126,8 @@ class PDFTextDevice(PDFDevice):
         return 0
 
 
-##  TagExtractor
-##
+#  TagExtractor
+#
 class TagExtractor(PDFDevice):
 
     def __init__(self, rsrcmgr, outfp):

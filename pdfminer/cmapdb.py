@@ -34,8 +34,8 @@ class CMapError(Exception):
     pass
 
 
-##  CMapBase
-##
+# CMapBase
+#
 class CMapBase:
     debug = 0
 
@@ -60,8 +60,8 @@ class CMapBase:
         return
 
 
-##  CMap
-##
+#  CMap
+#
 class CMap(CMapBase):
 
     def __init__(self, **kwargs):
@@ -114,8 +114,8 @@ class CMap(CMapBase):
         return
 
 
-##  IdentityCMap
-##
+#  IdentityCMap
+#
 class IdentityCMap(CMapBase):
 
     def decode(self, code):
@@ -126,8 +126,8 @@ class IdentityCMap(CMapBase):
             return ()
 
 
-##  UnicodeMap
-##
+#  UnicodeMap
+#
 class UnicodeMap(CMapBase):
 
     def __init__(self, **kwargs):
@@ -149,8 +149,8 @@ class UnicodeMap(CMapBase):
         return
 
 
-##  FileCMap
-##
+#  FileCMap
+#
 class FileCMap(CMap):
 
     def add_code2cid(self, code, cid):
@@ -169,8 +169,8 @@ class FileCMap(CMap):
         return
 
 
-##  FileUnicodeMap
-##
+#  FileUnicodeMap
+#
 class FileUnicodeMap(UnicodeMap):
 
     def add_cid2unichr(self, cid, code):
@@ -188,8 +188,8 @@ class FileUnicodeMap(UnicodeMap):
         return
 
 
-##  PyCMap
-##
+#  PyCMap
+#
 class PyCMap(CMap):
 
     def __init__(self, name, module):
@@ -200,8 +200,8 @@ class PyCMap(CMap):
         return
 
 
-##  PyUnicodeMap
-##
+#  PyUnicodeMap
+#
 class PyUnicodeMap(UnicodeMap):
 
     def __init__(self, name, module, vertical):
@@ -214,8 +214,8 @@ class PyUnicodeMap(UnicodeMap):
         return
 
 
-##  CMapDB
-##
+#  CMapDB
+#
 class CMapDB:
     _cmap_cache = {}
     _umap_cache = {}
@@ -261,12 +261,13 @@ class CMapDB:
         except KeyError:
             pass
         data = klass._load_data('to-unicode-%s' % name)
-        klass._umap_cache[name] = umaps = [PyUnicodeMap(name, data, v) for v in (False, True)]
+        klass._umap_cache[name] = umaps = \
+            [PyUnicodeMap(name, data, v) for v in (False, True)]
         return umaps[vertical]
 
 
-##  CMapParser
-##
+#  CMapParser
+#
 class CMapParser(PSStackParser):
 
     def __init__(self, cmap, fp):
@@ -416,8 +417,8 @@ class CMapParser(PSStackParser):
         return
 
 
-##  CMapConverter
-##
+#  CMapConverter
+#
 class CMapConverter:
 
     def __init__(self, enc2codec={}):
@@ -457,7 +458,8 @@ class CMapConverter:
         encs = None
         for line in fp:
             (line, _, _) = line.strip().partition('#')
-            if not line: continue
+            if not line:
+                continue
             values = line.split('\t')
             if encs is None:
                 assert values[0] == 'CID'
@@ -502,8 +504,10 @@ class CMapConverter:
             unimap_h = {}
             unimap_v = {}
             for (enc, value) in zip(encs, values):
-                if enc == 'CID': continue
-                if value == '*': continue
+                if enc == 'CID':
+                    continue
+                if value == '*':
+                    continue
 
                 # hcodes, vcodes: encoded bytes for each writing mode.
                 hcodes = []
@@ -514,7 +518,7 @@ class CMapConverter:
                         code = code[:-1]
                     try:
                         code = codecs.decode(code, 'hex')
-                    except:
+                    except Exception:
                         code = bytes([int(code, 16)])
                     if vertical:
                         vcodes.append(code)

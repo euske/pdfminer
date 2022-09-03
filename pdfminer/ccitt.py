@@ -15,6 +15,8 @@
 import sys
 import array
 
+import unittest
+
 
 #  BitParser
 #
@@ -411,9 +413,8 @@ class CCITTG4Parser(BitParser):
         elif len(self._refline) <= i:
             return ''.join(str(b) for b in self._refline) + '[]'
         else:
-            return (''.join(str(b) for b in self._refline[:i]) +
-                    '[' + str(self._refline[i]) + ']' +
-                    ''.join(str(b) for b in self._refline[i + 1:]))
+            return (''.join(str(b) for b in self._refline[:i]) + '[' + str(self._refline[i]) + ']' + ''.join(
+                str(b) for b in self._refline[i + 1:]))
 
     def reset(self):
         self._y = 0
@@ -444,7 +445,8 @@ class CCITTG4Parser(BitParser):
         return
 
     def _do_vertical(self, dx):
-        # print('* vertical(%d): curpos=%r, color=%r' % (dx, self._curpos, self._color))
+        # print('* vertical(%d): curpos=%r, color=%r' % (dx, self._curpos,
+        # self._color))
         # print('  refline:', self._get_refline(self._curpos+1))
         x1 = self._curpos + 1
         while 1:
@@ -453,8 +455,7 @@ class CCITTG4Parser(BitParser):
                     break
             elif x1 == len(self._refline):
                 break
-            elif (self._refline[x1 - 1] == self._color and
-                  self._refline[x1] != self._color):
+            elif (self._refline[x1 - 1] == self._color and self._refline[x1] != self._color):
                 break
             x1 += 1
         x1 += dx
@@ -480,8 +481,7 @@ class CCITTG4Parser(BitParser):
                     break
             elif x1 == len(self._refline):
                 break
-            elif (self._refline[x1 - 1] == self._color and
-                  self._refline[x1] != self._color):
+            elif (self._refline[x1 - 1] == self._color and self._refline[x1] != self._color):
                 break
             x1 += 1
         while 1:
@@ -490,8 +490,7 @@ class CCITTG4Parser(BitParser):
                     break
             elif x1 == len(self._refline):
                 break
-            elif (self._refline[x1 - 1] != self._color and
-                  self._refline[x1] == self._color):
+            elif (self._refline[x1 - 1] != self._color and self._refline[x1] == self._color):
                 break
             x1 += 1
         for x in range(self._curpos, x1):
@@ -500,7 +499,8 @@ class CCITTG4Parser(BitParser):
         return
 
     def _do_horizontal(self, n1, n2):
-        # print('* horizontal(%d,%d): curpos=%r, color=%r' % (n1, n2, self._curpos, self._color))
+        # print('* horizontal(%d,%d): curpos=%r, color=%r' % (n1, n2,
+        # self._curpos, self._color))
         if self._curpos < 0:
             self._curpos = 0
         x = self._curpos
@@ -526,11 +526,10 @@ class CCITTG4Parser(BitParser):
         return
 
 
-import unittest
+#  Test cases
+#
 
 
-##  Test cases
-##
 class TestCCITTG4Parser(unittest.TestCase):
 
     def get_parser(self, bits):
@@ -684,8 +683,8 @@ class TestCCITTG4Parser(unittest.TestCase):
         return
 
 
-##  CCITTFaxDecoder
-##
+# CCITTFaxDecoder
+#
 class CCITTFaxDecoder(CCITTG4Parser):
 
     def __init__(self, width, bytealign=False, reversed=False):
@@ -756,4 +755,5 @@ def main(argv):
     return
 
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
