@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 .vscode/
+
+# Files by Github in MacOS
+.DS_Store
+.idea/
