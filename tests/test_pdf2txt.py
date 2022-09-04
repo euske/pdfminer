@@ -9,7 +9,8 @@ class TestPdf2txtMethods(unittest.TestCase):
         self.assertEqual(tools.pdf2txt.usage([]), expected)
 
     def testSetOptions(self):
-        expected = "Hello world"
+        expected = "Hello\nWorld\nHello\nWorld\nH e l l o\nW o r l d\
+        \nH e l l o\nW o r l d"
         document = open("../samples/simpl1.pdf")
         self.assertEqual(tools.pdf2txt.setOptions(document), expected)
 
