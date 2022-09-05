@@ -46,6 +46,7 @@ def setOptions(argv):
         return usage(argv)
     if not args:
         return usage(argv)
+    
     # debug option
     debug = 0
     # input option
@@ -60,12 +61,9 @@ def setOptions(argv):
     stripcontrol = False
     layoutmode = 'normal'
     encoding = 'utf-8'
-    # Never used, consider to remove
-    # pageno = 1
     scale = 1
     caching = True
-    # Never used, consider to remove
-    # showpageno = True
+
     laparams = LAParams()
     for (k, v) in opts:
         if k == '-d':
@@ -109,6 +107,9 @@ def setOptions(argv):
         elif k == '-F':
             laparams.boxes_flow = float(v)
     pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
+              imagewriter, stripcontrol, scale, layoutmode, pagenos,
+              maxpages, password, rotation)
+    return (debug, caching, outtype, outfile, encoding,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
               maxpages, password, rotation)
 

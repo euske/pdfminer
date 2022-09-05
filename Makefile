@@ -63,4 +63,5 @@ test: cmap
 	$(PYTHON) -m pdfminer.runlength
 	$(PYTHON) -m tests.test_ccitt
 	$(PYTHON) -m tests.test_psparser
+	$(PYTHON) -m tests.test_pdf2txt
 	cd samples && $(MAKE) test
