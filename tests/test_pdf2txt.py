@@ -19,8 +19,8 @@ class TestPdf2txtMethods(unittest.TestCase):
         self.assertEqual(maxpages, 2)
 
     def testPdfToText(self):
-        expected = "Hello \n\nWorld\n\nHello \n\nWorld\n\nH e l l o  \n\
-            W o r l d\n\nH e l l o  \n\nW o r l d\n\n"
+        expected = "Hello \n\nWorld\n\nHello \n\nWorld\n\nH e l l o  \n\n" + \
+                    "W o r l d\n\nH e l l o  \n\nW o r l d\n\n"
         argv = ['pdf2txt.py', '-o', 'samples/test_outfp.txt', '-t', 'text',
                 'samples/simple1.pdf']
         tools.pdf2txt.setOptions(argv)
