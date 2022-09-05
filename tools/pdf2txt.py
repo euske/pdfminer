@@ -46,7 +46,7 @@ def setOptions(argv):
         return usage(argv)
     if not args:
         return usage(argv)
-    
+
     # debug option
     debug = 0
     # input option
@@ -110,8 +110,8 @@ def setOptions(argv):
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
               maxpages, password, rotation)
     return (debug, caching, outtype, outfile, encoding,
-              imagewriter, stripcontrol, scale, layoutmode, pagenos,
-              maxpages, password, rotation)
+            imagewriter, stripcontrol, scale, layoutmode, pagenos,
+            maxpages, password, rotation)
 
 
 def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
