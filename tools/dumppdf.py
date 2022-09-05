@@ -10,7 +10,6 @@ options:
 import sys
 import os.path
 from io import StringIO
-from unittest import result
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument, PDFNoOutlines
@@ -18,7 +17,6 @@ from pdfminer.pdftypes import PDFObjectNotFound, PDFValueError
 from pdfminer.pdftypes import PDFStream, PDFObjRef, resolve1, stream_value
 from pdfminer.pdfpage import PDFPage
 from pdfminer.utils import isnumber, q
-import re
 
 ESCAPE = set(map(ord, '&<>"'))
 _EMBEDDED_FILE_ERROR = 'unable to process PDF: ' \
@@ -130,6 +128,7 @@ def dumpallobjs(out, doc, mode=None):
     dumptrailers(out, doc)
     out.write('</pdf>')
     return
+
 
 # dumpoutline
 def dumpoutline(outfp, fname, objids, pagenos, password=b'',
