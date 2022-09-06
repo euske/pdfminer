@@ -19,7 +19,6 @@ from pdfminer.layout import LAParams
 from pdfminer.converter import HTMLConverter, TextConverter
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
-from pdfminer.pdfdocument import PDFDocument
 import pdfminer
 import sys
 import os
@@ -37,7 +36,11 @@ cgitb.enable()
 
 # quote HTML metacharacters
 def q(x):
-    return x.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+    return x \
+        .replace('&', '&amp;') \
+        .replace('>', '&gt;') \
+        .replace('<', '&lt;')\
+        .replace('"', '&quot;')
 
 
 # encode parameters as a URL
@@ -154,18 +157,21 @@ class WebApp(object):
         self.put(
             '<html><head><title>%s</title></head><body>\n' % q(self.TITLE),
             '<h1>%s</h1><hr>\n' % q(self.TITLE),
-            '<form method="POST" action="%s" enctype="multipart/form-data">\n' % q(
-                self.apppath),
+            '<form method="POST" action="%s" enctype="multipart/form-data">\n'
+            % q(self.apppath),
             '<p>Upload PDF File: <input name="f" type="file" value="">\n',
             '&nbsp; Page numbers (comma-separated):\n',
             '<input name="p" type="text" size="10" value="">\n',
-            '<p>(Text extraction is limited to maximum %d pages.\n' % self.MAXPAGES,
+            '<p>(Text extraction is limited to maximum %d pages.\n' %
+            self.MAXPAGES,
             'Maximum file size for input is %d bytes.)\n' % self.MAXFILESIZE,
             '<p><input type="submit" name="c" value="Convert to HTML">\n',
             '<input type="submit" name="c" value="Convert to TEXT">\n',
             '<input type="reset" value="Reset">\n',
             '</form><hr>\n',
-            '<p>Powered by <a href="http://www.unixuser.org/~euske/python/pdfminer/">PDFMiner</a>-%s\n' % pdfminer.__version__,
+            '<p>Powered by ',
+            '<a href="http://www.unixuser.org/~euske/python/pdfminer/">',
+            'PDFMiner</a>-%s\n' % pdfminer.__version__,
             '</body></html>\n',
         )
         return
@@ -212,16 +218,20 @@ class WebApp(object):
                 self.content_type = 'text/plain; charset=%s' % self.codec
             self.response_200()
             try:
-                convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
-                        maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
+                convert(
+                    item.file, self.outfp, tmppath, pagenos=pagenos,
+                    codec=self.codec, maxpages=self.MAXPAGES,
+                    maxfilesize=self.MAXFILESIZE, html=html
+                )
             except Exception as e:
                 self.put('<p>Sorry, an error has occurred: %s' % q(repr(e)))
-                self.logger.error('convert: %r: path=%r: %s' %
-                                  (e, traceback.format_exc()))
+                self.logger.error(
+                    'convert: %r: path=%r: %s' %
+                    (e, traceback.format_exc()))
         finally:
             try:
                 os.remove(tmppath)
-            except:
+            except Exception:
                 pass
         return
 

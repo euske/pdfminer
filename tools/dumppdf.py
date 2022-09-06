@@ -8,7 +8,6 @@
 #
 import sys
 import os.path
-import re
 from io import StringIO
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
 from pdfminer.pdfparser import PDFParser
@@ -94,9 +93,8 @@ def dumpxml(out, obj, mode=None):
 
     raise TypeError(obj)
 
+
 # dumptrailers
-
-
 def dumptrailers(out, doc):
     for xref in doc.xrefs:
         out.write('<trailer>\n')
@@ -104,9 +102,8 @@ def dumptrailers(out, doc):
         out.write('\n</trailer>\n\n')
     return
 
+
 # dumpallobjs
-
-
 def dumpallobjs(out, doc, mode=None):
     visited = set()
     out.write('<pdf>')
@@ -128,9 +125,8 @@ def dumpallobjs(out, doc, mode=None):
     out.write('</pdf>')
     return
 
+
 # dumpoutline
-
-
 def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                 dumpall=False, mode=None, extractdir=None):
     with open(fname, 'rb') as fp:
@@ -159,7 +155,11 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                     action = a.resolve()
                     if isinstance(action, dict):
                         subtype = action.get('S')
-                        if subtype and repr(subtype) == '/GoTo' and action.get('D'):
+                        if (
+                            subtype and
+                            repr(subtype) == '/GoTo' and
+                            action.get('D')
+                        ):
                             dest = resolve_dest(action['D'])
                             pageno = pages[dest[0].objid]
                 outfp.write('<outline level="%r" title="%s">\n' %
@@ -195,8 +195,9 @@ def extractembedded(outfp, fname, objids, pagenos, password=b'',
                 (filename))
         if fileobj.get('Type') is not LITERAL_EMBEDDEDFILE:
             raise PDFValueError(
-                'unable to process PDF: reference for %r is not an EmbeddedFile' %
-                (filename))
+                'unable to process PDF: reference for %r is \
+                not an EmbeddedFile' % filename
+            )
         path = os.path.join(extractdir, filename)
         if os.path.exists(path):
             raise IOError('file exists: %r' % path)
@@ -211,13 +212,15 @@ def extractembedded(outfp, fname, objids, pagenos, password=b'',
         for xref in doc.xrefs:
             for objid in xref.get_objids():
                 obj = doc.getobj(objid)
-                if isinstance(obj, dict) and obj.get('Type') is LITERAL_FILESPEC:
+                if (
+                    isinstance(obj, dict) and
+                    obj.get('Type') is LITERAL_FILESPEC
+                ):
                     extract1(obj)
     return
 
+
 # dumppdf
-
-
 def dumppdf(outfp, fname, objids, pagenos, password=b'',
             dumpall=False, mode=None, extractdir=None):
     with open(fname, 'rb') as fp:
@@ -250,8 +253,8 @@ def main(argv):
     import getopt
 
     def usage():
-        print(f'usage: {argv[0]} [-P password] [-a] [-p pageid] [-i objid] [-o output] '
-              '[-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...')
+        print(f'usage: {argv[0]} [-P password] [-a] [-p pageid] [-i objid] '
+              '[-o output] [-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dP:ap:i:o:rbtTO:')

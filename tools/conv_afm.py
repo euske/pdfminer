@@ -3,7 +3,7 @@ import sys
 import fileinput
 
 
-def main(argv):
+def main():
     fonts = {}
     for line in fileinput.input():
         f = line.strip().split(' ')

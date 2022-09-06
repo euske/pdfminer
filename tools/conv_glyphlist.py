@@ -3,7 +3,7 @@ import sys
 import fileinput
 
 
-def main(argv):
+def main():
     state = 0
     for line in fileinput.input():
         line = line.strip()
