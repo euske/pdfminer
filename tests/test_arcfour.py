@@ -1,7 +1,7 @@
-import unittest2
-from arcfour import Arcfour
+import unittest
+from pdfminer.arcfour import Arcfour
 
-class TestArcfourMethods(unittest2.TestCase):
+class TestArcfourMethods(unittest.TestCase):
     def test_1(self):
         arcfour = Arcfour(b'Key').process(b'Plaintext').hex()
         self.assertEqual(arcfour, 'bbf316e8d940af0ad3')
@@ -14,7 +14,7 @@ class TestArcfourMethods(unittest2.TestCase):
         
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
 
 
     
