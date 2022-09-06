@@ -14,7 +14,7 @@ from pdfminer.image import ImageWriter
 
 # main
 def main(argv):
-    setOptions(argv)
+    setOptionsAndConvert(argv)
 
 
 def usage(argv):
@@ -38,7 +38,7 @@ def usage(argv):
     return 100
 
 
-def setOptions(argv):
+def setOptionsAndConvert(argv):
     try:
         (opts, args) = getopt.getopt(argv[1:],
                                      'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')

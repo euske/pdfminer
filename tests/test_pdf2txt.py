@@ -13,7 +13,8 @@ class TestPdf2txtMethods(unittest.TestCase):
                 '-m', '2', 'samples/simple1.pdf']
         (debug, caching, outtype, outfile, encoding,
          imagewriter, stripcontrol, scale, layoutmode, pagenos,
-         maxpages, password, rotation) = tools.pdf2txt.setOptions(argv)
+         maxpages, password, rotation) = \
+            tools.pdf2txt.setOptionsAndConvert(argv)
         self.assertEqual(outtype, 'text')
         self.assertEqual(outfile, 'samples/test_outfp.txt')
         self.assertEqual(maxpages, 2)
@@ -23,7 +24,7 @@ class TestPdf2txtMethods(unittest.TestCase):
                     "W o r l d\n\nH e l l o  \n\nW o r l d\n\n"
         argv = ['pdf2txt.py', '-o', 'samples/test_outfp.txt', '-t', 'text',
                 'samples/simple1.pdf']
-        tools.pdf2txt.setOptions(argv)
+        tools.pdf2txt.setOptionsAndConvert(argv)
         outfp = open('samples/test_outfp.txt')
         result = outfp.read()
         result = result[:-1]
