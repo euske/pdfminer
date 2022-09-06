@@ -6,12 +6,13 @@ import struct
 from sys import maxsize as INF
 
 
-##  PNG Predictor
+# PNG Predictor
 ##
 def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
     if bitspercomponent != 8:
         # unsupported
-        raise ValueError("Unsupported `bitspercomponent': %d"%bitspercomponent)
+        raise ValueError(
+            "Unsupported `bitspercomponent': %d" % bitspercomponent)
     nbytes = colors*columns*bitspercomponent//8
     i = 0
     buf = b''
@@ -43,13 +44,13 @@ def apply_png_predictor(pred, colors, columns, bitspercomponent, data):
                 line2 += bytes([c])
         else:
             # unsupported
-            raise ValueError("Unsupported predictor value: %d"%ft)
+            raise ValueError("Unsupported predictor value: %d" % ft)
         buf += line2
         line0 = line2
     return buf
 
 
-##  Matrix operations
+# Matrix operations
 ##
 MATRIX_IDENTITY = (1, 0, 0, 1, 0, 0)
 
@@ -84,7 +85,7 @@ def apply_matrix_norm(m, v):
     return (a*p+c*q, b*p+d*q)
 
 
-##  Utility functions
+# Utility functions
 ##
 
 # isnumber
@@ -92,6 +93,8 @@ def isnumber(x):
     return isinstance(x, (int, float))
 
 # uniq
+
+
 def uniq(objs):
     """Eliminates duplicated elements."""
     done = set()
@@ -106,7 +109,7 @@ def uniq(objs):
 # csort
 def csort(objs, key):
     """Order-preserving sorting function."""
-    idxs = { obj:i for (i, obj) in enumerate(objs) }
+    idxs = {obj: i for (i, obj) in enumerate(objs)}
     return sorted(objs, key=lambda obj: (key(obj), idxs[obj]))
 
 
@@ -227,12 +230,14 @@ def decode_text(s):
     else:
         return ''.join(PDFDocEncoding[c] for c in s)
 
+
 def q(s):
     """Quotes html string."""
-    return (s.replace('&','&amp;')
-            .replace('<','&lt;')
-            .replace('>','&gt;')
-            .replace('"','&quot;'))
+    return (s.replace('&', '&amp;')
+            .replace('<', '&lt;')
+            .replace('>', '&gt;')
+            .replace('"', '&quot;'))
+
 
 def bbox2str(bbox):
     (x0, y0, x1, y1) = bbox
@@ -244,12 +249,12 @@ def matrix2str(m):
     return '[%.2f,%.2f,%.2f,%.2f, (%.2f,%.2f)]' % (a, b, c, d, e, f)
 
 
-##  Plane
+# Plane
 ##
-##  A set-like data structure for objects placed on a plane.
-##  Can efficiently find objects in a certain rectangular area.
-##  It maintains two parallel lists of objects, each of
-##  which is sorted by its x or y coordinate.
+# A set-like data structure for objects placed on a plane.
+# Can efficiently find objects in a certain rectangular area.
+# It maintains two parallel lists of objects, each of
+# which is sorted by its x or y coordinate.
 ##
 class Plane:
 
@@ -265,7 +270,7 @@ class Plane:
         return ('<Plane objs=%r>' % list(self))
 
     def __iter__(self):
-        return ( obj for obj in self._seq if obj in self._objs )
+        return (obj for obj in self._seq if obj in self._objs)
 
     def __len__(self):
         return len(self._objs)
@@ -276,7 +281,8 @@ class Plane:
     def _getrange(self, bbox):
         (x0, y0, x1, y1) = bbox
         if (x1 <= self.x0 or self.x1 <= x0 or
-            y1 <= self.y0 or self.y1 <= y0): return
+                y1 <= self.y0 or self.y1 <= y0):
+            return
         x0 = max(self.x0, x0)
         y0 = max(self.y0, y0)
         x1 = min(self.x1, x1)
@@ -327,7 +333,7 @@ class Plane:
                     continue
                 done.add(obj)
                 if (obj.x1 <= x0 or x1 <= obj.x0 or
-                    obj.y1 <= y0 or y1 <= obj.y0):
+                        obj.y1 <= y0 or y1 <= obj.y0):
                     continue
                 yield obj
         return

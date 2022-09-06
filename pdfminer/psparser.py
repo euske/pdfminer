@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import unittest
 import re
 import logging
 from .utils import choplist
@@ -6,7 +7,7 @@ from .utils import choplist
 STRICT = 0
 
 
-##  PS Exceptions
+# PS Exceptions
 ##
 class PSException(Exception):
     pass
@@ -28,10 +29,10 @@ class PSValueError(PSException):
     pass
 
 
-##  Basic PostScript Types
+# Basic PostScript Types
 ##
 
-##  PSObject
+# PSObject
 ##
 class PSObject:
 
@@ -40,7 +41,7 @@ class PSObject:
     pass
 
 
-##  PSLiteral
+# PSLiteral
 ##
 class PSLiteral(PSObject):
 
@@ -63,7 +64,7 @@ class PSLiteral(PSObject):
         return '/%r' % self.name
 
 
-##  PSKeyword
+# PSKeyword
 ##
 class PSKeyword(PSObject):
 
@@ -85,7 +86,7 @@ class PSKeyword(PSObject):
         return self.name.decode('ascii')
 
 
-##  PSSymbolTable
+# PSSymbolTable
 ##
 class PSSymbolTable:
 
@@ -106,6 +107,7 @@ class PSSymbolTable:
             lit = self.klass(name)
             self.dict[name] = lit
         return lit
+
 
 PSLiteralTable = PSSymbolTable(PSLiteral)
 PSKeywordTable = PSSymbolTable(PSKeyword)
@@ -137,7 +139,7 @@ def keyword_name(x):
     return x.name
 
 
-##  PSBaseParser
+# PSBaseParser
 ##
 EOL = re.compile(br'[\r\n]')
 SPC = re.compile(br'\s')
@@ -331,7 +333,7 @@ class PSBaseParser:
         self._curtoken += s[i:j]
         self._parse1 = self._parse_main
         # We ignore comments.
-        #self._tokens.append(self._curtoken)
+        # self._tokens.append(self._curtoken)
         return j
 
     def _parse_literal(self, s, i):
@@ -352,7 +354,8 @@ class PSBaseParser:
             utoken = self._curtoken.decode('utf-8')
         except UnicodeDecodeError:
             # We failed, there is possibly a corrupt PDF here.
-            if STRICT: raise
+            if STRICT:
+                raise
             utoken = ""
         self._add_token(LIT(utoken))
         self._parse1 = self._parse_main
@@ -507,7 +510,7 @@ class PSBaseParser:
         return token
 
 
-##  PSStackParser
+# PSStackParser
 ##
 class PSStackParser(PSBaseParser):
 
@@ -561,7 +564,8 @@ class PSStackParser(PSBaseParser):
         objs = [obj for (_, obj) in self.curstack]
         (pos, self.curtype, self.curstack) = self.context.pop()
         if self.debug:
-            logging.debug('end_type: pos=%r, type=%r, objs=%r' % (pos, type, objs))
+            logging.debug('end_type: pos=%r, type=%r, objs=%r' %
+                          (pos, type, objs))
         return (pos, objs)
 
     def do_keyword(self, pos, token):
@@ -597,9 +601,11 @@ class PSStackParser(PSBaseParser):
                 try:
                     (pos, objs) = self.end_type('d')
                     if len(objs) % 2 != 0:
-                        raise PSSyntaxError('Invalid dictionary construct: %r' % (objs,))
+                        raise PSSyntaxError(
+                            'Invalid dictionary construct: %r' % (objs,))
                     # construct a Python dictionary.
-                    d = dict((literal_name(k), v) for (k, v) in choplist(2, objs) if v is not None)
+                    d = dict((literal_name(k), v)
+                             for (k, v) in choplist(2, objs) if v is not None)
                     self.push((pos, d))
                 except PSTypeError:
                     if STRICT:
@@ -616,7 +622,7 @@ class PSStackParser(PSBaseParser):
                         raise
             else:
                 if self.debug:
-                    logging.debug('do_keyword: pos=%r, token=%r, stack=%r' % \
+                    logging.debug('do_keyword: pos=%r, token=%r, stack=%r' %
                                   (pos, token, self.curstack))
                 self.do_keyword(pos, token)
             if self.context:
@@ -629,10 +635,7 @@ class PSStackParser(PSBaseParser):
         return obj
 
 
-import unittest
-
-
-##  Simplistic Test cases
+# Simplistic Test cases
 ##
 class TestPSBaseParser(unittest.TestCase):
 
@@ -657,29 +660,30 @@ func/a/b{(c)do*}def
 '''
 
     TOKENS = [
-      (5, KWD(b'begin')), (11, KWD(b'end')), (16, KWD(b'"')), (19, KWD(b'@')),
-      (21, KWD(b'#')), (23, LIT('a')), (25, LIT('BCD')), (30, LIT('Some_Name')),
-      (41, LIT('foo_xbaa')), (54, 0), (56, 1), (59, -2), (62, 0.5),
-      (65, 1.234), (71, b'abc'), (77, b''), (80, b'abc ( def ) ghi'),
-      (98, b'def \x00 4ghi'), (118, b'bach\\slask'), (132, b'foo\nbaa'),
-      (143, b'this % is not a comment.'), (170, b'foo\nbaa'), (180, b'foobaa'),
-      (191, b''), (194, b' '), (199, b'@@ '), (211, b'\xab\xcd\x00\x124\x05'),
-      (226, KWD(b'func')), (230, LIT('a')), (232, LIT('b')),
-      (234, KWD(b'{')), (235, b'c'), (238, KWD(b'do*')), (241, KWD(b'}')),
-      (242, KWD(b'def')), (246, KWD(b'[')), (248, 1), (250, b'z'), (254, KWD(b'!')),
-      (256, KWD(b']')), (258, KWD(b'<<')), (261, LIT('foo')), (266, b'bar'),
-      (272, KWD(b'>>'))
+        (5, KWD(b'begin')), (11, KWD(b'end')), (16, KWD(b'"')), (19, KWD(b'@')),
+        (21, KWD(b'#')), (23, LIT('a')), (25, LIT('BCD')), (30, LIT('Some_Name')),
+        (41, LIT('foo_xbaa')), (54, 0), (56, 1), (59, -2), (62, 0.5),
+        (65, 1.234), (71, b'abc'), (77, b''), (80, b'abc ( def ) ghi'),
+        (98, b'def \x00 4ghi'), (118, b'bach\\slask'), (132, b'foo\nbaa'),
+        (143, b'this % is not a comment.'), (170, b'foo\nbaa'), (180, b'foobaa'),
+        (191, b''), (194, b' '), (199, b'@@ '), (211, b'\xab\xcd\x00\x124\x05'),
+        (226, KWD(b'func')), (230, LIT('a')), (232, LIT('b')),
+        (234, KWD(b'{')), (235, b'c'), (238, KWD(b'do*')), (241, KWD(b'}')),
+        (242, KWD(b'def')), (246, KWD(b'[')), (248,
+                                               1), (250, b'z'), (254, KWD(b'!')),
+        (256, KWD(b']')), (258, KWD(b'<<')), (261, LIT('foo')), (266, b'bar'),
+        (272, KWD(b'>>'))
     ]
 
     OBJS = [
-      (23, LIT('a')), (25, LIT('BCD')), (30, LIT('Some_Name')),
-      (41, LIT('foo_xbaa')), (54, 0), (56, 1), (59, -2), (62, 0.5),
-      (65, 1.234), (71, b'abc'), (77, b''), (80, b'abc ( def ) ghi'),
-      (98, b'def \x00 4ghi'), (118, b'bach\\slask'), (132, b'foo\nbaa'),
-      (143, b'this % is not a comment.'), (170, b'foo\nbaa'), (180, b'foobaa'),
-      (191, b''), (194, b' '), (199, b'@@ '), (211, b'\xab\xcd\x00\x124\x05'),
-      (230, LIT('a')), (232, LIT('b')), (234, [b'c']), (246, [1, b'z']),
-      (258, {'foo': b'bar'}),
+        (23, LIT('a')), (25, LIT('BCD')), (30, LIT('Some_Name')),
+        (41, LIT('foo_xbaa')), (54, 0), (56, 1), (59, -2), (62, 0.5),
+        (65, 1.234), (71, b'abc'), (77, b''), (80, b'abc ( def ) ghi'),
+        (98, b'def \x00 4ghi'), (118, b'bach\\slask'), (132, b'foo\nbaa'),
+        (143, b'this % is not a comment.'), (170, b'foo\nbaa'), (180, b'foobaa'),
+        (191, b''), (194, b' '), (199, b'@@ '), (211, b'\xab\xcd\x00\x124\x05'),
+        (230, LIT('a')), (232, LIT('b')), (234, [b'c']), (246, [1, b'z']),
+        (258, {'foo': b'bar'}),
     ]
 
     def get_tokens(self, s):
@@ -723,6 +727,7 @@ func/a/b{(c)do*}def
         print(objs)
         self.assertEqual(objs, self.OBJS)
         return
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -25,28 +25,33 @@ LITERALS_CCITTFAX_DECODE = (LIT('CCITTFaxDecode'), LIT('CCF'))
 LITERALS_DCT_DECODE = (LIT('DCTDecode'), LIT('DCT'))
 
 
-##  PDF Objects
+# PDF Objects
 ##
 class PDFObject(PSObject):
     pass
 
+
 class PDFException(PSException):
     pass
+
 
 class PDFTypeError(PDFException):
     pass
 
+
 class PDFValueError(PDFException):
     pass
 
+
 class PDFObjectNotFound(PDFException):
     pass
+
 
 class PDFNotImplementedError(PDFException):
     pass
 
 
-##  PDFObjRef
+# PDFObjRef
 ##
 class PDFObjRef(PDFObject):
 
@@ -56,7 +61,7 @@ class PDFObjRef(PDFObject):
                 raise PDFValueError('PDF object id cannot be 0.')
         self.doc = doc
         self.objid = objid
-        #self.genno = genno  # Never used.
+        # self.genno = genno  # Never used.
         return
 
     def __repr__(self):
@@ -174,7 +179,7 @@ def stream_value(x):
     return x
 
 
-##  PDFStream type
+# PDFStream type
 ##
 class PDFStream(PDFObject):
 
@@ -241,14 +246,15 @@ class PDFStream(PDFObject):
             self.data = data
             self.rawdata = None
             return
-        for (f,params) in filters:
+        for (f, params) in filters:
             if f in LITERALS_FLATE_DECODE:
                 # will get errors if the document is encrypted.
                 try:
                     data = zlib.decompress(data)
                 except zlib.error as e:
                     if STRICT:
-                        raise PDFException('Invalid zlib bytes: %r, %r' % (e, data))
+                        raise PDFException(
+                            'Invalid zlib bytes: %r, %r' % (e, data))
                     data = b''
             elif f in LITERALS_LZW_DECODE:
                 data = lzwdecode(data)
@@ -279,10 +285,13 @@ class PDFStream(PDFObject):
                     # PNG predictor
                     colors = int_value(params.get('Colors', 1))
                     columns = int_value(params.get('Columns', 1))
-                    bitspercomponent = int_value(params.get('BitsPerComponent', 8))
-                    data = apply_png_predictor(pred, colors, columns, bitspercomponent, data)
+                    bitspercomponent = int_value(
+                        params.get('BitsPerComponent', 8))
+                    data = apply_png_predictor(
+                        pred, colors, columns, bitspercomponent, data)
                 else:
-                    raise PDFNotImplementedError('Unsupported predictor: %r' % pred)
+                    raise PDFNotImplementedError(
+                        'Unsupported predictor: %r' % pred)
         self.data = data
         self.rawdata = None
         return

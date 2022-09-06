@@ -11,20 +11,25 @@ from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
 
 # main
+
+
 def main(argv):
     import getopt
+
     def usage():
         print(f'usage: {argv[0]} [-P password] [-o output] [-t text|html|xml|tag]'
-               ' [-O output_dir] [-c encoding] [-s scale] [-R rotation]'
-               ' [-Y normal|loose|exact] [-p pagenos] [-m maxpages]'
-               ' [-S] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin]'
-               ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...')
+              ' [-O output_dir] [-c encoding] [-s scale] [-R rotation]'
+              ' [-Y normal|loose|exact] [-p pagenos] [-m maxpages]'
+              ' [-S] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin]'
+              ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
+        (opts, args) = getopt.getopt(
+            argv[1:], 'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
     except getopt.GetoptError:
         return usage()
-    if not args: return usage()
+    if not args:
+        return usage()
     # debug option
     debug = 0
     # input option
@@ -45,26 +50,46 @@ def main(argv):
     showpageno = True
     laparams = LAParams()
     for (k, v) in opts:
-        if k == '-d': debug += 1
-        elif k == '-P': password = v.encode('ascii')
-        elif k == '-o': outfile = v
-        elif k == '-t': outtype = v
-        elif k == '-O': imagewriter = ImageWriter(v)
-        elif k == '-c': encoding = v
-        elif k == '-s': scale = float(v)
-        elif k == '-R': rotation = int(v)
-        elif k == '-Y': layoutmode = v
-        elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
-        elif k == '-m': maxpages = int(v)
-        elif k == '-S': stripcontrol = True
-        elif k == '-C': caching = False
-        elif k == '-n': laparams = None
-        elif k == '-A': laparams.all_texts = True
-        elif k == '-V': laparams.detect_vertical = True
-        elif k == '-M': laparams.char_margin = float(v)
-        elif k == '-W': laparams.word_margin = float(v)
-        elif k == '-L': laparams.line_margin = float(v)
-        elif k == '-F': laparams.boxes_flow = float(v)
+        if k == '-d':
+            debug += 1
+        elif k == '-P':
+            password = v.encode('ascii')
+        elif k == '-o':
+            outfile = v
+        elif k == '-t':
+            outtype = v
+        elif k == '-O':
+            imagewriter = ImageWriter(v)
+        elif k == '-c':
+            encoding = v
+        elif k == '-s':
+            scale = float(v)
+        elif k == '-R':
+            rotation = int(v)
+        elif k == '-Y':
+            layoutmode = v
+        elif k == '-p':
+            pagenos.update(int(x)-1 for x in v.split(','))
+        elif k == '-m':
+            maxpages = int(v)
+        elif k == '-S':
+            stripcontrol = True
+        elif k == '-C':
+            caching = False
+        elif k == '-n':
+            laparams = None
+        elif k == '-A':
+            laparams.all_texts = True
+        elif k == '-V':
+            laparams.detect_vertical = True
+        elif k == '-M':
+            laparams.char_margin = float(v)
+        elif k == '-W':
+            laparams.word_margin = float(v)
+        elif k == '-L':
+            laparams.line_margin = float(v)
+        elif k == '-F':
+            laparams.boxes_flow = float(v)
     #
     PDFDocument.debug = debug
     PDFParser.debug = debug
@@ -112,4 +137,6 @@ def main(argv):
     outfp.close()
     return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
