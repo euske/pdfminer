@@ -160,5 +160,4 @@ cython_debug/
 .idea/
 
 # PDFMiner
-samples/
 pdfminer/cmap/
