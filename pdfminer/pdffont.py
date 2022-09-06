@@ -48,9 +48,6 @@ def get_widths(seq):
                     widths[i] = w
                 r = []
     return widths
-# assert get_widths([1]) == {}
-# assert get_widths([1,2,3]) == {1:3, 2:3}
-# assert get_widths([1,[2,3],6,[7,8]]) == {1:2,2:3, 6:7,7:8}
 
 
 def get_widths2(seq):
@@ -71,9 +68,6 @@ def get_widths2(seq):
                     widths[i] = (w, (vx, vy))
                 r = []
     return widths
-# assert get_widths2([1]) == {}
-# assert get_widths2([1,2,3,4,5]) == {1:(3, (4,5)), 2:(3, (4,5))}
-# assert get_widths2([1,[2,3,4,5],6,[7,8,9]]) == {1:(2, (3,4)), 6:(7, (8,9))}
 
 
 # FontMetricsDB
