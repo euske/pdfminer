@@ -2,7 +2,7 @@
 import sys
 
 def prof_main(argv):
-    import hotshot, hotshot.stats
+    import cProfile, pstats
     def usage():
         print('usage: %s module.function [args ...]' % argv[0])
         return 100
@@ -16,11 +16,11 @@ def prof_main(argv):
     func = getattr(module, funcname)
     if args:
         args.insert(0, argv[0])
-        prof = hotshot.Profile(prof)
+        prof = cProfile(prof)
         prof.runcall(lambda : func(args))
         prof.close()
     else:
-        stats = hotshot.stats.load(prof)
+        stats = pstats.Stats(prof)
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
         stats.print_stats(1000)

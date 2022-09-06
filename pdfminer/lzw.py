@@ -6,8 +6,8 @@ class CorruptDataError(Exception):
     pass
 
 
-##  LZWDecoder
-##
+#  LZWDecoder
+#
 class LZWDecoder:
 
     def __init__(self, fp):
@@ -23,19 +23,20 @@ class LZWDecoder:
         v = 0
         while 1:
             # the number of remaining bits we can get from the current buffer.
-            r = 8-self.bpos
+            r = 8 - self.bpos
             if bits <= r:
                 # |-----8-bits-----|
                 # |-bpos-|-bits-|  |
                 # |      |----r----|
-                v = (v << bits) | ((self.buff >> (r-bits)) & ((1 << bits)-1))
+                v = (v << bits) | (
+                        (self.buff >> (r - bits)) & ((1 << bits) - 1))
                 self.bpos += bits
                 break
             else:
                 # |-----8-bits-----|
                 # |-bpos-|---bits----...
                 # |      |----r----|
-                v = (v << r) | (self.buff & ((1 << r)-1))
+                v = (v << r) | (self.buff & ((1 << r) - 1))
                 bits -= r
                 x = self.fp.read(1)
                 if not x:
@@ -59,18 +60,18 @@ class LZWDecoder:
         else:
             if code < len(self.table):
                 x = self.table[code]
-                self.table.append(self.prevbuf+x[:1])
+                self.table.append(self.prevbuf + x[:1])
             elif code == len(self.table):
-                self.table.append(self.prevbuf+self.prevbuf[:1])
+                self.table.append(self.prevbuf + self.prevbuf[:1])
                 x = self.table[code]
             else:
                 raise CorruptDataError
-            l = len(self.table)
-            if l == 511:
+            length = len(self.table)
+            if length == 511:
                 self.nbits = 10
-            elif l == 1023:
+            elif length == 1023:
                 self.nbits = 11
-            elif l == 2047:
+            elif length == 2047:
                 self.nbits = 12
             self.prevbuf = x
         return x
@@ -87,7 +88,7 @@ class LZWDecoder:
                 # just ignore corrupt data and stop yielding there
                 break
             yield x
-            #logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
+            # logging.debug('nbits=%d, code=%d, output=%r, table=%r' %
             #              (self.nbits, code, x, self.table[258:]))
         return
 
@@ -101,6 +102,8 @@ def lzwdecode(data):
     fp = BytesIO(data)
     return b''.join(LZWDecoder(fp).run())
 
+
 if __name__ == '__main__':
     import doctest
+
     print('pdfminer.lzw', doctest.testmod())

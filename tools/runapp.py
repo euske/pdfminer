@@ -8,9 +8,8 @@
 
 import sys
 import urllib
-from httplib import responses
-from BaseHTTPServer import HTTPServer
-from SimpleHTTPServer import SimpleHTTPRequestHandler
+from http.client import responses
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 ##  WebAppHandler
 ##
@@ -45,7 +44,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         env['SERVER_PROTOCOL'] = self.protocol_version
         env['SERVER_PORT'] = str(self.server.server_port)
         env['REQUEST_METHOD'] = self.command
-        uqrest = urllib.unquote(rest)
+        uqrest = urllib.parse.unquote(rest)
         env['PATH_INFO'] = uqrest
         env['PATH_TRANSLATED'] = self.translate_path(uqrest)
         env['SCRIPT_NAME'] = scriptname
@@ -55,11 +54,11 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         if host != self.client_address[0]:
             env['REMOTE_HOST'] = host
         env['REMOTE_ADDR'] = self.client_address[0]
-        if self.headers.typeheader is None:
-            env['CONTENT_TYPE'] = self.headers.type
+        if self.headers.get_content_type() is None:
+            env['CONTENT_TYPE'] = self.headers.get_default_type()
         else:
-            env['CONTENT_TYPE'] = self.headers.typeheader
-        length = self.headers.getheader('content-length')
+            env['CONTENT_TYPE'] = self.headers.get_content_type()
+        length = self.headers.get('content-length')
         if length:
             env['CONTENT_LENGTH'] = length
         accept = []
@@ -69,10 +68,10 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             else:
                 accept = accept + line[7:].split(',')
         env['HTTP_ACCEPT'] = ','.join(accept)
-        ua = self.headers.getheader('user-agent')
+        ua = self.headers.get('user-agent')
         if ua:
             env['HTTP_USER_AGENT'] = ua
-        co = filter(None, self.headers.getheaders('cookie'))
+        co = filter(None, self.headers.get('cookie'))
         if co:
             env['HTTP_COOKIE'] = ', '.join(co)
         for k in ('QUERY_STRING', 'REMOTE_HOST', 'CONTENT_LENGTH',
