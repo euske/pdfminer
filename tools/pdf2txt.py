@@ -12,7 +12,7 @@ from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
 
 
-def main(argv):
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input', metavar='input.pdf', nargs='+')
     parser.add_argument('-P', '--password')
@@ -37,7 +37,6 @@ def main(argv):
     parser.add_argument('-W', '--word-margin')
     parser.add_argument('-F', '--boxes-flow')
     parser.add_argument('-d', '--debug', action='store_true')
-
     args = parser.parse_args()
 
     # debug option
@@ -142,8 +141,9 @@ def main(argv):
                 page.rotate = (page.rotate+rotation) % 360
                 interpreter.process_page(page)
     device.close()
-    outfp.close()
+    if outfile:
+        outfp.close()
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())

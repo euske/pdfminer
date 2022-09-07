@@ -86,8 +86,16 @@ func/a/b{(c)do*}def
 
     def test_1(self):
         tokens = self.get_tokens(self.TESTDATA)
-        self.assertEqual(tokens, self.TOKENS)
+        self.assertEqual(
+            tokens,
+            self.TOKENS,
+            'The token does not match the expected one'
+        )
 
     def test_2(self):
         objs = self.get_objects(self.TESTDATA)
-        self.assertEqual(objs, self.OBJS)
+        self.assertEqual(
+            objs,
+            self.OBJS,
+            'The objects do not match the expected ones'
+        )
