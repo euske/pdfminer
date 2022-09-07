@@ -201,10 +201,12 @@ class PDFStream(PDFObject):
     def __repr__(self):
         if self.data is None:
             assert self.rawdata is not None
-            return '<PDFStream(%r): raw=%d, %r>' % (self.objid, len(self.rawdata), self.attrs)
+            return '<PDFStream(%r): raw=%d, %r>' % \
+                (self.objid, len(self.rawdata), self.attrs)
         else:
             assert self.data is not None
-            return '<PDFStream(%r): len=%d, %r>' % (self.objid, len(self.data), self.attrs)
+            return '<PDFStream(%r): len=%d, %r>' % \
+                (self.objid, len(self.data), self.attrs)
 
     def __contains__(self, name):
         return name in self.attrs
@@ -267,7 +269,8 @@ class PDFStream(PDFObject):
             elif f in LITERALS_CCITTFAX_DECODE:
                 data = ccittfaxdecode(data, params)
             elif f in LITERALS_DCT_DECODE:
-                # This is probably a JPG stream - it does not need to be decoded twice.
+                # This is probably a JPG stream
+                # It does not need to be decoded twice.
                 # Just return the stream to the user.
                 pass
             elif f == LITERAL_CRYPT:

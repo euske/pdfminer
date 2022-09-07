@@ -337,7 +337,8 @@ class CFFFont:
         if format == b'\x00':
             # Format 0
             n = self.nglyphs-1
-            for (gid, sid) in enumerate(struct.unpack('>'+'H'*n, self.fp.read(2*n))):
+            unpacked_struct = struct.unpack('>'+'H'*n, self.fp.read(2*n))
+            for (gid, sid) in enumerate(unpacked_struct):
                 gid += 1
                 name = self.getstr(sid)
                 self.name2gid[name] = gid
@@ -360,7 +361,7 @@ class CFFFont:
             raise ValueError('unsupported charset format: %r' % format)
         # print(self.code2gid)
         # print(self.name2gid)
-        #assert 0
+        # assert 0
         return
 
     def getstr(self, sid):
@@ -587,7 +588,7 @@ class PDFType1Font(PDFSimpleFont):
         except KeyError:
             descriptor = dict_value(spec.get('FontDescriptor', {}))
             firstchar = int_value(spec.get('FirstChar', 0))
-            #lastchar = int_value(spec.get('LastChar', 255))
+            # lastchar = int_value(spec.get('LastChar', 255))
             widths = list_value(spec.get('Widths', [0]*256))
             widths = dict((i+firstchar, w) for (i, w) in enumerate(widths))
         PDFSimpleFont.__init__(self, descriptor, widths, spec)
@@ -616,7 +617,7 @@ class PDFType3Font(PDFSimpleFont):
 
     def __init__(self, rsrcmgr, spec):
         firstchar = int_value(spec.get('FirstChar', 0))
-        #lastchar = int_value(spec.get('LastChar', 0))
+        # lastchar = int_value(spec.get('LastChar', 0))
         widths = list_value(spec.get('Widths', [0]*256))
         widths = dict((i+firstchar, w) for (i, w) in enumerate(widths))
         if 'FontDescriptor' in spec:
@@ -686,7 +687,7 @@ class PDFCIDFont(PDFFont):
             try:
                 self.unicode_map = CMapDB.get_unicode_map(
                     self.cidcoding, self.cmap.is_vertical())
-            except CMapDB.CMapNotFound as e:
+            except CMapDB.CMapNotFound:
                 pass
 
         self.vertical = self.cmap.is_vertical()
@@ -709,7 +710,8 @@ class PDFCIDFont(PDFFont):
         return
 
     def __repr__(self):
-        return '<PDFCIDFont: basefont=%r, cidcoding=%r>' % (self.basefont, self.cidcoding)
+        return '<PDFCIDFont: basefont=%r, cidcoding=%r>' % \
+            (self.basefont, self.cidcoding)
 
     def is_vertical(self):
         return self.vertical
@@ -737,7 +739,7 @@ class PDFCIDFont(PDFFont):
 def main(argv):
     for fname in argv[1:]:
         with open(fname, 'rb') as fp:
-            #font = TrueTypeFont(fname, fp)
+            # font = TrueTypeFont(fname, fp)
             font = CFFFont(fname, fp)
             print(font)
     return

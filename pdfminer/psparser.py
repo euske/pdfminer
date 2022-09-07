@@ -171,7 +171,8 @@ class PSBaseParser:
         return
 
     def __repr__(self):
-        return '<%s: %r, bufpos=%d>' % (self.__class__.__name__, self.fp, self.bufpos)
+        return '<%s: %r, bufpos=%d>' % \
+            (self.__class__.__name__, self.fp, self.bufpos)
 
     def flush(self):
         return
@@ -441,7 +442,8 @@ class PSBaseParser:
             return j+1
         if c == b')':
             self.paren -= 1
-            if self.paren:  # WTF, they said balanced parens need no special treatment.
+            if self.paren:
+                # WTF, they said balanced parens need no special treatment.
                 self._curtoken += c
                 return j+1
         self._add_token(self._curtoken)
@@ -574,11 +576,12 @@ class PSStackParser(PSBaseParser):
         """Yields a list of objects.
 
         Returns keywords, literals, strings, numbers, arrays and dictionaries.
-        Arrays and dictionaries are represented as Python lists and dictionaries.
+        Arrays and dictionaries are represented as
+        Python lists and dictionaries.
         """
         while not self.results:
             (pos, token) = self.nexttoken()
-            #print((pos,token), (self.curtype, self.curstack))
+            # print((pos,token), (self.curtype, self.curstack))
             if isinstance(token, (int, float, bool, bytes, PSLiteral)):
                 # normal token
                 self.push((pos, token))

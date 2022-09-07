@@ -71,7 +71,8 @@ class PDFPage:
         return
 
     def __repr__(self):
-        return '<PDFPage: Resources=%r, MediaBox=%r>' % (self.resources, self.mediabox)
+        return '<PDFPage: Resources=%r, MediaBox=%r>' % \
+            (self.resources, self.mediabox)
 
     INHERITABLE_ATTRS = set(['Resources', 'MediaBox', 'CropBox', 'Rotate'])
 
@@ -99,7 +100,8 @@ class PDFPage:
                 yield (objid, tree)
         pages = False
         if 'Pages' in document.catalog:
-            for (objid, tree) in search(document.catalog['Pages'], document.catalog):
+            for (objid, tree) in search(
+                    document.catalog['Pages'], document.catalog):
                 yield klass(document, objid, tree)
                 pages = True
         if not pages:
@@ -108,7 +110,8 @@ class PDFPage:
                 for objid in xref.get_objids():
                     try:
                         obj = document.getobj(objid)
-                        if isinstance(obj, dict) and obj.get('Type') is LITERAL_PAGE:
+                        if isinstance(obj, dict) and \
+                                obj.get('Type') is LITERAL_PAGE:
                             yield klass(document, objid, obj)
                     except PDFObjectNotFound:
                         pass

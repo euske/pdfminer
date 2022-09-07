@@ -70,9 +70,9 @@ class PDFTextState:
         return
 
     def __repr__(self):
-        return ('<PDFTextState: font=%r, fontsize=%r, charspace=%r, wordspace=%r, '
-                ' scaling=%r, leading=%r, render=%r, rise=%r, '
-                ' matrix=%r, linematrix=%r>' %
+        return ('<PDFTextState: font=%r, fontsize=%r, charspace=%r, '
+                ' wordspace=%r, scaling=%r, leading=%r, render=%r, '
+                ' rise=%r, matrix=%r, linematrix=%r>' %
                 (self.font, self.fontsize, self.charspace, self.wordspace,
                  self.scaling, self.leading, self.render, self.rise,
                  self.matrix, self.linematrix))
@@ -154,7 +154,7 @@ class PDFResourceManager:
             elif proc is LITERAL_TEXT:
                 pass
             else:
-                #raise PDFResourceError('ProcSet %r is not supported.' % proc)
+                # raise PDFResourceError('ProcSet %r is not supported.' % proc)
                 pass
         return
 
@@ -270,7 +270,7 @@ class PDFContentParser(PSStackParser):
             else:
                 try:
                     j = self.buf.index(target[0], self.charpos)
-                    #print('found', (0, self.buf[j:j+10]))
+                    # print('found', (0, self.buf[j:j+10]))
                     data += self.buf[self.charpos:j+1]
                     self.charpos = j+1
                     i = 1
@@ -341,9 +341,11 @@ class PDFPageInterpreter:
                 name = literal_name(spec[0])
             else:
                 name = literal_name(spec)
-            if name == 'ICCBased' and isinstance(spec, list) and 2 <= len(spec):
+            if name == 'ICCBased' and isinstance(spec, list) and \
+                    2 <= len(spec):
                 return PDFColorSpace(name, stream_value(spec[1])['N'])
-            elif name == 'DeviceN' and isinstance(spec, list) and 2 <= len(spec):
+            elif name == 'DeviceN' and isinstance(spec, list) and \
+                    2 <= len(spec):
                 return PDFColorSpace(name, len(list_value(spec[1])))
             else:
                 return PREDEFINED_COLORSPACE.get(name)
@@ -735,7 +737,7 @@ class PDFPageInterpreter:
         (a, b, c, d, e, f) = self.textstate.matrix
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.linematrix = (0, 0)
-        #print('Td(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
+        # print('Td(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
         return
 
     # text-move
@@ -744,7 +746,7 @@ class PDFPageInterpreter:
         self.textstate.matrix = (a, b, c, d, tx*a+ty*c+e, tx*b+ty*d+f)
         self.textstate.leading = ty
         self.textstate.linematrix = (0, 0)
-        #print('TD(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
+        # print('TD(%r,%r): %r' % (tx, ty, self.textstate), file=sys.stderr)
         return
 
     # textmatrix
@@ -763,7 +765,7 @@ class PDFPageInterpreter:
 
     # show-pos
     def do_TJ(self, seq):
-        #print('TJ(%r): %r' % (seq, self.textstate), file=sys.stderr)
+        # print('TJ(%r): %r' % (seq, self.textstate), file=sys.stderr)
         if self.textstate.font is None:
             if STRICT:
                 raise PDFInterpreterError('No font specified!')
