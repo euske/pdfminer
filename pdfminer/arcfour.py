@@ -6,8 +6,9 @@ This code is in the public domain.
 
 """
 
-##  Arcfour
-##
+
+#  Arcfour
+#
 class Arcfour:
     def __init__(self, key):
         s = list(range(256))
@@ -34,5 +35,6 @@ class Arcfour:
         return bytes(r)
 
     encrypt = decrypt = process
+
 
 new = Arcfour

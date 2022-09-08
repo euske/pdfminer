@@ -13,14 +13,14 @@ from .pdftypes import int_value
 from .pdftypes import dict_value
 
 
-##  Exceptions
-##
+#  Exceptions
+#
 class PDFSyntaxError(PDFException):
     pass
 
 
-##  PDFParser
-##
+#  PDFParser
+#
 class PDFParser(PSStackParser):
 
     """
@@ -121,7 +121,7 @@ class PDFParser(PSStackParser):
             self.seek(pos+objlen)
             # XXX limit objlen not to exceed object boundary
             if self.debug:
-                logging.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...' % \
+                logging.debug('Stream: pos=%d, objlen=%d, dic=%r, data=%r...'
                               (pos, objlen, dic, data[:10]))
             obj = PDFStream(dic, data, self.doc.decipher)
             self.push((pos, obj))
@@ -133,8 +133,8 @@ class PDFParser(PSStackParser):
         return
 
 
-##  PDFStreamParser
-##
+#  PDFStreamParser
+#
 class PDFStreamParser(PDFParser):
 
     """
@@ -154,6 +154,7 @@ class PDFStreamParser(PDFParser):
         return
 
     KEYWORD_OBJ = KWD(b'obj')
+
     def do_keyword(self, pos, token):
         if token is self.KEYWORD_R:
             # reference to indirect object

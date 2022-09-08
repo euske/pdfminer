@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import getopt
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -13,35 +14,39 @@ from pdfminer.image import ImageWriter
 
 # main
 def main(argv):
-    import getopt
+    setOptionsAndConvert(argv)
 
-    def usage():
-        print(f'usage: {argv[0]} '
-              f'[-P password] '
-              f'[-o output] '
-              f'[-t text|html|xml|tag]'
-              ' [-O output_dir] '
-              '[-c encoding] '
-              '[-s scale] [-R rotation] '
-              '[-Y normal|loose|exact] '
-              '[-p pagenos] '
-              '[-m maxpages] '
-              '[-S] [-C] [-n] [-A] [-V] '
-              '[-M char_margin] '
-              '[-L line_margin]'
-              '[-W word_margin] '
-              '[-F boxes_flow] '
-              '[-d] '
-              'input.pdf ...')
-        return 100
 
+def usage(argv):
+    print(f'usage: {argv[0]} '
+          f'[-P password] '
+          f'[-o output] '
+          f'[-t text|html|xml|tag]'
+          ' [-O output_dir] '
+          '[-c encoding] '
+          '[-s scale] [-R rotation] '
+          '[-Y normal|loose|exact] '
+          '[-p pagenos] '
+          '[-m maxpages] '
+          '[-S] [-C] [-n] [-A] [-V] '
+          '[-M char_margin] '
+          '[-L line_margin]'
+          '[-W word_margin] '
+          '[-F boxes_flow] '
+          '[-d] '
+          'input.pdf ...')
+    return 100
+
+
+def setOptionsAndConvert(argv):
     try:
         (opts, args) = getopt.getopt(argv[1:],
                                      'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
     except getopt.GetoptError:
-        return usage()
+        return usage(argv)
     if not args:
-        return usage()
+        return usage(argv)
+
     # debug option
     debug = 0
     # input option
@@ -56,12 +61,9 @@ def main(argv):
     stripcontrol = False
     layoutmode = 'normal'
     encoding = 'utf-8'
-    # Never used, consider to remove
-    # pageno = 1
     scale = 1
     caching = True
-    # Never used, consider to remove
-    # showpageno = True
+
     laparams = LAParams()
     for (k, v) in opts:
         if k == '-d':
@@ -104,12 +106,21 @@ def main(argv):
             laparams.line_margin = float(v)
         elif k == '-F':
             laparams.boxes_flow = float(v)
-    #
+    pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
+              imagewriter, stripcontrol, scale, layoutmode, pagenos,
+              maxpages, password, rotation)
+    return (debug, caching, outtype, outfile, encoding,
+            imagewriter, stripcontrol, scale, layoutmode, pagenos,
+            maxpages, password, rotation)
+
+
+def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
+              imagewriter, stripcontrol, scale, layoutmode, pagenos,
+              maxpages, password, rotation):
     PDFDocument.debug = debug
     PDFParser.debug = debug
     CMapDB.debug = debug
     PDFPageInterpreter.debug = debug
-    #
     rsrcmgr = PDFResourceManager(caching=caching)
     if not outtype:
         outtype = 'text'
@@ -138,7 +149,7 @@ def main(argv):
     elif outtype == 'tag':
         device = TagExtractor(rsrcmgr, outfp)
     else:
-        return usage()
+        return usage([])
     for fname in args:
         with open(fname, 'rb') as fp:
             interpreter = PDFPageInterpreter(rsrcmgr, device)
