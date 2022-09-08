@@ -15,35 +15,53 @@
 #   $ cp pdfminer/tools/pdf2html.cgi $CGIDIR
 #
 
-import sys, os, os.path, re, time
-import cgi, logging, traceback, random
-# comment out at this at runtime.
-import cgitb; cgitb.enable()
-import pdfminer
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfpage import PDFPage
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.converter import HTMLConverter, TextConverter
 from pdfminer.layout import LAParams
+from pdfminer.converter import HTMLConverter, TextConverter
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+import pdfminer
+import sys
+import os
+import os.path
+import re
+import time
+import cgi
+import logging
+import traceback
+import random
+# comment out at this at runtime.
+import cgitb
+cgitb.enable()
 
 
 # quote HTML metacharacters
 def q(x):
-    return x.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
+    return x \
+        .replace('&', '&amp;') \
+        .replace('>', '&gt;') \
+        .replace('<', '&lt;')\
+        .replace('"', '&quot;')
+
 
 # encode parameters as a URL
 Q = re.compile(r'[^a-zA-Z0-9_.-=]')
+
+
 def url(base, **kw):
     r = []
-    for (k,v) in kw.iteritems():
-        v = Q.sub(lambda m: '%%%02X' % ord(m.group(0)), q(v).encode("utf-8", 'replace')[0])
+    for (k, v) in kw.iteritems():
+        v = Q.sub(lambda m: '%%%02X' % ord(m.group(0)),
+                  q(v).encode("utf-8", 'replace')[0])
         r.append('%s=%s' % (k, v))
     return base+'&'.join(r)
 
 
-##  convert
+# convert
 ##
-class FileSizeExceeded(ValueError): pass
+class FileSizeExceeded(ValueError):
+    pass
+
+
 def convert(infp, outfp, path, codec='utf-8',
             maxpages=0, maxfilesize=0, pagenos=None,
             html=True):
@@ -55,7 +73,8 @@ def convert(infp, outfp, path, codec='utf-8',
         nbytes += len(data)
         if maxfilesize and maxfilesize < nbytes:
             raise FileSizeExceeded(maxfilesize)
-        if not data: break
+        if not data:
+            break
         src.write(data)
     src.close()
     infp.close()
@@ -77,7 +96,7 @@ def convert(infp, outfp, path, codec='utf-8',
     return
 
 
-##  WebApp
+# WebApp
 ##
 class WebApp(object):
 
@@ -106,7 +125,7 @@ class WebApp(object):
             # if isinstance(x, str):
             #     self.outfp.write(x)
             # elif isinstance(x, bytes):
-                self.outfp.write(x.encode(self.codec, 'xmlcharrefreplace'))
+            self.outfp.write(x.encode(self.codec, 'xmlcharrefreplace'))
         return
 
     def response_200(self):
@@ -136,21 +155,25 @@ class WebApp(object):
 
     def coverpage(self):
         self.put(
-          '<html><head><title>%s</title></head><body>\n' % q(self.TITLE),
-          '<h1>%s</h1><hr>\n' % q(self.TITLE),
-          '<form method="POST" action="%s" enctype="multipart/form-data">\n' % q(self.apppath),
-          '<p>Upload PDF File: <input name="f" type="file" value="">\n',
-          '&nbsp; Page numbers (comma-separated):\n',
-          '<input name="p" type="text" size="10" value="">\n',
-          '<p>(Text extraction is limited to maximum %d pages.\n' % self.MAXPAGES,
-          'Maximum file size for input is %d bytes.)\n' % self.MAXFILESIZE,
-          '<p><input type="submit" name="c" value="Convert to HTML">\n',
-          '<input type="submit" name="c" value="Convert to TEXT">\n',
-          '<input type="reset" value="Reset">\n',
-          '</form><hr>\n',
-          '<p>Powered by <a href="http://www.unixuser.org/~euske/python/pdfminer/">PDFMiner</a>-%s\n' % pdfminer.__version__,
-          '</body></html>\n',
-          )
+            '<html><head><title>%s</title></head><body>\n' % q(self.TITLE),
+            '<h1>%s</h1><hr>\n' % q(self.TITLE),
+            '<form method="POST" action="%s" enctype="multipart/form-data">\n'
+            % q(self.apppath),
+            '<p>Upload PDF File: <input name="f" type="file" value="">\n',
+            '&nbsp; Page numbers (comma-separated):\n',
+            '<input name="p" type="text" size="10" value="">\n',
+            '<p>(Text extraction is limited to maximum %d pages.\n' %
+            self.MAXPAGES,
+            'Maximum file size for input is %d bytes.)\n' % self.MAXFILESIZE,
+            '<p><input type="submit" name="c" value="Convert to HTML">\n',
+            '<input type="submit" name="c" value="Convert to TEXT">\n',
+            '<input type="reset" value="Reset">\n',
+            '</form><hr>\n',
+            '<p>Powered by ',
+            '<a href="http://www.unixuser.org/~euske/python/pdfminer/">',
+            'PDFMiner</a>-%s\n' % pdfminer.__version__,
+            '</body></html>\n',
+        )
         return
 
     def setup(self):
@@ -168,7 +191,7 @@ class WebApp(object):
         form = cgi.FieldStorage(fp=self.infp, environ=self.environ)
         if (self.method != 'POST' or
             'c' not in form or
-            'f' not in form):
+                'f' not in form):
             self.response_200()
             self.coverpage()
             return
@@ -195,15 +218,20 @@ class WebApp(object):
                 self.content_type = 'text/plain; charset=%s' % self.codec
             self.response_200()
             try:
-                convert(item.file, self.outfp, tmppath, pagenos=pagenos, codec=self.codec,
-                        maxpages=self.MAXPAGES, maxfilesize=self.MAXFILESIZE, html=html)
+                convert(
+                    item.file, self.outfp, tmppath, pagenos=pagenos,
+                    codec=self.codec, maxpages=self.MAXPAGES,
+                    maxfilesize=self.MAXFILESIZE, html=html
+                )
             except Exception as e:
                 self.put('<p>Sorry, an error has occurred: %s' % q(repr(e)))
-                self.logger.error('convert: %r: path=%r: %s' % (e, traceback.format_exc()))
+                self.logger.error(
+                    'convert: %r: path=%r: %s' %
+                    (e, traceback.format_exc()))
         finally:
             try:
                 os.remove(tmppath)
-            except:
+            except Exception:
                 pass
         return
 

@@ -48,9 +48,6 @@ def get_widths(seq):
                     widths[i] = w
                 r = []
     return widths
-#assert get_widths([1]) == {}
-#assert get_widths([1,2,3]) == {1:3, 2:3}
-#assert get_widths([1,[2,3],6,[7,8]]) == {1:2,2:3, 6:7,7:8}
 
 
 def get_widths2(seq):
@@ -71,12 +68,9 @@ def get_widths2(seq):
                     widths[i] = (w, (vx, vy))
                 r = []
     return widths
-#assert get_widths2([1]) == {}
-#assert get_widths2([1,2,3,4,5]) == {1:(3, (4,5)), 2:(3, (4,5))}
-#assert get_widths2([1,[2,3,4,5],6,[7,8,9]]) == {1:(2, (3,4)), 6:(7, (8,9))}
 
 
-##  FontMetricsDB
+# FontMetricsDB
 ##
 class FontMetricsDB:
 
@@ -85,7 +79,7 @@ class FontMetricsDB:
         return FONT_METRICS[fontname]
 
 
-##  Type1FontHeaderParser
+# Type1FontHeaderParser
 ##
 class Type1FontHeaderParser(PSStackParser):
 
@@ -120,17 +114,18 @@ class Type1FontHeaderParser(PSStackParser):
         if token is self.KEYWORD_PUT:
             ((_, key), (_, value)) = self.pop(2)
             if (isinstance(key, int) and
-                isinstance(value, PSLiteral)):
+                    isinstance(value, PSLiteral)):
                 self.add_results((key, literal_name(value)))
         return
 
 
-NIBBLES = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'e-', None, '-')
+NIBBLES = ('0', '1', '2', '3', '4', '5', '6', '7',
+           '8', '9', '.', 'e', 'e-', None, '-')
 
 
-##  CFFFont
-##  (Format specified in Adobe Technical Note: #5176
-##   "The Compact Font Format Specification")
+# CFFFont
+# (Format specified in Adobe Technical Note: #5176
+# "The Compact Font Format Specification")
 ##
 def getdict(data):
     d = {}
@@ -171,7 +166,8 @@ def getdict(data):
                 if b0 == 28:
                     value = b1 << 8 | b2
                 else:
-                    value = b1 << 24 | b2 << 16 | struct.unpack('>H', fp.read(2))[0]
+                    value = b1 << 24 | b2 << 16 | \
+                        struct.unpack('>H', fp.read(2))[0]
         stack.append(value)
     return d
 
@@ -179,84 +175,84 @@ def getdict(data):
 class CFFFont:
 
     STANDARD_STRINGS = (
-      '.notdef', 'space', 'exclam', 'quotedbl', 'numbersign',
-      'dollar', 'percent', 'ampersand', 'quoteright', 'parenleft',
-      'parenright', 'asterisk', 'plus', 'comma', 'hyphen', 'period',
-      'slash', 'zero', 'one', 'two', 'three', 'four', 'five', 'six',
-      'seven', 'eight', 'nine', 'colon', 'semicolon', 'less', 'equal',
-      'greater', 'question', 'at', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-      'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-      'U', 'V', 'W', 'X', 'Y', 'Z', 'bracketleft', 'backslash',
-      'bracketright', 'asciicircum', 'underscore', 'quoteleft', 'a',
-      'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-      'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-      'braceleft', 'bar', 'braceright', 'asciitilde', 'exclamdown',
-      'cent', 'sterling', 'fraction', 'yen', 'florin', 'section',
-      'currency', 'quotesingle', 'quotedblleft', 'guillemotleft',
-      'guilsinglleft', 'guilsinglright', 'fi', 'fl', 'endash',
-      'dagger', 'daggerdbl', 'periodcentered', 'paragraph', 'bullet',
-      'quotesinglbase', 'quotedblbase', 'quotedblright',
-      'guillemotright', 'ellipsis', 'perthousand', 'questiondown',
-      'grave', 'acute', 'circumflex', 'tilde', 'macron', 'breve',
-      'dotaccent', 'dieresis', 'ring', 'cedilla', 'hungarumlaut',
-      'ogonek', 'caron', 'emdash', 'AE', 'ordfeminine', 'Lslash',
-      'Oslash', 'OE', 'ordmasculine', 'ae', 'dotlessi', 'lslash',
-      'oslash', 'oe', 'germandbls', 'onesuperior', 'logicalnot', 'mu',
-      'trademark', 'Eth', 'onehalf', 'plusminus', 'Thorn',
-      'onequarter', 'divide', 'brokenbar', 'degree', 'thorn',
-      'threequarters', 'twosuperior', 'registered', 'minus', 'eth',
-      'multiply', 'threesuperior', 'copyright', 'Aacute',
-      'Acircumflex', 'Adieresis', 'Agrave', 'Aring', 'Atilde',
-      'Ccedilla', 'Eacute', 'Ecircumflex', 'Edieresis', 'Egrave',
-      'Iacute', 'Icircumflex', 'Idieresis', 'Igrave', 'Ntilde',
-      'Oacute', 'Ocircumflex', 'Odieresis', 'Ograve', 'Otilde',
-      'Scaron', 'Uacute', 'Ucircumflex', 'Udieresis', 'Ugrave',
-      'Yacute', 'Ydieresis', 'Zcaron', 'aacute', 'acircumflex',
-      'adieresis', 'agrave', 'aring', 'atilde', 'ccedilla', 'eacute',
-      'ecircumflex', 'edieresis', 'egrave', 'iacute', 'icircumflex',
-      'idieresis', 'igrave', 'ntilde', 'oacute', 'ocircumflex',
-      'odieresis', 'ograve', 'otilde', 'scaron', 'uacute',
-      'ucircumflex', 'udieresis', 'ugrave', 'yacute', 'ydieresis',
-      'zcaron', 'exclamsmall', 'Hungarumlautsmall', 'dollaroldstyle',
-      'dollarsuperior', 'ampersandsmall', 'Acutesmall',
-      'parenleftsuperior', 'parenrightsuperior', 'twodotenleader',
-      'onedotenleader', 'zerooldstyle', 'oneoldstyle', 'twooldstyle',
-      'threeoldstyle', 'fouroldstyle', 'fiveoldstyle', 'sixoldstyle',
-      'sevenoldstyle', 'eightoldstyle', 'nineoldstyle',
-      'commasuperior', 'threequartersemdash', 'periodsuperior',
-      'questionsmall', 'asuperior', 'bsuperior', 'centsuperior',
-      'dsuperior', 'esuperior', 'isuperior', 'lsuperior', 'msuperior',
-      'nsuperior', 'osuperior', 'rsuperior', 'ssuperior', 'tsuperior',
-      'ff', 'ffi', 'ffl', 'parenleftinferior', 'parenrightinferior',
-      'Circumflexsmall', 'hyphensuperior', 'Gravesmall', 'Asmall',
-      'Bsmall', 'Csmall', 'Dsmall', 'Esmall', 'Fsmall', 'Gsmall',
-      'Hsmall', 'Ismall', 'Jsmall', 'Ksmall', 'Lsmall', 'Msmall',
-      'Nsmall', 'Osmall', 'Psmall', 'Qsmall', 'Rsmall', 'Ssmall',
-      'Tsmall', 'Usmall', 'Vsmall', 'Wsmall', 'Xsmall', 'Ysmall',
-      'Zsmall', 'colonmonetary', 'onefitted', 'rupiah', 'Tildesmall',
-      'exclamdownsmall', 'centoldstyle', 'Lslashsmall', 'Scaronsmall',
-      'Zcaronsmall', 'Dieresissmall', 'Brevesmall', 'Caronsmall',
-      'Dotaccentsmall', 'Macronsmall', 'figuredash', 'hypheninferior',
-      'Ogoneksmall', 'Ringsmall', 'Cedillasmall', 'questiondownsmall',
-      'oneeighth', 'threeeighths', 'fiveeighths', 'seveneighths',
-      'onethird', 'twothirds', 'zerosuperior', 'foursuperior',
-      'fivesuperior', 'sixsuperior', 'sevensuperior', 'eightsuperior',
-      'ninesuperior', 'zeroinferior', 'oneinferior', 'twoinferior',
-      'threeinferior', 'fourinferior', 'fiveinferior', 'sixinferior',
-      'seveninferior', 'eightinferior', 'nineinferior',
-      'centinferior', 'dollarinferior', 'periodinferior',
-      'commainferior', 'Agravesmall', 'Aacutesmall',
-      'Acircumflexsmall', 'Atildesmall', 'Adieresissmall',
-      'Aringsmall', 'AEsmall', 'Ccedillasmall', 'Egravesmall',
-      'Eacutesmall', 'Ecircumflexsmall', 'Edieresissmall',
-      'Igravesmall', 'Iacutesmall', 'Icircumflexsmall',
-      'Idieresissmall', 'Ethsmall', 'Ntildesmall', 'Ogravesmall',
-      'Oacutesmall', 'Ocircumflexsmall', 'Otildesmall',
-      'Odieresissmall', 'OEsmall', 'Oslashsmall', 'Ugravesmall',
-      'Uacutesmall', 'Ucircumflexsmall', 'Udieresissmall',
-      'Yacutesmall', 'Thornsmall', 'Ydieresissmall', '001.000',
-      '001.001', '001.002', '001.003', 'Black', 'Bold', 'Book',
-      'Light', 'Medium', 'Regular', 'Roman', 'Semibold',
+        '.notdef', 'space', 'exclam', 'quotedbl', 'numbersign',
+        'dollar', 'percent', 'ampersand', 'quoteright', 'parenleft',
+        'parenright', 'asterisk', 'plus', 'comma', 'hyphen', 'period',
+        'slash', 'zero', 'one', 'two', 'three', 'four', 'five', 'six',
+        'seven', 'eight', 'nine', 'colon', 'semicolon', 'less', 'equal',
+        'greater', 'question', 'at', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+        'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+        'U', 'V', 'W', 'X', 'Y', 'Z', 'bracketleft', 'backslash',
+        'bracketright', 'asciicircum', 'underscore', 'quoteleft', 'a',
+        'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+        'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        'braceleft', 'bar', 'braceright', 'asciitilde', 'exclamdown',
+        'cent', 'sterling', 'fraction', 'yen', 'florin', 'section',
+        'currency', 'quotesingle', 'quotedblleft', 'guillemotleft',
+        'guilsinglleft', 'guilsinglright', 'fi', 'fl', 'endash',
+        'dagger', 'daggerdbl', 'periodcentered', 'paragraph', 'bullet',
+        'quotesinglbase', 'quotedblbase', 'quotedblright',
+        'guillemotright', 'ellipsis', 'perthousand', 'questiondown',
+        'grave', 'acute', 'circumflex', 'tilde', 'macron', 'breve',
+        'dotaccent', 'dieresis', 'ring', 'cedilla', 'hungarumlaut',
+        'ogonek', 'caron', 'emdash', 'AE', 'ordfeminine', 'Lslash',
+        'Oslash', 'OE', 'ordmasculine', 'ae', 'dotlessi', 'lslash',
+        'oslash', 'oe', 'germandbls', 'onesuperior', 'logicalnot', 'mu',
+        'trademark', 'Eth', 'onehalf', 'plusminus', 'Thorn',
+        'onequarter', 'divide', 'brokenbar', 'degree', 'thorn',
+        'threequarters', 'twosuperior', 'registered', 'minus', 'eth',
+        'multiply', 'threesuperior', 'copyright', 'Aacute',
+        'Acircumflex', 'Adieresis', 'Agrave', 'Aring', 'Atilde',
+        'Ccedilla', 'Eacute', 'Ecircumflex', 'Edieresis', 'Egrave',
+        'Iacute', 'Icircumflex', 'Idieresis', 'Igrave', 'Ntilde',
+        'Oacute', 'Ocircumflex', 'Odieresis', 'Ograve', 'Otilde',
+        'Scaron', 'Uacute', 'Ucircumflex', 'Udieresis', 'Ugrave',
+        'Yacute', 'Ydieresis', 'Zcaron', 'aacute', 'acircumflex',
+        'adieresis', 'agrave', 'aring', 'atilde', 'ccedilla', 'eacute',
+        'ecircumflex', 'edieresis', 'egrave', 'iacute', 'icircumflex',
+        'idieresis', 'igrave', 'ntilde', 'oacute', 'ocircumflex',
+        'odieresis', 'ograve', 'otilde', 'scaron', 'uacute',
+        'ucircumflex', 'udieresis', 'ugrave', 'yacute', 'ydieresis',
+        'zcaron', 'exclamsmall', 'Hungarumlautsmall', 'dollaroldstyle',
+        'dollarsuperior', 'ampersandsmall', 'Acutesmall',
+        'parenleftsuperior', 'parenrightsuperior', 'twodotenleader',
+        'onedotenleader', 'zerooldstyle', 'oneoldstyle', 'twooldstyle',
+        'threeoldstyle', 'fouroldstyle', 'fiveoldstyle', 'sixoldstyle',
+        'sevenoldstyle', 'eightoldstyle', 'nineoldstyle',
+        'commasuperior', 'threequartersemdash', 'periodsuperior',
+        'questionsmall', 'asuperior', 'bsuperior', 'centsuperior',
+        'dsuperior', 'esuperior', 'isuperior', 'lsuperior', 'msuperior',
+        'nsuperior', 'osuperior', 'rsuperior', 'ssuperior', 'tsuperior',
+        'ff', 'ffi', 'ffl', 'parenleftinferior', 'parenrightinferior',
+        'Circumflexsmall', 'hyphensuperior', 'Gravesmall', 'Asmall',
+        'Bsmall', 'Csmall', 'Dsmall', 'Esmall', 'Fsmall', 'Gsmall',
+        'Hsmall', 'Ismall', 'Jsmall', 'Ksmall', 'Lsmall', 'Msmall',
+        'Nsmall', 'Osmall', 'Psmall', 'Qsmall', 'Rsmall', 'Ssmall',
+        'Tsmall', 'Usmall', 'Vsmall', 'Wsmall', 'Xsmall', 'Ysmall',
+        'Zsmall', 'colonmonetary', 'onefitted', 'rupiah', 'Tildesmall',
+        'exclamdownsmall', 'centoldstyle', 'Lslashsmall', 'Scaronsmall',
+        'Zcaronsmall', 'Dieresissmall', 'Brevesmall', 'Caronsmall',
+        'Dotaccentsmall', 'Macronsmall', 'figuredash', 'hypheninferior',
+        'Ogoneksmall', 'Ringsmall', 'Cedillasmall', 'questiondownsmall',
+        'oneeighth', 'threeeighths', 'fiveeighths', 'seveneighths',
+        'onethird', 'twothirds', 'zerosuperior', 'foursuperior',
+        'fivesuperior', 'sixsuperior', 'sevensuperior', 'eightsuperior',
+        'ninesuperior', 'zeroinferior', 'oneinferior', 'twoinferior',
+        'threeinferior', 'fourinferior', 'fiveinferior', 'sixinferior',
+        'seveninferior', 'eightinferior', 'nineinferior',
+        'centinferior', 'dollarinferior', 'periodinferior',
+        'commainferior', 'Agravesmall', 'Aacutesmall',
+        'Acircumflexsmall', 'Atildesmall', 'Adieresissmall',
+        'Aringsmall', 'AEsmall', 'Ccedillasmall', 'Egravesmall',
+        'Eacutesmall', 'Ecircumflexsmall', 'Edieresissmall',
+        'Igravesmall', 'Iacutesmall', 'Icircumflexsmall',
+        'Idieresissmall', 'Ethsmall', 'Ntildesmall', 'Ogravesmall',
+        'Oacutesmall', 'Ocircumflexsmall', 'Otildesmall',
+        'Odieresissmall', 'OEsmall', 'Oslashsmall', 'Ugravesmall',
+        'Uacutesmall', 'Ucircumflexsmall', 'Udieresissmall',
+        'Yacutesmall', 'Thornsmall', 'Ydieresissmall', '001.000',
+        '001.001', '001.002', '001.003', 'Black', 'Bold', 'Book',
+        'Light', 'Medium', 'Regular', 'Roman', 'Semibold',
     )
 
     class INDEX:
@@ -288,7 +284,9 @@ class CFFFont:
         self.name = name
         self.fp = fp
         # Header
-        (_major, _minor, hdrsize, offsize) = struct.unpack('BBBB', self.fp.read(4))
+        (_major, _minor, hdrsize, offsize) = struct.unpack(
+            'BBBB', self.fp.read(4)
+        )
         self.fp.read(hdrsize-4)
         # Name INDEX
         self.name_index = self.INDEX(self.fp)
@@ -315,7 +313,8 @@ class CFFFont:
         if format == b'\x00':
             # Format 0
             (n,) = struct.unpack('B', self.fp.read(1))
-            for (code, gid) in enumerate(struct.unpack('B'*n, self.fp.read(n))):
+            unpacked_struct = struct.unpack('B'*n, self.fp.read(n))
+            for (code, gid) in enumerate(unpacked_struct):
                 self.code2gid[code] = gid
                 self.gid2code[gid] = code
         elif format == b'\x01':
@@ -338,7 +337,8 @@ class CFFFont:
         if format == b'\x00':
             # Format 0
             n = self.nglyphs-1
-            for (gid, sid) in enumerate(struct.unpack('>'+'H'*n, self.fp.read(2*n))):
+            unpacked_struct = struct.unpack('>'+'H'*n, self.fp.read(2*n))
+            for (gid, sid) in enumerate(unpacked_struct):
                 gid += 1
                 name = self.getstr(sid)
                 self.name2gid[name] = gid
@@ -359,9 +359,9 @@ class CFFFont:
             assert 0
         else:
             raise ValueError('unsupported charset format: %r' % format)
-        #print(self.code2gid)
-        #print(self.name2gid)
-        #assert 0
+        # print(self.code2gid)
+        # print(self.name2gid)
+        # assert 0
         return
 
     def getstr(self, sid):
@@ -370,7 +370,7 @@ class CFFFont:
         return self.string_index[sid-len(self.STANDARD_STRINGS)]
 
 
-##  TrueTypeFont
+# TrueTypeFont
 ##
 class TrueTypeFont:
 
@@ -404,7 +404,8 @@ class TrueTypeFont:
             fp.seek(base_offset+st_offset)
             (fmttype, fmtlen, fmtlang) = struct.unpack('>HHH', fp.read(6))
             if fmttype == 0:
-                char2gid.update(enumerate(struct.unpack('>256B', fp.read(256))))
+                char2gid.update(
+                    enumerate(struct.unpack('>256B', fp.read(256))))
             elif fmttype == 2:
                 subheaderkeys = struct.unpack('>256H', fp.read(512))
                 firstbytes = [0]*8192
@@ -413,8 +414,10 @@ class TrueTypeFont:
                 nhdrs = max(subheaderkeys)//8 + 1
                 hdrs = []
                 for i in range(nhdrs):
-                    (firstcode, entcount, delta, offset) = struct.unpack('>HHhH', fp.read(8))
-                    hdrs.append((i, firstcode, entcount, delta, fp.tell()-2+offset))
+                    (firstcode, entcount, delta, offset) = struct.unpack(
+                        '>HHhH', fp.read(8))
+                    hdrs.append((i, firstcode, entcount,
+                                delta, fp.tell()-2+offset))
                 for (i, firstcode, entcount, delta, pos) in hdrs:
                     if not entcount:
                         continue
@@ -438,7 +441,8 @@ class TrueTypeFont:
                     if idr:
                         fp.seek(pos+idr)
                         for c in range(sc, ec+1):
-                            char2gid[c] = (struct.unpack('>H', fp.read(2))[0] + idd) & 0xffff
+                            char2gid[c] = (struct.unpack(
+                                '>H', fp.read(2))[0] + idd) & 0xffff
                     else:
                         for c in range(sc, ec+1):
                             char2gid[c] = (c + idd) & 0xffff
@@ -451,7 +455,7 @@ class TrueTypeFont:
         return unicode_map
 
 
-##  Fonts
+# Fonts
 ##
 class PDFFontError(PDFException):
     pass
@@ -459,6 +463,7 @@ class PDFFontError(PDFException):
 
 class PDFUnicodeNotDefined(PDFFontError):
     pass
+
 
 LITERAL_STANDARD_ENCODING = LIT('StandardEncoding')
 LITERAL_TYPE1C = LIT('Type1C')
@@ -477,7 +482,8 @@ class PDFFont:
         self.ascent = num_value(descriptor.get('Ascent', 0))
         self.descent = num_value(descriptor.get('Descent', 0))
         self.italic_angle = num_value(descriptor.get('ItalicAngle', 0))
-        self.default_width = default_width or num_value(descriptor.get('MissingWidth', 0))
+        self.default_width = default_width or num_value(
+            descriptor.get('MissingWidth', 0))
         self.leading = num_value(descriptor.get('Leading', 0))
         self.bbox = list_value(descriptor.get('FontBBox', (0, 0, 0, 0)))
         self.hscale = self.vscale = .001
@@ -541,7 +547,8 @@ class PDFSimpleFont(PDFFont):
         else:
             encoding = LITERAL_STANDARD_ENCODING
         if isinstance(encoding, dict):
-            name = literal_name(encoding.get('BaseEncoding', LITERAL_STANDARD_ENCODING))
+            name = literal_name(encoding.get(
+                'BaseEncoding', LITERAL_STANDARD_ENCODING))
             diff = list_value(encoding.get('Differences', None))
             self.cid2unicode = EncodingDB.get_encoding(name, diff)
         else:
@@ -581,7 +588,7 @@ class PDFType1Font(PDFSimpleFont):
         except KeyError:
             descriptor = dict_value(spec.get('FontDescriptor', {}))
             firstchar = int_value(spec.get('FirstChar', 0))
-            #lastchar = int_value(spec.get('LastChar', 255))
+            # lastchar = int_value(spec.get('LastChar', 255))
             widths = list_value(spec.get('Widths', [0]*256))
             widths = dict((i+firstchar, w) for (i, w) in enumerate(widths))
         PDFSimpleFont.__init__(self, descriptor, widths, spec)
@@ -610,7 +617,7 @@ class PDFType3Font(PDFSimpleFont):
 
     def __init__(self, rsrcmgr, spec):
         firstchar = int_value(spec.get('FirstChar', 0))
-        #lastchar = int_value(spec.get('LastChar', 0))
+        # lastchar = int_value(spec.get('LastChar', 0))
         widths = list_value(spec.get('Widths', [0]*256))
         widths = dict((i+firstchar, w) for (i, w) in enumerate(widths))
         if 'FontDescriptor' in spec:
@@ -678,15 +685,17 @@ class PDFCIDFont(PDFFont):
                     pass
         else:
             try:
-                self.unicode_map = CMapDB.get_unicode_map(self.cidcoding, self.cmap.is_vertical())
-            except CMapDB.CMapNotFound as e:
+                self.unicode_map = CMapDB.get_unicode_map(
+                    self.cidcoding, self.cmap.is_vertical())
+            except CMapDB.CMapNotFound:
                 pass
 
         self.vertical = self.cmap.is_vertical()
         if self.vertical:
             # writing mode: vertical
             widths = get_widths2(list_value(spec.get('W2', [])))
-            self.disps = dict((cid, (vx, vy)) for (cid, (_, (vx, vy))) in widths.items())
+            self.disps = dict((cid, (vx, vy))
+                              for (cid, (_, (vx, vy))) in widths.items())
             (vy, w) = spec.get('DW2', [880, -1000])
             self.default_disp = (None, vy)
             widths = dict((cid, w) for (cid, (w, _)) in widths.items())
@@ -701,7 +710,8 @@ class PDFCIDFont(PDFFont):
         return
 
     def __repr__(self):
-        return '<PDFCIDFont: basefont=%r, cidcoding=%r>' % (self.basefont, self.cidcoding)
+        return '<PDFCIDFont: basefont=%r, cidcoding=%r>' % \
+            (self.basefont, self.cidcoding)
 
     def is_vertical(self):
         return self.vertical
@@ -729,10 +739,11 @@ class PDFCIDFont(PDFFont):
 def main(argv):
     for fname in argv[1:]:
         with open(fname, 'rb') as fp:
-            #font = TrueTypeFont(fname, fp)
+            # font = TrueTypeFont(fname, fp)
             font = CFFFont(fname, fp)
             print(font)
     return
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

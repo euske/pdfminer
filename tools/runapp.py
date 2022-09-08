@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 ##
-##  WebApp class runner
+# WebApp class runner
 ##
-##  usage:
-##    $ runapp.py pdf2html.cgi
+# usage:
+# $ runapp.py pdf2html.cgi
 ##
 
 import sys
@@ -11,8 +11,10 @@ import urllib
 from http.client import responses
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-##  WebAppHandler
+# WebAppHandler
 ##
+
+
 class WebAppHandler(SimpleHTTPRequestHandler):
 
     APP_CLASS = None
@@ -36,7 +38,7 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         else:
             script, rest = rest, ''
         scriptname = '/' + script
-        scriptfile = self.translate_path(scriptname)
+        # scriptfile = self.translate_path(scriptname)
         env = {}
         env['SERVER_SOFTWARE'] = self.version_string()
         env['SERVER_NAME'] = self.server.server_name
@@ -84,8 +86,12 @@ class WebAppHandler(SimpleHTTPRequestHandler):
         return
 
 # main
+
+
 def main(argv):
-    import getopt, imp
+    import getopt
+    import imp
+
     def usage():
         print('usage: %s [-h host] [-p port] [-n name] module.class' % argv[0])
         return 100
@@ -97,16 +103,22 @@ def main(argv):
     port = 8080
     name = 'WebApp'
     for (k, v) in opts:
-        if k == '-h': host = v
-        elif k == '-p': port = int(v)
-        elif k == '-n': name = v
-    if not args: return usage()
+        if k == '-h':
+            host = v
+        elif k == '-p':
+            port = int(v)
+        elif k == '-n':
+            name = v
+    if not args:
+        return usage()
     path = args.pop(0)
     module = imp.load_source('app', path)
     WebAppHandler.APP_CLASS = getattr(module, name)
-    print('Listening %s:%d...' % (host,port))
-    httpd = HTTPServer((host,port), WebAppHandler)
+    print('Listening %s:%d...' % (host, port))
+    httpd = HTTPServer((host, port), WebAppHandler)
     httpd.serve_forever()
     return
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
