@@ -16,6 +16,10 @@ from pdfminer.pdftypes import PDFStream, PDFObjRef, resolve1, stream_value
 from pdfminer.pdfpage import PDFPage
 from pdfminer.utils import isnumber, q
 
+# Added today
+ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
+def e(s):
+    return ESC_PAT.sub(lambda m:'&#%d;' % ord(m.group(0)), s)
 
 ESCAPE = set(map(ord, '&<>"'))
 def encode(data):
@@ -148,6 +152,8 @@ def dumpoutline(outfp, fname, objids, pagenos, password=b'',
                         if subtype and repr(subtype) == '/GoTo' and action.get('D'):
                             dest = resolve_dest(action['D'])
                             pageno = pages[dest[0].objid]
+                # Added today
+                s = e(title).encode('utf-8', 'xmlcharrefreplace')
                 outfp.write('<outline level="%r" title="%s">\n' % (level, q(s)))
                 if dest is not None:
                     outfp.write('<dest>')

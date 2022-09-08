@@ -32,22 +32,23 @@ def ascii85decode(data):
     n = b = 0
     out = b''
     for c in data:
-        if 33 <= c and c <= 117: # b'!' <= c and c <= b'u'
+        if 33 <= c and c <= 117:  # b'!' <= c and c <= b'u'
             n += 1
             b = b*85+(c-33)
             if n == 5:
                 out += struct.pack('>L', b)
                 n = b = 0
-        elif c == 122: # b'z'
+        elif c == 122:  # b'z'
             assert n == 0
             out += b'\0\0\0\0'
-        elif c == 126: # b'~'
+        elif c == 126:  # b'~'
             if n:
                 for _ in range(5-n):
                     b = b*85+84
                 out += struct.pack('>L', b)[:n-1]
             break
     return out
+
 
 # asciihexdecode(data)
 hex_re = re.compile(r'([a-f\d]{2})', re.IGNORECASE)
@@ -72,10 +73,10 @@ def asciihexdecode(data):
     b'p'
     """
     data = data.decode('latin1')
-    out = [ int(hx,16) for hx in  hex_re.findall(data) ]
+    out = [int(hx, 16) for hx in hex_re.findall(data)]
     m = trail_re.search(data)
     if m:
-        out.append(int(m.group(1),16) << 4)
+        out.append(int(m.group(1), 16) << 4)
     return bytes(out)
 
 
