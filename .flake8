@@ -1,0 +1,7 @@
+[flake8]
+exclude =
+    # Never scan the git folder
+    .git,
+    cmaprsrc/*
+    docs/*
+    venv/*

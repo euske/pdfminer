@@ -29,6 +29,10 @@ For the active project, check out its fork
 1. `pip install -r requirements.txt`
 1. `python3 -m tools.pdf2txt samples/simple1.pdf`
 
+## How to test
+
+Run `python3 -m unittest` in the root folder
+
 ## Command Line Syntax:
 
 ### pdf2txt.py

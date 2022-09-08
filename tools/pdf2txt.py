@@ -1,30 +1,44 @@
 #!/usr/bin/env python
 import sys
+import argparse
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfdevice import PDFDevice, TagExtractor
+from pdfminer.pdfdevice import TagExtractor
 from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
 
-# main
-def main(argv):
-    import getopt
-    def usage():
-        print(f'usage: {argv[0]} [-P password] [-o output] [-t text|html|xml|tag]'
-               ' [-O output_dir] [-c encoding] [-s scale] [-R rotation]'
-               ' [-Y normal|loose|exact] [-p pagenos] [-m maxpages]'
-               ' [-S] [-C] [-n] [-A] [-V] [-M char_margin] [-L line_margin]'
-               ' [-W word_margin] [-F boxes_flow] [-d] input.pdf ...')
-        return 100
-    try:
-        (opts, args) = getopt.getopt(argv[1:], 'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
-    except getopt.GetoptError:
-        return usage()
-    if not args: return usage()
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', metavar='input.pdf', nargs='+')
+    parser.add_argument('-P', '--password')
+    parser.add_argument('-o', '--output')
+    parser.add_argument('-t', '--text-type',
+                        choices=['text', 'html', 'xml', 'tag'])
+    parser.add_argument('-O', '--output-dir')
+    parser.add_argument('-c', '--encoding')
+    parser.add_argument('-s', '--scale')
+    parser.add_argument('-R', '--rotation')
+    parser.add_argument('-Y', '--layout-mode',
+                        choices=['normal', 'loose', 'exact'])
+    parser.add_argument('-p', '--pagenos')
+    parser.add_argument('-m', '--maxpages')
+    parser.add_argument('-S', '--strip-control', action='store_true')
+    parser.add_argument('-C', '--disable-caching', action='store_true')
+    parser.add_argument('-n', '--no-layout', action='store_true')
+    parser.add_argument('-A', '--all-texts', action='store_true')
+    parser.add_argument('-V', '--detect-vertical', action='store_true')
+    parser.add_argument('-M', '--char-margin')
+    parser.add_argument('-L', '--line-margin')
+    parser.add_argument('-W', '--word-margin')
+    parser.add_argument('-F', '--boxes-flow')
+    parser.add_argument('-d', '--debug', action='store_true')
+    args = parser.parse_args()
+
     # debug option
     debug = 0
     # input option
@@ -39,32 +53,50 @@ def main(argv):
     stripcontrol = False
     layoutmode = 'normal'
     encoding = 'utf-8'
-    pageno = 1
     scale = 1
     caching = True
-    showpageno = True
+
     laparams = LAParams()
-    for (k, v) in opts:
-        if k == '-d': debug += 1
-        elif k == '-P': password = v.encode('ascii')
-        elif k == '-o': outfile = v
-        elif k == '-t': outtype = v
-        elif k == '-O': imagewriter = ImageWriter(v)
-        elif k == '-c': encoding = v
-        elif k == '-s': scale = float(v)
-        elif k == '-R': rotation = int(v)
-        elif k == '-Y': layoutmode = v
-        elif k == '-p': pagenos.update( int(x)-1 for x in v.split(',') )
-        elif k == '-m': maxpages = int(v)
-        elif k == '-S': stripcontrol = True
-        elif k == '-C': caching = False
-        elif k == '-n': laparams = None
-        elif k == '-A': laparams.all_texts = True
-        elif k == '-V': laparams.detect_vertical = True
-        elif k == '-M': laparams.char_margin = float(v)
-        elif k == '-W': laparams.word_margin = float(v)
-        elif k == '-L': laparams.line_margin = float(v)
-        elif k == '-F': laparams.boxes_flow = float(v)
+    if args.debug:
+        debug += 1
+    elif args.password:
+        password = args.password.encode('ascii')
+    elif args.output:
+        outfile = args.output
+    elif args.text_type:
+        outtype = args.text_type
+    elif args.output_dir:
+        imagewriter = ImageWriter(args['output-dir'])
+    elif args.encoding:
+        encoding = args.encoding
+    elif args.scale:
+        scale = float(args.scale)
+    elif args.rotation:
+        rotation = int(args.rotation)
+    elif args.layout_mode:
+        layoutmode = args.layout_mode
+    elif args.pagenos:
+        pagenos.update(int(x)-1 for x in args.pagenos.split(','))
+    elif args.maxpages:
+        maxpages = int(args.maxpages)
+    elif args.strip_control:
+        stripcontrol = True
+    elif args.disable_caching:
+        caching = False
+    elif args.no_layout:
+        laparams = None
+    elif args.all_texts:
+        laparams.all_texts = True
+    elif args.detect_vertical:
+        laparams.detect_vertical = True
+    elif args.char_margin:
+        laparams.char_margin = float(args.char_margin)
+    elif args.word_margin:
+        laparams.word_margin = float(args.word_margin)
+    elif args.line_margin:
+        laparams.line_margin = float(args.line_margin)
+    elif args.boxes_flow:
+        laparams.boxes_flow = float(args.boxes_flow)
     #
     PDFDocument.debug = debug
     PDFParser.debug = debug
@@ -98,18 +130,20 @@ def main(argv):
                                imagewriter=imagewriter, debug=debug)
     elif outtype == 'tag':
         device = TagExtractor(rsrcmgr, outfp)
-    else:
-        return usage()
-    for fname in args:
+
+    for fname in args.input:
         with open(fname, 'rb') as fp:
             interpreter = PDFPageInterpreter(rsrcmgr, device)
-            for page in PDFPage.get_pages(fp, pagenos,
-                                          maxpages=maxpages, password=password,
-                                          caching=caching, check_extractable=True):
+            for page in PDFPage.get_pages(
+                fp, pagenos, maxpages=maxpages, password=password,
+                caching=caching, check_extractable=True
+            ):
                 page.rotate = (page.rotate+rotation) % 360
                 interpreter.process_page(page)
     device.close()
-    outfp.close()
-    return
+    if outfile:
+        outfp.close()
 
-if __name__ == '__main__': sys.exit(main(sys.argv))
+
+if __name__ == '__main__':
+    sys.exit(main())
