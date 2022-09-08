@@ -7,6 +7,7 @@
 #    -i objid : object id
 #
 import sys
+import argparse
 import os.path
 from io import StringIO
 from pdfminer.psparser import PSKeyword, PSLiteral, LIT
@@ -255,18 +256,21 @@ def dumppdf(outfp, fname, objids, pagenos, password=b'',
 
 # main
 def main(argv):
-    import getopt
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', metavar='input.pdf', nargs='+')
+    parser.add_argument('-P', '--password')
+    parser.add_argument('-a', '--dump-all-text', action='store_true')
+    parser.add_argument('-p', '--page-id', action='store')
+    parser.add_argument('-i', '--object-id', action='store')
+    parser.add_argument('-o', '--output')
+    parser.add_argument('-r', '--raw', action='store_true')
+    parser.add_argument('b', '--binary', action='store_true')
+    parser.add_argument('-t', '--text', action='store_true')
+    parser.add_argument('-T', '--dumpoutline', action='store_true')
+    parser.add_argument('-O', '--output-dir')
+    parser.add_argument('-d', '--debug', action='store_true')
+    args = parser.parse_args()
 
-    def usage():
-        print(f'usage: {argv[0]} [-P password] [-a] [-p pageid] [-i objid] '
-              '[-o output] [-r|-b|-t] [-T] [-O output_dir] [-d] input.pdf ...')
-        return 100
-    try:
-        (opts, args) = getopt.getopt(argv[1:], 'dP:ap:i:o:rbtTO:')
-    except getopt.GetoptError:
-        return usage()
-    if not args:
-        return usage()
     debug = 0
     objids = []
     pagenos = set()
@@ -276,31 +280,30 @@ def main(argv):
     proc = dumppdf
     outfp = sys.stdout
     extractdir = None
-    for (k, v) in opts:
-        if k == '-d':
-            debug += 1
-        elif k == '-P':
-            password = v.encode('ascii')
-        elif k == '-a':
-            dumpall = True
-        elif k == '-p':
-            pagenos.update(int(x)-1 for x in v.split(','))
-        elif k == '-i':
-            objids.extend(int(x) for x in v.split(','))
-        elif k == '-o':
-            outfp = open(v, 'wb')
-        elif k == '-r':
-            mode = 'raw'
-        elif k == '-b':
-            mode = 'binary'
-        elif k == '-t':
-            mode = 'text'
-        elif k == '-T':
-            proc = dumpoutline
-        elif k == '-O':
-            extractdir = v
-            proc = extractembedded
-    #
+    if args.debug:
+        debug += 1
+    elif args.password:
+        password = args.password.encode('ascii')
+    elif args.dump_all_text:
+        dumpall = True
+    elif args.page_id:
+        pagenos.update(int(x)-1 for x in args.page_id.split(','))
+    elif args.object_id:
+        objids.extend(int(x) for x in args.object_id.split(','))
+    elif args.output:
+        outfp = open(args.output, 'wb')
+    elif args.raw:
+        mode = 'raw'
+    elif args.binary:
+        mode = 'binary'
+    elif args.text:
+        mode = 'text'
+    elif args.dumpoutline:
+        proc = dumpoutline
+    elif args.output_dir:
+        extractdir = args.output_dir
+        proc = extractembedded
+
     PDFDocument.debug = debug
     PDFParser.debug = debug
     #
