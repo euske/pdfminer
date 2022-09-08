@@ -101,4 +101,3 @@ def lzwdecode(data):
 if __name__ == '__main__':
     import doctest
     print('pdfminer.lzw', doctest.testmod())
-
