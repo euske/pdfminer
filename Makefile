@@ -8,6 +8,7 @@ TWINE=twine
 RM=rm -f
 CP=cp -f
 MKDIR=mkdir
+PYTHON3 = python3 -m unittest
 
 all:
 
@@ -55,12 +56,15 @@ $(CMAPDST)/to-unicode-Adobe-Korea1.marshal.gz: $(CMAPDST)
 	$(CONV_CMAP) -c KSC-EUC=euc-kr -c KSC-Johab=johab -c KSCms-UHC=cp949 -c UniKS-UTF8=utf-8 \
 		$(CMAPDST) Adobe-Korea1 $(CMAPSRC)/cid2code_Adobe_Korea1.txt
 
-test: cmap
-	$(PYTHON) -m pdfminer.arcfour
-	$(PYTHON) -m pdfminer.ascii85
-	$(PYTHON) -m pdfminer.lzw
-	$(PYTHON) -m pdfminer.rijndael
-	$(PYTHON) -m pdfminer.runlength
-	$(PYTHON) -m pdfminer.ccitt
-	$(PYTHON) -m pdfminer.psparser
-	cd samples && $(MAKE) test
+#test: cmap
+#	$(PYTHON) -m pdfminer.arcfour
+#	$(PYTHON) -m pdfminer.ascii85
+#	$(PYTHON) -m pdfminer.lzw
+#	$(PYTHON) -m pdfminer.rijndael
+#	$(PYTHON) -m pdfminer.runlength
+#	$(PYTHON) -m pdfminer.ccitt
+#	$(PYTHON) -m pdfminer.psparser
+#	cd samples && $(MAKE) test
+
+test:
+	$(PYTHON3) tests/*.py

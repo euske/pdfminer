@@ -12,24 +12,26 @@ For the active project, check out its fork
 
 ## Features:
 
-  * Pure Python (3.6 or above).
-  * Supports PDF-1.7. (well, almost)
-  * Obtains the exact location of text as well as other layout information (fonts, etc.).
-  * Performs automatic layout analysis.
-  * Can convert PDF into other formats (HTML/XML).
-  * Can extract an outline (TOC).
-  * Can extract tagged contents.
-  * Supports basic encryption (RC4 and AES).
-  * Supports various font types (Type1, TrueType, Type3, and CID).
-  * Supports CJK languages and vertical writing scripts.
-  * Has an extensible PDF parser that can be used for other purposes.
-
+- Pure Python (3.6 or above).
+- Supports PDF-1.7. (well, almost)
+- Obtains the exact location of text as well as other layout information (fonts, etc.).
+- Performs automatic layout analysis.
+- Can convert PDF into other formats (HTML/XML).
+- Can extract an outline (TOC).
+- Can extract tagged contents.
+- Supports basic encryption (RC4 and AES).
+- Supports various font types (Type1, TrueType, Type3, and CID).
+- Supports CJK languages and vertical writing scripts.
+- Has an extensible PDF parser that can be used for other purposes.
 
 ## How to Use:
 
-  1. `> pip install pdfminer`
-  1. `> pdf2txt.py samples/simple1.pdf`
+1. `pip install -r requirements.txt`
+1. `python3 -m tools.pdf2txt samples/simple1.pdf`
 
+## How to test
+
+Run `python3 -m unittest` in the root folder
 
 ## Command Line Syntax:
 
@@ -37,7 +39,7 @@ For the active project, check out its fork
 
 pdf2txt.py extracts all the texts that are rendered programmatically.
 It also extracts the corresponding locations, font names, font sizes,
-writing direction (horizontal or vertical) for each text segment.  It
+writing direction (horizontal or vertical) for each text segment. It
 does not recognize text in images. A password needs to be provided for
 restricted PDF documents.
 
@@ -49,26 +51,26 @@ restricted PDF documents.
                  [-F boxes_flow] [-d]
                  input.pdf ...
 
-  * `-P password` : PDF password.
-  * `-o output` : Output file name.
-  * `-t text|html|xml|tag` : Output type. (default: automatically inferred from the output file name.)
-  * `-O output_dir` : Output directory for extracted images.
-  * `-c encoding` : Output encoding. (default: utf-8)
-  * `-s scale` : Output scale.
-  * `-R rotation` : Rotates the page in degree.
-  * `-Y normal|loose|exact` : Specifies the layout mode. (only for HTML output.)
-  * `-p pagenos` : Processes certain pages only.
-  * `-m maxpages` : Limits the number of maximum pages to process.
-  * `-S` : Strips control characters.
-  * `-C` : Disables resource caching.
-  * `-n` : Disables layout analysis.
-  * `-A` : Applies layout analysis for all texts including figures.
-  * `-V` : Automatically detects vertical writing.
-  * `-M char_margin` : Speficies the char margin.
-  * `-W word_margin` : Speficies the word margin.
-  * `-L line_margin` : Speficies the line margin.
-  * `-F boxes_flow` : Speficies the box flow ratio.
-  * `-d` : Turns on Debug output.
+- `-P password` : PDF password.
+- `-o output` : Output file name.
+- `-t text|html|xml|tag` : Output type. (default: automatically inferred from the output file name.)
+- `-O output_dir` : Output directory for extracted images.
+- `-c encoding` : Output encoding. (default: utf-8)
+- `-s scale` : Output scale.
+- `-R rotation` : Rotates the page in degree.
+- `-Y normal|loose|exact` : Specifies the layout mode. (only for HTML output.)
+- `-p pagenos` : Processes certain pages only.
+- `-m maxpages` : Limits the number of maximum pages to process.
+- `-S` : Strips control characters.
+- `-C` : Disables resource caching.
+- `-n` : Disables layout analysis.
+- `-A` : Applies layout analysis for all texts including figures.
+- `-V` : Automatically detects vertical writing.
+- `-M char_margin` : Speficies the char margin.
+- `-W word_margin` : Speficies the word margin.
+- `-L line_margin` : Speficies the line margin.
+- `-F boxes_flow` : Speficies the box flow ratio.
+- `-d` : Turns on Debug output.
 
 ### dumppdf.py
 
@@ -79,31 +81,30 @@ It dumps all the internal contents in pseudo-XML format.
                  [-o output] [-r|-b|-t] [-T] [-O directory] [-d]
                  input.pdf ...
 
-  * `-P password` : PDF password.
-  * `-a` : Extracts all objects.
-  * `-p pageid` : Extracts a Page object.
-  * `-i objid` : Extracts a certain object.
-  * `-o output` : Output file name.
-  * `-r` : Raw mode. Dumps the raw compressed/encoded streams.
-  * `-b` : Binary mode. Dumps the uncompressed/decoded streams.
-  * `-t` : Text mode. Dumps the streams in text format.
-  * `-T` : Tagged mode. Dumps the tagged contents.
-  * `-O output_dir` : Output directory for extracted streams.
+- `-P password` : PDF password.
+- `-a` : Extracts all objects.
+- `-p pageid` : Extracts a Page object.
+- `-i objid` : Extracts a certain object.
+- `-o output` : Output file name.
+- `-r` : Raw mode. Dumps the raw compressed/encoded streams.
+- `-b` : Binary mode. Dumps the uncompressed/decoded streams.
+- `-t` : Text mode. Dumps the streams in text format.
+- `-T` : Tagged mode. Dumps the tagged contents.
+- `-O output_dir` : Output directory for extracted streams.
 
 ## TODO
 
-  * Replace STRICT variable with something better.
-  * Improve the debugging functions.
-  * Use logging module instead of sys.stderr.
-  * Proper test cases.
-  * PEP-8 and PEP-257 conformance.
-  * Better documentation.
-  * Crypto stream filter support.
-
+- Replace STRICT variable with something better.
+- Improve the debugging functions.
+- Use logging module instead of sys.stderr.
+- Proper test cases.
+- PEP-8 and PEP-257 conformance.
+- Better documentation.
+- Crypto stream filter support.
 
 ## Related Projects
 
-  * <a href="http://pybrary.net/pyPdf/">pyPdf</a>
-  * <a href="http://www.foolabs.com/xpdf/">xpdf</a>
-  * <a href="http://pdfbox.apache.org/">pdfbox</a>
-  * <a href="http://mupdf.com/">mupdf</a>
+- <a href="http://pybrary.net/pyPdf/">pyPdf</a>
+- <a href="http://www.foolabs.com/xpdf/">xpdf</a>
+- <a href="http://pdfbox.apache.org/">pdfbox</a>
+- <a href="http://mupdf.com/">mupdf</a>
