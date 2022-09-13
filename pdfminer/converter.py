@@ -446,6 +446,10 @@ class XMLConverter(PDFConverter):
         return
 
     def receive_layout(self, ltpage):
+        word = []
+        coordinates = []
+        unwantedChars = [".", ","," ","\n","?",":",";","(",")","[","]","\t","{","}"]
+
         def show_group(item):
             if isinstance(item, LTTextBox):
                 self.outfp.write('<textbox id="%d" bbox="%s" />\n' %
@@ -509,6 +513,16 @@ class XMLConverter(PDFConverter):
                                   item.size))
                 self.write_text(item.get_text())
                 self.outfp.write('</text>\n')
+                if item.get_text() not in unwantedChars:
+                    word.append(item.get_text())
+                    print(item.get_text())
+                    coordinates.append(item.bbox)
+                else:
+                    self.outfp.write('<text bbox="%s">' % bbox2str(coordinates[0]))
+                    self.write_text(''.join(word))
+                    self.outfp.write('</text>\n')
+                    word.clear()
+                    print("Second")
             elif isinstance(item, LTText):
                 self.outfp.write('<text>%s </text>\n' % item.get_text())
             elif isinstance(item, LTImage):
