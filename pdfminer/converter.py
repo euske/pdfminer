@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import re
+from xml.dom import IndexSizeErr
 from .pdfdevice import PDFTextDevice
 from .pdffont import PDFUnicodeNotDefined
 from .layout import LTContainer
@@ -515,14 +516,17 @@ class XMLConverter(PDFConverter):
                 self.outfp.write('</text>\n')
                 if item.get_text() not in unwantedChars:
                     word.append(item.get_text())
-                    print(item.get_text())
                     coordinates.append(item.bbox)
                 else:
-                    self.outfp.write('<text bbox="%s">' % bbox2str(coordinates[0]))
-                    self.write_text(''.join(word))
-                    self.outfp.write('</text>\n')
-                    word.clear()
-                    print("Second")
+                    if coordinates.__sizeof__() > 1:
+                        try:
+                            self.outfp.write('<text bbox="%s"2="%s">' % (coordinates[0], coordinates[-1]))
+                            self.write_text(''.join(word))
+                            self.outfp.write('</text>\n')
+                            word.clear()
+                            coordinates.clear()
+                        except:
+                            return NotImplemented
             elif isinstance(item, LTText):
                 self.outfp.write('<text>%s </text>\n' % item.get_text())
             elif isinstance(item, LTImage):
