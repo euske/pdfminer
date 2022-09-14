@@ -55,6 +55,7 @@ def setOptionsAndConvert(argv):
     maxpages = 0
     # output option
     outfile = None
+    chapterSplit = False
     outtype = None
     imagewriter = None
     rotation = 0
@@ -74,6 +75,8 @@ def setOptionsAndConvert(argv):
             outfile = v
         elif k == '-t':
             outtype = v
+        elif k == 'T':
+            chapterSplit = True
         elif k == '-O':
             imagewriter = ImageWriter(v)
         elif k == '-c':
@@ -108,7 +111,7 @@ def setOptionsAndConvert(argv):
             laparams.boxes_flow = float(v)
     pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
-              maxpages, password, rotation)
+              maxpages, password, rotation, chapterSplit)
     return (debug, caching, outtype, outfile, encoding,
             imagewriter, stripcontrol, scale, layoutmode, pagenos,
             maxpages, password, rotation)
@@ -116,12 +119,13 @@ def setOptionsAndConvert(argv):
 
 def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
-              maxpages, password, rotation):
+              maxpages, password, rotation, chapterSplit):
     PDFDocument.debug = debug
     PDFParser.debug = debug
     CMapDB.debug = debug
     PDFPageInterpreter.debug = debug
     rsrcmgr = PDFResourceManager(caching=caching)
+    
     if not outtype:
         outtype = 'text'
         if outfile:
@@ -135,8 +139,9 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
         outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
+    
     if outtype == 'text':
-        device = TextConverter(rsrcmgr, outfp, laparams=laparams,
+        device = TextConverter(rsrcmgr, outfp, chapterSplit, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
         device = XMLConverter(rsrcmgr, outfp, laparams=laparams,
@@ -160,7 +165,10 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                                           caching=caching,
                                           check_extractable=True):
                 page.rotate = (page.rotate + rotation) % 360
+        
                 interpreter.process_page(page)
+                
+                
     device.close()
     outfp.close()
     return
