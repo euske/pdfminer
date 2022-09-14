@@ -658,8 +658,9 @@ class XMLConverter(PDFConverter):
                             self.outfp.write("</text>\n")
                             word.clear()
                             coordinates.clear()
-                        except:
-                            return NotImplemented
+                        except IndexError:
+                            return "Edge case of index out of bounds because \
+                                    coordinates array is both full and empty"
             elif isinstance(item, LTText):
                 self.outfp.write("<text>%s </text>\n" % item.get_text())
             elif isinstance(item, LTImage):
