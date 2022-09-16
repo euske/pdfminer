@@ -125,7 +125,7 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
     CMapDB.debug = debug
     PDFPageInterpreter.debug = debug
     rsrcmgr = PDFResourceManager(caching=caching)
-    
+
     if not outtype:
         outtype = 'text'
         if outfile:
@@ -139,9 +139,9 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
         outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
-    
+
     if outtype == 'text':
-        
+
         device = TextConverter(rsrcmgr, outfp, chapterSplit, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
@@ -167,8 +167,7 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                                           check_extractable=True):
                 page.rotate = (page.rotate + rotation) % 360
                 interpreter.process_page(page)
-                
-                
+      
     device.close()
     outfp.close()
     return
