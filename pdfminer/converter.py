@@ -159,13 +159,13 @@ class TextConverter(PDFConverter):
 
     def __init__(self, rsrcmgr, outfp, chapterSplit, pageno=1, laparams=None,
                  showpageno=False, imagewriter=None, ):
-        
+
         PDFConverter.__init__(self, rsrcmgr, outfp, pageno=pageno,
                               laparams=laparams)
         self.showpageno = showpageno
         self.imagewriter = imagewriter
         self.chapterSplit = chapterSplit
-        
+
         return
 
     def write_text(self, text):
@@ -187,7 +187,7 @@ class TextConverter(PDFConverter):
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)
         render(ltpage)
-        
+
         self.write_text('\f')
         return
 
@@ -351,7 +351,7 @@ class HTMLConverter(PDFConverter):
             return
 
         def render(item):
-            
+
             if isinstance(item, LTPage):
                 self._yoffset += item.y1
                 self.place_border('page', 1, item)

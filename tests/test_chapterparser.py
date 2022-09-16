@@ -68,7 +68,7 @@ class TestChapterParser(unittest.TestCase):
         (debug, caching, outtype, outfile, encoding, chapterSplit,
          imagewriter, stripcontrol, scale, layoutmode, pagenos,
          maxpages, password, rotation) = \
-        tools.pdf2txt.setOptionsAndConvert(argv)
+            tools.pdf2txt.setOptionsAndConvert(argv)
         self.assertEqual(chapterSplit, True)
         os.remove('chapter1.txt')
 
@@ -79,7 +79,7 @@ class TestChapterParser(unittest.TestCase):
         (debug, caching, outtype, outfile, encoding, chapterSplit, imagewriter,
          stripcontrol, scale, layoutmode, pagenos,
          maxpages, password, rotation) = \
-        tools.pdf2txt.setOptionsAndConvert(argv)
+            tools.pdf2txt.setOptionsAndConvert(argv)
         self.assertEqual(chapterSplit, True)
         self.assertEqual(outtype, 'text')
         self.assertEqual(maxpages, 2)
