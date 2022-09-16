@@ -17,8 +17,8 @@ class TestChapterParser(unittest.TestCase):
         Chapter 2 textgoeshereaigain
         chapter 3 finalchaptertext"""
         result = ChapterParser.cp_split(self, text)
-        expected = [" textgoeshere ",
-                    " textgoeshereaigain ",
+        expected = [" textgoeshere\n        ",
+                    " textgoeshereaigain\n        ",
                     " finalchaptertext"]
         self.assertEqual(result, expected)
 
