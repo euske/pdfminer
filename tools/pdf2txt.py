@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import getopt
+import os
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -10,6 +11,7 @@ from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
+from pdfminer.chapterparser import ChapterParser
 
 
 # main
@@ -139,6 +141,10 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
         outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
+        if chapterSplit:
+            outfp = open('chaptersplit.txt', 'w', encoding=encoding)
+        else:
+            outfp = sys.stdout
     
     if outtype == 'text':
         device = TextConverter(rsrcmgr, outfp, chapterSplit, laparams=laparams,
@@ -171,6 +177,11 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                 
     device.close()
     outfp.close()
+    if chapterSplit:
+        cp = ChapterParser()
+        cp.split_chapters('chaptersplit.txt', '')
+        os.remove('chaptersplit.txt')
+
     return
 
 
