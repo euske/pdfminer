@@ -127,7 +127,7 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
     CMapDB.debug = debug
     PDFPageInterpreter.debug = debug
     rsrcmgr = PDFResourceManager(caching=caching)
-    
+
     if not outtype:
         outtype = 'text'
         if outfile:
@@ -145,7 +145,7 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
             outfp = open('chaptersplit.txt', 'w', encoding=encoding)
         else:
             outfp = sys.stdout
-    
+
     if outtype == 'text':
         device = TextConverter(rsrcmgr, outfp, chapterSplit, laparams=laparams,
                                imagewriter=imagewriter)
@@ -171,10 +171,9 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                                           caching=caching,
                                           check_extractable=True):
                 page.rotate = (page.rotate + rotation) % 360
-        
+
                 interpreter.process_page(page)
-                
-                
+
     device.close()
     outfp.close()
     if chapterSplit:
