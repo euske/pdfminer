@@ -22,18 +22,18 @@ class ChapterParser:
             chapterList = [text]
         
         return chapterList
-   def cp_write_chapters(self, chapters):
+   def cp_write_chapters(self, chapters, outpath):
        for i, chapter in enumerate(chapters):
-           outfp = 'samples/txts/chaper' + str(i+1) + '.txt' 
+           outfp = outpath + 'chapter' + str(i+1) + '.txt'
            
            with open(outfp, 'w') as f:
                 f.write(chapter)    
        return
    
-   def split_chapters(self, inpfp):
+   def split_chapters(self, inpfp, outpath):
        
        text = ChapterParser.cp_read_text(self, inpfp)
        chapterList = ChapterParser.cp_split(self, text)
-       ChapterParser.cp_write_chapters(self, chapterList)
+       ChapterParser.cp_write_chapters(self, chapterList, outpath)
        
        return
