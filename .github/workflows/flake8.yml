@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   flake8:
-    config_file: .flake8
     runs-on: ubuntu-latest
     steps:
       - name: Checkout out repository
