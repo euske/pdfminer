@@ -11,7 +11,7 @@ class TestPdf2txtMethods(unittest.TestCase):
     def testSetOptions(self):
         argv = ['pdf2txt.py', '-o', 'samples/test_outfp.txt', '-t', 'text',
                 '-m', '2', 'samples/simple1.pdf']
-        (debug, caching, outtype, outfile, encoding,
+        (debug, caching, outtype, outfile, encoding, chapterSplit,
          imagewriter, stripcontrol, scale, layoutmode, pagenos,
          maxpages, password, rotation) = \
             tools.pdf2txt.setOptionsAndConvert(argv)

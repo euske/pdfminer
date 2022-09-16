@@ -75,7 +75,7 @@ def setOptionsAndConvert(argv):
             outfile = v
         elif k == '-t':
             outtype = v
-        elif k == 'T':
+        elif k == '-T':
             chapterSplit = True
         elif k == '-O':
             imagewriter = ImageWriter(v)

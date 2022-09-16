@@ -41,7 +41,7 @@ def usage(argv):
 def setOptionsAndConvert(argv):
     try:
         (opts, args) = getopt.getopt(argv[1:],
-                                     'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
+                                     'dP:o:t:TO:c:s:R:Y:p:m:SCnAVM:W:L:F:')
     except getopt.GetoptError:
         return usage(argv)
     if not args:
@@ -75,7 +75,7 @@ def setOptionsAndConvert(argv):
             outfile = v
         elif k == '-t':
             outtype = v
-        elif k == 'T':
+        elif k == '-T':
             chapterSplit = True
         elif k == '-O':
             imagewriter = ImageWriter(v)
@@ -112,7 +112,7 @@ def setOptionsAndConvert(argv):
     pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
               maxpages, password, rotation, chapterSplit)
-    return (debug, caching, outtype, outfile, encoding,
+    return (debug, caching, outtype, outfile, encoding, chapterSplit,
             imagewriter, stripcontrol, scale, layoutmode, pagenos,
             maxpages, password, rotation)
 
