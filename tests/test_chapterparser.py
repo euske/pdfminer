@@ -88,6 +88,22 @@ class TestChapterParser(unittest.TestCase):
         self.assertEqual(outfile, 'samples/test_outfp.txt')
         self.assertEqual(maxpages, 2)
     
+    
+    def testSplitChapters(self):
+        inpfp = 'samples/txts/test4.txt'
+        ChapterParser.split_chapters(self, inpfp)
+        
+        chapterfp1 = 'samples/txts/chaper1.txt'
+        chapterfp2 = 'samples/txts/chaper2.txt'
+        
+        result1 = ChapterParser.cp_read_text(self, chapterfp1)
+        result2 = ChapterParser.cp_read_text(self, chapterfp2)
+        
+        expected1 = " FirstTestChapter "
+        expected2 = " SecondTestChapter"
+        
+        self.assertEqual(result1, expected1)
+        self.assertEqual(result2, expected2)
 
 
 if __name__ == '__main__':

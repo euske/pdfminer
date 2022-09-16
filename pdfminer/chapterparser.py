@@ -29,3 +29,11 @@ class ChapterParser:
            with open(outfp, 'w') as f:
                 f.write(chapter)    
        return
+   
+   def split_chapters(self, inpfp):
+       
+       text = ChapterParser.cp_read_text(self, inpfp)
+       chapterList = ChapterParser.cp_split(self, text)
+       ChapterParser.cp_write_chapters(self, chapterList)
+       
+       return
