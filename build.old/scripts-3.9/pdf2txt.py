@@ -167,7 +167,7 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                                           check_extractable=True):
                 page.rotate = (page.rotate + rotation) % 360
                 interpreter.process_page(page)
-      
+
     device.close()
     outfp.close()
     return
