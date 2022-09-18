@@ -65,4 +65,6 @@ test: cmap
 	$(PYTHON) -m tests.test_psparser
 	$(PYTHON) -m tests.test_pdf2txt
 	$(PYTHON) -m tests.test_dumpoutline
+	$(PYTHON) -m tests.test_util
+	$(PYTHON) -m tests.test_pdf2XmlConversion
 	cd samples && $(MAKE) test
