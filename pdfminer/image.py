@@ -75,7 +75,9 @@ class ImageWriter:
         (width, height) = image.srcsize
         if len(filters) == 1 and filters[0][0] in LITERALS_DCT_DECODE:
             ext = '.jpg'
-        elif (image.bits == 1 or image.bits == 8 and image.colorspace[0] in (LITERAL_DEVICE_RGB, LITERAL_DEVICE_GRAY)):
+        elif (image.bits == 1 or
+              image.bits == 8 and
+              image.colorspace[0] in (LITERAL_DEVICE_RGB, LITERAL_DEVICE_GRAY)):
             ext = '.%dx%d.bmp' % (width, height)
         else:
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
@@ -94,7 +96,6 @@ class ImageWriter:
                     i.save(fp, 'JPEG')
                 else:
                     fp.write(raw_data)
-            # TODO add png here
             elif image.bits == 1:
                 bmp = BMPWriter(fp, 1, width, height)
                 data = stream.get_data()
