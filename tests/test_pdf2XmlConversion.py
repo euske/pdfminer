@@ -36,7 +36,7 @@ class TestLineCoordinates(unittest.TestCase):
     def testLineReader(self):
 
         argv = ['pdf2txt.py', '-o', 'samples/testxml.xml', '-t', 'xml',
-                'samples/simple1.pdf'])
+                'samples/simple1.pdf']
         tools.pdf2txt.setOptionsAndConvert(argv)
         with open('samples/test_outfp.txt', 'r') as f:
             charCoordinateArray = []
