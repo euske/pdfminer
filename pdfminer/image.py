@@ -77,7 +77,8 @@ class ImageWriter:
             ext = '.jpg'
         elif (image.bits == 1 or
               image.bits == 8 and
-              image.colorspace[0] in (LITERAL_DEVICE_RGB, LITERAL_DEVICE_GRAY)):
+              image.colorspace[0] in (LITERAL_DEVICE_RGB,
+                                      LITERAL_DEVICE_GRAY)):
             ext = '.%dx%d.bmp' % (width, height)
         else:
             ext = '.%d.%dx%d.img' % (image.bits, width, height)
@@ -112,7 +113,8 @@ class ImageWriter:
                 for y in range(height):
                     bmp.write_line(y, data[i:i+width])
                     i += width
-            elif image.bits == 8 and image.colorspace[0] is LITERAL_DEVICE_GRAY:
+            elif image.bits == 8 and \
+                    image.colorspace[0] is LITERAL_DEVICE_GRAY:
                 bmp = BMPWriter(fp, 8, width, height)
                 data = stream.get_data()
                 i = 0

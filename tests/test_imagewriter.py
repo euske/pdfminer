@@ -3,12 +3,16 @@ from tools.pdf2txt import setOptionsAndConvert
 import os
 import shutil
 
-
+_OUT_DIR = './samples/expected_output/'
 _OUTPUT_ARG = '-O'
 _TEST_OUTPUT_DIR = './samples/test_image_writer/'
 _OUTPUT_FILE_FLAG = '-o'
 _TMP_OUTPUT_FILE = 'tmp.txt'
-_ARGV = ['', _OUTPUT_FILE_FLAG, _TMP_OUTPUT_FILE, _OUTPUT_ARG, _TEST_OUTPUT_DIR]
+_ARGV = ['',
+         _OUTPUT_FILE_FLAG,
+         _TMP_OUTPUT_FILE,
+         _OUTPUT_ARG,
+         _TEST_OUTPUT_DIR]
 
 
 def check_output(expected_output, directory, count):
@@ -32,29 +36,31 @@ class TestImageWriter(unittest.TestCase):
     def test_jpg_colour(self):
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
         setOptionsAndConvert(_ARGV + ['./samples/example-pdf-jpg.pdf'])
-        self.assertTrue(check_output(['./samples/expected_output/example-pdf-jpg.jpg'],
-                                     _TEST_OUTPUT_DIR,
-                                     1))
+        self.assertTrue(
+            check_output([_OUT_DIR + 'example-pdf-jpg.jpg'],
+                         _TEST_OUTPUT_DIR,
+                         1))
 
     def test_png_colour(self):
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
         setOptionsAndConvert(_ARGV + ['./samples/example-pdf-png.pdf'])
-        self.assertTrue(check_output(['./samples/expected_output/example-pdf-png.bmp'],
-                                     _TEST_OUTPUT_DIR,
-                                     1))
+        self.assertTrue(
+            check_output([_OUT_DIR + 'example-pdf-png.bmp'],
+                         _TEST_OUTPUT_DIR,
+                         1))
 
     def test_png_grayscale(self):
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
-        setOptionsAndConvert(_ARGV + ['./samples/example-pdf-png-grayscale.pdf'])
-        self.assertTrue(check_output(['./samples/expected_output/example-pdf-png-grayscale_2.bmp',
-                                      './samples/expected_output/example-pdf-png-grayscale_1.bmp'],
-                                     _TEST_OUTPUT_DIR,
-                                     2))
+        setOptionsAndConvert(
+            _ARGV + ['./samples/example-pdf-png-grayscale.pdf'])
+        self.assertTrue(
+            check_output([_OUT_DIR + 'example-pdf-png-grayscale_2.bmp',
+                          _OUT_DIR + 'example-pdf-png-grayscale_1.bmp'],
+                         _TEST_OUTPUT_DIR,
+                         2))
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
         os.remove(_TMP_OUTPUT_FILE)
 
 
 if __name__ == "__main__":
     unittest.main()
-
-
