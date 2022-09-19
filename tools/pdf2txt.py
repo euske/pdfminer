@@ -67,9 +67,6 @@ def main():
         password = args.password.encode('ascii')
     elif args.output:
         outfile = args.output
-    elif args.chapterize:
-        chapter_definition = args.chapterize
-        chapters = True
     elif args.text_type:
         outtype = args.text_type
     elif args.output_dir:
@@ -104,6 +101,9 @@ def main():
         laparams.line_margin = float(args.line_margin)
     elif args.boxes_flow:
         laparams.boxes_flow = float(args.boxes_flow)
+    elif args.chapterize:
+        chapter_definition = args.chapterize
+        chapters = True
 
     #
     PDFDocument.debug = debug
@@ -177,17 +177,6 @@ def main():
 
     if outfile:
         outfp.close()
-
-
-def create_chapters(chapter_name, lines):
-    file = open(chapter_name, 'r')
-    for line in lines:
-        words = line.split
-        if len(words) == 2 and words[0] == 'Chapter':
-            return
-        file.write(line, 'r')
-        if line == '':
-            return
 
 
 if __name__ == '__main__':
