@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import os
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -37,6 +38,7 @@ def main():
     parser.add_argument('-W', '--word-margin')
     parser.add_argument('-F', '--boxes-flow')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-ch', '--chapterize')
     args = parser.parse_args()
 
     # debug option
@@ -55,6 +57,8 @@ def main():
     encoding = 'utf-8'
     scale = 1
     caching = True
+    chapters = False
+    chapter_definition = None
 
     laparams = LAParams()
     if args.debug:
@@ -63,6 +67,9 @@ def main():
         password = args.password.encode('ascii')
     elif args.output:
         outfile = args.output
+    elif args.chapterize:
+        chapter_definition = args.chapterize
+        chapters = True
     elif args.text_type:
         outtype = args.text_type
     elif args.output_dir:
@@ -97,6 +104,7 @@ def main():
         laparams.line_margin = float(args.line_margin)
     elif args.boxes_flow:
         laparams.boxes_flow = float(args.boxes_flow)
+
     #
     PDFDocument.debug = debug
     PDFParser.debug = debug
@@ -132,6 +140,9 @@ def main():
         device = TagExtractor(rsrcmgr, outfp)
 
     for fname in args.input:
+        input_file_name = fname.split('/')[-1]
+        # Get the input file name to create a directory with all the chapters
+        input_file_name = input_file_name.replace('.pdf', '')
         with open(fname, 'rb') as fp:
             interpreter = PDFPageInterpreter(rsrcmgr, device)
             for page in PDFPage.get_pages(
@@ -141,8 +152,42 @@ def main():
                 page.rotate = (page.rotate+rotation) % 360
                 interpreter.process_page(page)
     device.close()
+    if chapters:
+        chap_dir = str(input_file_name) + '_chapters'
+        path = os.path.join(os.pardir, chap_dir)
+        os.makedirs(path, exist_ok=True)
+
+        with open(outfile, 'r') as fp:
+            #lines = fp.readline()
+            chapters_name = 'preface'
+            file = open(os.path.join(path, chapters_name), 'w')
+            while True:
+                cur_line = fp.readline()
+
+                line = cur_line.split(' ')
+                if len(line) == 3 and line[0].lower() == chapter_definition.lower():
+                    file.close()
+                    chapters_name = line[0] + line[1]
+                    file = open(os.path.join(path, chapters_name), 'w')
+
+                file.write(cur_line)
+                if cur_line == '':
+                    file.close()
+                    break
+
     if outfile:
         outfp.close()
+
+
+def create_chapters(chapter_name, lines):
+    file = open(chapter_name, 'r')
+    for line in lines:
+        words = line.split
+        if len(words) == 2 and words[0] == 'Chapter':
+            return
+        file.write(line, 'r')
+        if line == '':
+            return
 
 
 if __name__ == '__main__':
