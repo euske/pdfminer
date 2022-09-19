@@ -2,7 +2,7 @@ import contextlib
 import io
 import unittest
 from unittest.mock import patch
-from tools.pdffonts import main
+from tools.pdffontsinfo import main
 
 
 class TestPDFFonts(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestPDFFonts(unittest.TestCase):
             Times-Roman                Type 1   Custom               no
             Times-Bold                 Type 1   Standard             no
             Helvetica                  Type 1   Custom               no
-            Helvetica-Bold             Type 1  Standard              no
+            Helvetica-Bold             Type 1   Standard             no
 
             The table header: 4 titles: 'Name', 'Type', 'Encoding', 'Uni'.
             The width of the columns in chars is the following: 25 for Name,
@@ -55,7 +55,8 @@ class TestPDFFonts(unittest.TestCase):
             '''
             # Check the header titles
             self.assertIn(
-                "Name"+(' '*21)+" Type"+(' '*6)+" Encoding"+('-'*12)+" Uni",
+                "Name".ljust(25)+" Type".ljust(10) +
+                " Encoding".ljust(20)+" Uni".ljust(3),
                 fake_stdout.getvalue())
 
             # Check the sequence of dashes
