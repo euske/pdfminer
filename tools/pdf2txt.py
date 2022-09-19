@@ -57,8 +57,8 @@ def main():
     encoding = 'utf-8'
     scale = 1
     caching = True
-    chapters = False
-    chapter_definition = None
+    chapters = True
+    chapter_definition = 'chapter'
 
     laparams = LAParams()
     if args.debug:
@@ -177,6 +177,8 @@ def main():
 
     if outfile:
         outfp.close()
+    if os.path.isfile(outfile):
+        os.remove(outfile)
 
 
 if __name__ == '__main__':
