@@ -13,18 +13,21 @@ class TestWordprinting(unittest.TestCase):
             charCoordinateArray = []
             for line in f:
                 if 'word' in line:
-                    sub1 = line.split('bbox=')[1]
-                    wordCoordinates = sub1.split('>')[0]
-                    firstString = charCoordinateArray[0]
-                    secondString = charCoordinateArray[
-                        len(charCoordinateArray)-2]
-                    firstCharCoordinates = firstString.split(',')
-                    secondCharCoordinates = secondString.split(',')
-                    n = 2
-                    left = ','.join(firstCharCoordinates[:n])
-                    right = ','.join(secondCharCoordinates[n:])
-                    self.assertEqual(wordCoordinates, left+","+right)
-                    charCoordinateArray.clear()
+                    try:
+                        sub1 = line.split('bbox=')[1]
+                        wordCoordinates = sub1.split('>')[0]
+                        firstString = charCoordinateArray[0]
+                        secondString = charCoordinateArray[
+                            len(charCoordinateArray)-2]
+                        firstCharCoordinates = firstString.split(',')
+                        secondCharCoordinates = secondString.split(',')
+                        n = 2
+                        left = ','.join(firstCharCoordinates[:n])
+                        right = ','.join(secondCharCoordinates[n:])
+                        self.assertEqual(wordCoordinates, left+","+right)
+                        charCoordinateArray.clear()
+                    except IndexError as e:
+                        print(e)
                 else:
                     if '<text ' and '</text>' in line:
                         sub1 = line.split('bbox=')[1]
