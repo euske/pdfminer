@@ -69,7 +69,7 @@ class TestLineCoordinates(unittest.TestCase):
                     left = ','.join(firstCharCoordinates[:n])
                     right = ','.join(secondCharCoordinates[n:])
                     self.assertEqual(lineCoordinate, left+","+right)
-                    charCoordinateArray.clear
+                    charCoordinateArray.clear()
 
 
 if __name__ == '__main__':
