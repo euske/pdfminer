@@ -57,8 +57,11 @@ class TestLineCoordinates(unittest.TestCase):
                     except IndexError:
                         return
                 elif '<text ' and '</text>' in line:
-                    sub1 = line.split('bbox=')[1]
-                    charCoordinateArray.append(sub1.split(' ')[0])
+                    try:
+                        sub1 = line.split('bbox=')[1]
+                        charCoordinateArray.append(sub1.split(' ')[0])
+                    except IndexError:
+                        return
                 elif '</textline>' in line:
                     firstString = charCoordinateArray[1]
                     secondString = charCoordinateArray[
