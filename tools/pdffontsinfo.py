@@ -6,7 +6,7 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
-from pdfminer.converter import TextConverter
+from pdfminer.converter import PDFConverter
 
 
 def main():
@@ -38,10 +38,8 @@ def main():
 
     outfp = sys.stdout
 
-    device = TextConverter(
-        rsrcmgr, outfp, laparams=laparams, imagewriter=imagewriter)
-    # FIXME: Find a way of using the converter to avoid the printing, that or
-    # create a new converter for the pdffontinfo
+    device = PDFConverter(
+        rsrcmgr, outfp, laparams=laparams)
 
     for fname in args.input:
         with open(fname, 'rb') as fp:
@@ -88,7 +86,7 @@ def main():
 
     device.close()
 
-    print(fonts2txt(fonts), outfile)
+    outfp.write(fonts2txt(fonts))
 
     if outfile:
         outfp.close()
