@@ -27,7 +27,7 @@ class TestWordprinting(unittest.TestCase):
                         self.assertEqual(wordCoordinates, left+","+right)
                         charCoordinateArray.clear()
                     except IndexError:
-                        print("index error")
+                        return
                 else:
                     if '<text ' and '</text>' in line:
                         if 'bbox=' in line:
@@ -51,8 +51,11 @@ class TestLineCoordinates(unittest.TestCase):
             lineCoordinate = ''
             for line in f:
                 if '<textline>' in line:
-                    sub1 = line.split('bbox=')[1:]
-                    lineCoordinate = sub1[0].split('>')[0]
+                    try:
+                        sub1 = line.split('bbox=')[1:]
+                        lineCoordinate = sub1[0].split('>')[0]
+                    except IndexError:
+                        return
                 elif '<text ' and '</text>' in line:
                     sub1 = line.split('bbox=')[1]
                     charCoordinateArray.append(sub1.split(' ')[0])
