@@ -43,22 +43,23 @@ class TestLineCoordinates(unittest.TestCase):
             lineCoordinate = ''
             for line in f:
                 if '<textline>' in line:
-                    sub1 =  line.split('bbox=')[1]
-                    lineCoordinate = sub1.split(' ')[0]
-                elif '<text ' and '</text>' in line: 
                     sub1 = line.split('bbox=')[1]
-                    charCoordinateArray.append(sub1.split(' ')[0])  
+                    lineCoordinate = sub1.split(' ')[0]
+                elif '<text ' and '</text>' in line:
+                    sub1 = line.split('bbox=')[1]
+                    charCoordinateArray.append(sub1.split(' ')[0])
                 elif '</textline>' in line:
                     firstString = charCoordinateArray[1]
                     secondString = charCoordinateArray[
                         len(charCoordinateArray)-1]
                     firstCharCoordinates = firstString.split(',')
-                    secondCharCoordinates = secondString.split(',') 
+                    secondCharCoordinates = secondString.split(',')
                     n = 2
                     left = ','.join(firstCharCoordinates[:n])
                     right = ','.join(secondCharCoordinates[n:])
                     self.assertEqual(lineCoordinate, left+","+right)
-                    charCoordinateArray.clear   
-                 
+                    charCoordinateArray.clear
+
+
 if __name__ == '__main__':
-    unittest.main()  
+    unittest.main()

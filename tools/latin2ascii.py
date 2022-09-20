@@ -124,11 +124,8 @@ def main(argv):
         return usage()
     if not args:
         return usage()
-    codec = 'utf-8'
+
     lines = b''
-    for (k, v) in opts:
-        if k == '-c':
-            codec = v
     for line in fileinput.input(args):
         line = latin2ascii(line)
         encoded_line = line.encode('ascii', 'replace')
