@@ -9,7 +9,7 @@ class TestWordprinting(unittest.TestCase):
         argv = ['pdf2txt.py', '-o', 'samples/testxml.xml', '-t', 'xml',
                 'samples/XMLConverterTestFile.pdf']
         tools.pdf2txt.setOptionsAndConvert(argv)
-        with open('samples/testxml.txt', 'r') as f:
+        with open('samples/testxml.xml', 'r') as f:
             charCoordinateArray = []
             for line in f:
                 if 'word' in line:
@@ -38,7 +38,7 @@ class TestLineCoordinates(unittest.TestCase):
         argv = ['pdf2txt.py', '-o', 'samples/testxml.xml', '-t', 'xml',
                 'samples/simple1.pdf']
         tools.pdf2txt.setOptionsAndConvert(argv)
-        with open('samples/testxml.txt', 'r') as f:
+        with open('samples/testxml.xml', 'r') as f:
             charCoordinateArray = []
             lineCoordinate = ''
             for line in f:
