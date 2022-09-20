@@ -23,7 +23,7 @@ class TestPDFFonts(unittest.TestCase):
                 func_with_tests(fake_stdout)
         fake_stdout.close()
 
-    def test_default(self):
+    def test_simple1(self):
         def tests(fake_stdout):
             ''' Testing if the output table has the following characteristics:
 
@@ -55,8 +55,8 @@ class TestPDFFonts(unittest.TestCase):
             '''
             # Check the header titles
             self.assertIn(
-                "Name".ljust(25)+" Type".ljust(10) +
-                " Encoding".ljust(20)+" Uni".ljust(3),
+                "Name".ljust(25)+" Type".ljust(10+1) +
+                " Encoding".ljust(20+1)+" Uni".ljust(3+1),
                 fake_stdout.getvalue())
 
             # Check the sequence of dashes

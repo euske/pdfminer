@@ -153,7 +153,12 @@ def fonts2txt(fonts):
     table = process_line(["Name", "Type", "Encoding", "Uni"]) + "\n"
     table += process_line(['-'*25, '-'*10, '-'*20, '-'*3]) + "\n"
 
-    # FIXME:the uni values are booleans instead of strings
+    if len(fonts['names']) == 0:
+        table += process_line(["(No font)",
+                              "",
+                               "",
+                               ""]) + "\n"
+
     for i in range(len(fonts['names'])):
         # For all values process the lines
         table += process_line([fonts['names'][i],

@@ -487,6 +487,8 @@ class PDFFont:
         self.leading = num_value(descriptor.get('Leading', 0))
         self.bbox = list_value(descriptor.get('FontBBox', (0, 0, 0, 0)))
         self.hscale = self.vscale = .001
+        self.encoding = LITERAL_STANDARD_ENCODING
+        self.toUnicode = False
         return
 
     def __repr__(self):
@@ -534,15 +536,17 @@ class PDFFont:
     def string_width(self, s):
         return sum(self.char_width(cid) for cid in self.decode(s))
 
+    def get_encoding(self):
+        return self.encoding
+
+    def get_toUnicode(self):
+        return self.toUnicode
+
 
 # PDFSimpleFont
 class PDFSimpleFont(PDFFont):
 
     def __init__(self, descriptor, widths, spec):
-
-        self.encoding = LITERAL_STANDARD_ENCODING
-        self.toUnicode = False
-
         # Font encoding is specified either by a name of
         # built-in encoding or a dictionary that describes
         # the differences.
@@ -554,7 +558,8 @@ class PDFSimpleFont(PDFFont):
             diff = list_value(self.encoding.get('Differences', None))
             self.cid2unicode = EncodingDB.get_encoding(name, diff)
         else:
-            self.cid2unicode = EncodingDB.get_encoding(literal_name(self.encoding))
+            self.cid2unicode = EncodingDB.get_encoding(
+                literal_name(self.encoding))
         self.unicode_map = None
         if 'ToUnicode' in spec:
             self.toUnicode = True
@@ -574,11 +579,6 @@ class PDFSimpleFont(PDFFont):
             return self.cid2unicode[cid]
         except KeyError:
             raise PDFUnicodeNotDefined(None, cid)
-
-    def get_encoding(self):
-        return self.encoding
-    def get_toUnicode(self):
-        return self.toUnicode
 
 
 # PDFType1Font
