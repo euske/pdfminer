@@ -14,5 +14,6 @@ class TestUtils(unittest.TestCase):
         leftbbox = '25.000,50.000'
         self.assertEqual(leftbbox, pdfminer.utils.leftbbox2str(bbox))
 
+
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
