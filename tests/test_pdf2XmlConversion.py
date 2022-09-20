@@ -51,8 +51,8 @@ class TestLineCoordinates(unittest.TestCase):
             lineCoordinate = ''
             for line in f:
                 if '<textline>' in line:
-                    sub1 = line.split('bbox=')[1]
-                    lineCoordinate = sub1.split(' ')[0]
+                    sub1 = line.split('bbox=')[1:]
+                    lineCoordinate = sub1[0].split('>')[0]
                 elif '<text ' and '</text>' in line:
                     sub1 = line.split('bbox=')[1]
                     charCoordinateArray.append(sub1.split(' ')[0])
