@@ -28,6 +28,7 @@ For the active project, check out its fork
 
 1. `pip install -r requirements.txt`
 1. `python3 -m tools.pdf2txt samples/simple1.pdf`
+1. `python3 -m tools.pdffontsinfo samples/simple1.pdf`
 
 ## How to test
 
