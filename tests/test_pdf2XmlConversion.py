@@ -15,7 +15,7 @@ class TestWordprinting(unittest.TestCase):
                 if 'word' in line:
                     try:
                         sub1 = line.split('bbox=')[1:]
-                        wordCoordinates = sub1.split('>')[0]
+                        wordCoordinates = sub1[0].split('>')[0]
                         firstString = charCoordinateArray[0]
                         secondString = charCoordinateArray[
                             len(charCoordinateArray)-2]

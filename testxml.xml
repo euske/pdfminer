@@ -8,26 +8,26 @@
 <text font="BCDEEE+Calibri" bbox="83.196,756.720,85.736,767.760" size="11.040">i</text>
 <text font="BCDEEE+Calibri" bbox="85.736,756.720,90.052,767.760" size="11.040">s</text>
 <text font="BCDEEE+Calibri" bbox="90.052,756.720,92.547,767.760" size="11.040"> </text>
-<text word bbox="72.024,756.720,90.052,767.760">This</text>
+<text type="word" bbox="72.024,756.720,90.052,767.760">This</text>
 <text font="BCDEEE+Calibri" bbox="92.547,756.720,95.087,767.760" size="11.040">i</text>
 <text font="BCDEEE+Calibri" bbox="95.087,756.720,99.403,767.760" size="11.040">s</text>
 <text font="BCDEEE+Calibri" bbox="99.403,756.720,101.898,767.760" size="11.040"> </text>
-<text word bbox="92.547,756.720,99.403,767.760">is</text>
+<text type="word" bbox="92.547,756.720,99.403,767.760">is</text>
 <text font="BCDEEE+Calibri" bbox="101.898,756.720,107.186,767.760" size="11.040">a</text>
 <text font="BCDEEE+Calibri" bbox="107.186,756.720,109.681,767.760" size="11.040"> </text>
-<text word bbox="101.898,756.720,107.186,767.760">a</text>
+<text type="word" bbox="101.898,756.720,107.186,767.760">a</text>
 <text font="BCDEEE+Calibri" bbox="109.582,756.720,113.280,767.760" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="113.280,756.720,118.778,767.760" size="11.040">e</text>
 <text font="BCDEEE+Calibri" bbox="118.812,756.720,123.128,767.760" size="11.040">s</text>
 <text font="BCDEEE+Calibri" bbox="123.128,756.720,126.827,767.760" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="126.727,756.720,129.222,767.760" size="11.040"> </text>
-<text word bbox="109.582,756.720,126.827,767.760">test</text>
+<text type="word" bbox="109.582,756.720,126.827,767.760">test</text>
 <text font="BCDEEE+Calibri" bbox="129.222,756.720,132.589,767.760" size="11.040">f</text>
 <text font="BCDEEE+Calibri" bbox="132.589,756.720,135.129,767.760" size="11.040">i</text>
 <text font="BCDEEE+Calibri" bbox="135.129,756.720,137.668,767.760" size="11.040">l</text>
 <text font="BCDEEE+Calibri" bbox="137.668,756.720,143.166,767.760" size="11.040">e</text>
 <text font="BCDEEE+Calibri" bbox="143.060,756.720,145.555,767.760" size="11.040"> </text>
-<text word bbox="129.222,756.720,143.166,767.760">file</text>
+<text type="word" bbox="129.222,756.720,143.166,767.760">file</text>
 <text>
  </text>
 </textline>
@@ -44,18 +44,18 @@
 <text font="BCDEEE+Calibri" bbox="72.024,711.700,74.806,722.740" size="11.040">I</text>
 <text font="BCDEEE+Calibri" bbox="74.806,711.700,78.504,722.740" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="78.504,711.700,81.000,722.740" size="11.040"> </text>
-<text word bbox="72.024,711.700,78.504,722.740">It</text>
+<text type="word" bbox="72.024,711.700,78.504,722.740">It</text>
 <text font="BCDEEE+Calibri" bbox="81.000,711.700,83.539,722.740" size="11.040">i</text>
 <text font="BCDEEE+Calibri" bbox="83.539,711.700,87.855,722.740" size="11.040">s</text>
 <text font="BCDEEE+Calibri" bbox="87.855,711.700,90.350,722.740" size="11.040"> </text>
-<text word bbox="81.000,711.700,87.855,722.740">is</text>
+<text type="word" bbox="81.000,711.700,87.855,722.740">is</text>
 <text font="BCDEEE+Calibri" bbox="90.262,711.700,99.083,722.740" size="11.040">m</text>
 <text font="BCDEEE+Calibri" bbox="99.127,711.700,104.625,722.740" size="11.040">e</text>
 <text font="BCDEEE+Calibri" bbox="104.625,711.700,109.913,722.740" size="11.040">a</text>
 <text font="BCDEEE+Calibri" bbox="109.913,711.700,115.709,722.740" size="11.040">n</text>
 <text font="BCDEEE+Calibri" bbox="115.709,711.700,119.408,722.740" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="119.408,711.700,121.903,722.740" size="11.040"> </text>
-<text word bbox="90.262,711.700,119.408,722.740">meant</text>
+<text type="word" bbox="90.262,711.700,119.408,722.740">meant</text>
 <text font="BCDEEE+Calibri" bbox="121.820,711.700,124.315,722.740" size="11.040"> </text>
 <text>
  </text>
@@ -66,13 +66,13 @@
 <text font="BCDEEE+Calibri" bbox="72.024,689.260,75.722,700.300" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="75.722,689.260,81.540,700.300" size="11.040">o</text>
 <text font="BCDEEE+Calibri" bbox="81.618,689.260,84.113,700.300" size="11.040"> </text>
-<text word bbox="72.024,689.260,81.540,700.300">to</text>
+<text type="word" bbox="72.024,689.260,81.540,700.300">to</text>
 <text font="BCDEEE+Calibri" bbox="84.013,689.260,87.712,700.300" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="87.712,689.260,93.210,700.300" size="11.040">e</text>
 <text font="BCDEEE+Calibri" bbox="93.243,689.260,97.560,700.300" size="11.040">s</text>
 <text font="BCDEEE+Calibri" bbox="97.560,689.260,101.258,700.300" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="101.180,689.260,103.675,700.300" size="11.040"> </text>
-<text word bbox="84.013,689.260,101.258,700.300">test</text>
+<text type="word" bbox="84.013,689.260,101.258,700.300">test</text>
 <text>
  </text>
 </textline>
@@ -100,7 +100,7 @@
 <text font="BCDEEE+Calibri" bbox="130.315,644.260,136.133,655.300" size="11.040">o</text>
 <text font="BCDEEE+Calibri" bbox="136.188,644.260,141.984,655.300" size="11.040">n</text>
 <text font="BCDEEE+Calibri" bbox="141.951,644.260,144.446,655.300" size="11.040"> </text>
-<text word bbox="72.024,644.260,141.984,655.300">XMLConversion</text>
+<text type="word" bbox="72.024,644.260,141.984,655.300">XMLConversion</text>
 <text font="BCDEEE+Calibri" bbox="144.446,644.260,149.116,655.300" size="11.040">c</text>
 <text font="BCDEEE+Calibri" bbox="149.028,644.260,154.846,655.300" size="11.040">o</text>
 <text font="BCDEEE+Calibri" bbox="154.791,644.260,160.609,655.300" size="11.040">o</text>
@@ -112,7 +112,7 @@
 <text font="BCDEEE+Calibri" bbox="183.837,644.260,187.536,655.300" size="11.040">t</text>
 <text font="BCDEEE+Calibri" bbox="187.536,644.260,193.033,655.300" size="11.040">e</text>
 <text font="BCDEEE+Calibri" bbox="192.945,644.260,195.440,655.300" size="11.040"> </text>
-<text word bbox="144.446,644.260,193.033,655.300">coordinate</text>
+<text type="word" bbox="144.446,644.260,193.033,655.300">coordinate</text>
 <text font="BCDEEE+Calibri" bbox="195.440,644.260,201.236,655.300" size="11.040">p</text>
 <text font="BCDEEE+Calibri" bbox="201.236,644.260,205.089,655.300" size="11.040">r</text>
 <text font="BCDEEE+Calibri" bbox="205.089,644.260,207.628,655.300" size="11.040">i</text>
@@ -122,7 +122,7 @@
 <text font="BCDEEE+Calibri" bbox="219.585,644.260,225.381,655.300" size="11.040">n</text>
 <text font="BCDEEE+Calibri" bbox="225.348,644.260,230.547,655.300" size="11.040">g</text>
 <text font="BCDEEE+Calibri" bbox="230.570,644.260,233.065,655.300" size="11.040"> </text>
-<text word bbox="195.440,644.260,230.547,655.300">printing</text>
+<text type="word" bbox="195.440,644.260,230.547,655.300">printing</text>
 <text>
  </text>
 </textline>
