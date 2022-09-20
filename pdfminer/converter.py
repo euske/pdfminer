@@ -576,6 +576,13 @@ class XMLConverter(PDFConverter):
                 self.outfp.write("</textgroup>\n")
             return
 
+        """
+        @param param1: Takes an item from a pdf
+        @example page, char or string
+        @functionality: Depending of item type prints string with coordinates
+                        of the item to output
+        """
+
         def render(item):
             if isinstance(item, LTPage):
                 self.outfp.write(
