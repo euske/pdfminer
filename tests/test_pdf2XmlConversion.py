@@ -29,12 +29,13 @@ class TestWordprinting(unittest.TestCase):
                     except IndexError:
                         print("index error")
                 else:
-                    if '<text ' and '</text>' and 'bbox=' in line:
-                        try:
-                            sub1 = line.split('bbox=')[1]
-                            charCoordinateArray.append(sub1.split(' ')[0])
-                        except IndexError:
-                            print("index error 2")
+                    if '<text ' and '</text>' in line:
+                        if 'bbox=' in line:
+                            try:
+                                sub1 = line.split('bbox=')[1]
+                                charCoordinateArray.append(sub1.split(' ')[0])
+                            except IndexError:
+                                print("index error 2")
 
 
 class TestLineCoordinates(unittest.TestCase):
