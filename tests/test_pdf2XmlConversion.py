@@ -26,8 +26,8 @@ class TestWordprinting(unittest.TestCase):
                         right = ','.join(secondCharCoordinates[n:])
                         self.assertEqual(wordCoordinates, left+","+right)
                         charCoordinateArray.clear()
-                    except IndexError as e:
-                        print(e)
+                    except IndexError:
+                        return NotImplemented
                 else:
                     if '<text ' and '</text>' in line:
                         sub1 = line.split('bbox=')[1]
