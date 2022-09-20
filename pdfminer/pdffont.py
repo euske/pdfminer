@@ -539,22 +539,25 @@ class PDFFont:
 class PDFSimpleFont(PDFFont):
 
     def __init__(self, descriptor, widths, spec):
+
+        self.encoding = LITERAL_STANDARD_ENCODING
+        self.toUnicode = False
+
         # Font encoding is specified either by a name of
         # built-in encoding or a dictionary that describes
         # the differences.
         if 'Encoding' in spec:
-            encoding = resolve1(spec['Encoding'])
-        else:
-            encoding = LITERAL_STANDARD_ENCODING
-        if isinstance(encoding, dict):
-            name = literal_name(encoding.get(
+            self.encoding = resolve1(spec['Encoding'])
+        if isinstance(self.encoding, dict):
+            name = literal_name(self.encoding.get(
                 'BaseEncoding', LITERAL_STANDARD_ENCODING))
-            diff = list_value(encoding.get('Differences', None))
+            diff = list_value(self.encoding.get('Differences', None))
             self.cid2unicode = EncodingDB.get_encoding(name, diff)
         else:
-            self.cid2unicode = EncodingDB.get_encoding(literal_name(encoding))
+            self.cid2unicode = EncodingDB.get_encoding(literal_name(self.encoding))
         self.unicode_map = None
         if 'ToUnicode' in spec:
+            self.toUnicode = True
             strm = stream_value(spec['ToUnicode'])
             self.unicode_map = FileUnicodeMap()
             CMapParser(self.unicode_map, BytesIO(strm.get_data())).run()
@@ -571,6 +574,11 @@ class PDFSimpleFont(PDFFont):
             return self.cid2unicode[cid]
         except KeyError:
             raise PDFUnicodeNotDefined(None, cid)
+
+    def get_encoding(self):
+        return self.encoding
+    def get_toUnicode(self):
+        return self.toUnicode
 
 
 # PDFType1Font

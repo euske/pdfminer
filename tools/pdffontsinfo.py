@@ -71,15 +71,13 @@ def main():
         # Name = Helvetica etc
         font_name = font.basefont
 
-        # font.cid2unicode FIXME: find a way of retrieving the encoding
-        font_enc = '---'
+        font_enc = font.get_encoding().name
 
-        font_uni = False  # font.unicode_map FIXME
+        font_uni = font.get_toUnicode()
 
         l_font_types.append(font_type)
         l_font_names.append(font_name)
         l_font_enc.append(font_enc)
-        # FIXME:the uni values are booleans instead of strings
         l_font_uni.append(font_uni)
 
     fonts = {}
