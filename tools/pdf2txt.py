@@ -104,6 +104,9 @@ def main():
     if args.chapterize:
         chapter_definition = args.chapterize
         chapters = True
+        # If output flag is not used then we create one.
+        if not args.output:
+            outfile = 'chapters'
 
     #
     PDFDocument.debug = debug
@@ -152,13 +155,15 @@ def main():
                 page.rotate = (page.rotate+rotation) % 360
                 interpreter.process_page(page)
     device.close()
+
+    # Flag if we need to create separate file for each chapter or not
     if chapters:
         chap_dir = str(input_file_name) + '_chapters'
         path = os.path.join(os.pardir, chap_dir)
         os.makedirs(path, exist_ok=True)
 
         with open(outfile, 'r') as fp:
-            #lines = fp.readline()
+
             chapters_name = 'preface'
             file = open(os.path.join(path, chapters_name), 'w')
             while True:
@@ -177,7 +182,8 @@ def main():
 
     if outfile:
         outfp.close()
-    if os.path.isfile(outfile):
+    # Deletes the files that we created for reading the chapters
+    if not args.output and os.path.isfile(outfile):
         os.remove(outfile)
 
 
