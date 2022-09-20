@@ -78,3 +78,110 @@ class TestPDFFonts(unittest.TestCase):
             self.assertIn("no", fake_stdout.getvalue())
 
         self.run_tests(tests, ['pdffonts.py', 'samples/simple1.pdf'])
+
+    def test_simple2(self):
+        def tests(fake_stdout):
+            ''' Testing if the output table has the following characteristics:
+
+            Name                       Type     Encoding             Uni
+            -------------------------- -------- -------------------- ---
+            Times-Roman                Type 1   Custom               no
+            Times-Bold                 Type 1   Standard             no
+            Helvetica                  Type 1   Custom               no
+            Helvetica-Bold             Type 1   Standard             no
+
+            The table header: 4 titles: 'Name', 'Type', 'Encoding', 'Uni'.
+            The width of the columns in chars is the following: 25 for Name,
+                10 for Type, 20 for Encoding & 3 for Uni.
+            Between each column there is a separating whitespace.
+            The header is separated from the data with a sequence of dashes
+                ('-') as the width of each column.
+
+            This test is carried out with samples/simple2.pdf, the output
+                should look like the following:
+
+            Name                       Type     Encoding             Uni
+            -------------------------- -------- -------------------- ---
+            (No font)                          
+
+            Params:
+                fake_stdout: a fake stdout mimicking the real output
+                    of the program
+
+            '''
+            # Check the header titles
+            self.assertIn(
+                "Name".ljust(25)+" Type".ljust(10+1) +
+                " Encoding".ljust(20+1)+" Uni".ljust(3+1),
+                fake_stdout.getvalue())
+
+            # Check the sequence of dashes
+            self.assertIn(('-'*25)+" "+('-'*10)+" "+('-'*20) +
+                          " "+('-'*3), fake_stdout.getvalue())
+
+            # Check the values
+
+            # Check 'No font'
+            self.assertIn("(No font)", fake_stdout.getvalue())
+
+        self.run_tests(tests, ['pdffonts.py', 'samples/simple2.pdf'])
+
+    def test_simple3(self):
+        def tests(fake_stdout):
+            ''' Testing if the output table has the following characteristics:
+
+            Name                       Type     Encoding             Uni
+            -------------------------- -------- -------------------- ---
+            Times-Roman                Type 1   Custom               no
+            Times-Bold                 Type 1   Standard             no
+            Helvetica                  Type 1   Custom               no
+            Helvetica-Bold             Type 1   Standard             no
+
+            The table header: 4 titles: 'Name', 'Type', 'Encoding', 'Uni'.
+            The width of the columns in chars is the following: 25 for Name,
+                10 for Type, 20 for Encoding & 3 for Uni.
+            Between each column there is a separating whitespace.
+            The header is separated from the data with a sequence of dashes
+                ('-') as the width of each column.
+
+            This test is carried out with samples/simple3.pdf, the output
+                should look like the following:
+
+            Name                       Type     Encoding             Uni
+            -------------------------- -------- -------------------- ---
+            Helvetica                  Type 1   MacRomanEncoding     no
+            unknown                    Type CID V                    no
+
+            Params:
+                fake_stdout: a fake stdout mimicking the real output
+                    of the program
+
+            '''
+            # Check the header titles
+            self.assertIn(
+                "Name".ljust(25)+" Type".ljust(10+1) +
+                " Encoding".ljust(20+1)+" Uni".ljust(3+1),
+                fake_stdout.getvalue())
+
+            # Check the sequence of dashes
+            self.assertIn(('-'*25)+" "+('-'*10)+" "+('-'*20) +
+                          " "+('-'*3), fake_stdout.getvalue())
+
+            # Check the values
+
+            # Check Name
+            self.assertIn("Helvetica", fake_stdout.getvalue())
+            self.assertIn("unknown", fake_stdout.getvalue())
+
+            # Check Type
+            self.assertIn("Type 1", fake_stdout.getvalue())
+            self.assertIn("Type CID", fake_stdout.getvalue())
+
+            # Check Encoding
+            self.assertIn("MacRomanEncoding", fake_stdout.getvalue())
+            self.assertIn("V", fake_stdout.getvalue())
+
+            # Check Uni
+            self.assertIn("no", fake_stdout.getvalue())
+
+        self.run_tests(tests, ['pdffonts.py', 'samples/simple3.pdf'])
