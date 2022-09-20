@@ -14,7 +14,7 @@ class TestWordprinting(unittest.TestCase):
             for line in f:
                 if 'word' in line:
                     try:
-                        sub1 = line.split('bbox=')[1]
+                        sub1 = line.split('bbox=')[1:]
                         wordCoordinates = sub1.split('>')[0]
                         firstString = charCoordinateArray[0]
                         secondString = charCoordinateArray[
@@ -27,7 +27,7 @@ class TestWordprinting(unittest.TestCase):
                         self.assertEqual(wordCoordinates, left+","+right)
                         charCoordinateArray.clear()
                     except IndexError:
-                        return NotImplemented
+                        print("index error")
                 else:
                     if '<text ' and '</text>' in line:
                         sub1 = line.split('bbox=')[1]

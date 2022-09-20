@@ -646,7 +646,7 @@ class XMLConverter(PDFConverter):
                     if coordinates.__sizeof__() > 1:
                         try:
                             self.outfp.write(
-                                '<text word bbox="%s>'
+                                '<text type="word" bbox="%s>'
                                 % (
                                     leftbbox2str(coordinates[0])
                                     + ","
