@@ -1,6 +1,7 @@
 import sys
 import argparse
 from pdfminer.cmapdb import CMapDB
+from pdfminer.image import ImageWriter
 from pdfminer.layout import LAParams
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
@@ -12,6 +13,20 @@ from pdfminer.converter import PDFConverter
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input', metavar='input.pdf', nargs='+')
+    parser.add_argument('-P', '--password')
+    parser.add_argument('-o', '--output')
+    parser.add_argument('-R', '--rotation')
+    parser.add_argument('-p', '--pagenos')
+    parser.add_argument('-m', '--maxpages')
+    parser.add_argument('-C', '--disable-caching', action='store_true')
+    parser.add_argument('-n', '--no-layout', action='store_true')
+    parser.add_argument('-A', '--all-texts', action='store_true')
+    parser.add_argument('-V', '--detect-vertical', action='store_true')
+    parser.add_argument('-M', '--char-margin')
+    parser.add_argument('-L', '--line-margin')
+    parser.add_argument('-W', '--word-margin')
+    parser.add_argument('-F', '--boxes-flow')
+    parser.add_argument('-d', '--debug', action='store_true')
     args = parser.parse_args()
 
     # debug option
@@ -22,10 +37,38 @@ def main():
     maxpages = 0
     # output option
     outfile = None
-    imagewriter = None
     rotation = 0
     caching = True
+
     laparams = LAParams()
+    if args.debug:
+        debug += 1
+    elif args.password:
+        password = args.password.encode('ascii')
+    elif args.output:
+        outfile = args.output
+    elif args.rotation:
+        rotation = int(args.rotation)
+    elif args.pagenos:
+        pagenos.update(int(x)-1 for x in args.pagenos.split(','))
+    elif args.maxpages:
+        maxpages = int(args.maxpages)
+    elif args.disable_caching:
+        caching = False
+    elif args.no_layout:
+        laparams = None
+    elif args.all_texts:
+        laparams.all_texts = True
+    elif args.detect_vertical:
+        laparams.detect_vertical = True
+    elif args.char_margin:
+        laparams.char_margin = float(args.char_margin)
+    elif args.word_margin:
+        laparams.word_margin = float(args.word_margin)
+    elif args.line_margin:
+        laparams.line_margin = float(args.line_margin)
+    elif args.boxes_flow:
+        laparams.boxes_flow = float(args.boxes_flow)
 
     #
     PDFDocument.debug = debug
@@ -36,7 +79,10 @@ def main():
 
     rsrcmgr = PDFResourceManager(caching=caching)
 
-    outfp = sys.stdout
+    if outfile:
+        outfp = open(outfile, 'w')
+    else:
+        outfp = sys.stdout
 
     device = PDFConverter(
         rsrcmgr, outfp, laparams=laparams)
@@ -55,38 +101,42 @@ def main():
                 page.rotate = (page.rotate + rotation) % 360
                 interpreter.process_page(page)
 
-    l_font_names = []
-    l_font_types = []
-    l_font_enc = []
-    l_font_uni = []
+        l_font_names = []
+        l_font_types = []
+        l_font_enc = []
+        l_font_uni = []
 
-    # Collecting data from sources
-    for fontkey in rsrcmgr._cached_fonts:
-        # Font = class (PDFType1Font etc)
-        font = rsrcmgr._cached_fonts[fontkey]
-        # Type = TrueType/Type 1/Type 3/Type CID
-        font_type = font.__class__.__name__
-        # Name = Helvetica etc
-        font_name = font.basefont
+        # Collecting data from sources
+        for fontkey in rsrcmgr._cached_fonts:
+            # Font = class (PDFType1Font etc)
+            font = rsrcmgr._cached_fonts[fontkey]
+            # Type = TrueType/Type 1/Type 3/Type CID
+            font_type = font.__class__.__name__
+            # Name = Helvetica etc
+            font_name = font.basefont
 
-        font_enc = font.get_encoding().name
+            font_enc = font.get_encoding_name()
 
-        font_uni = font.get_toUnicode()
+            font_uni = font.get_toUnicode()
 
-        l_font_types.append(font_type)
-        l_font_names.append(font_name)
-        l_font_enc.append(font_enc)
-        l_font_uni.append(font_uni)
+            l_font_types.append(font_type)
+            l_font_names.append(font_name)
+            l_font_enc.append(font_enc)
+            l_font_uni.append(font_uni)
 
-    fonts = {}
-    fonts['names'] = l_font_names
-    fonts['types'] = l_font_types
-    fonts['enc'] = l_font_enc
-    fonts['uni'] = l_font_uni
+        fonts = {}
+        fonts['names'] = l_font_names
+        fonts['types'] = l_font_types
+        fonts['enc'] = l_font_enc
+        fonts['uni'] = l_font_uni
 
-    device.close()
+        device.close()
+        outfp.write(fname+" fonts:\n")
+        outfp.write(fonts2txt(fonts))
+        outfp.write('\n')
 
-    outfp.write(fonts2txt(fonts))
+        # delete the cache
+        rsrcmgr._cached_fonts = {}
 
     if outfile:
         outfp.close()
