@@ -34,7 +34,8 @@ class TestWordprinting(unittest.TestCase):
                             if ' ' not in line:
                                 try:
                                     sub1 = line.split('bbox=')[1]
-                                    charCoordinateArray.append(sub1.split(' ')[0])
+                                    charCoordinateArray.append(
+                                                    sub1.split(' ')[0])
                                 except IndexError:
                                     print("index error 2")
 
