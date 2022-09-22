@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import getopt
+import os
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -10,6 +11,7 @@ from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.cmapdb import CMapDB
 from pdfminer.layout import LAParams
 from pdfminer.image import ImageWriter
+from pdfminer.chapterparser import ChapterParser
 
 
 # main
@@ -41,7 +43,7 @@ def usage(argv):
 def setOptionsAndConvert(argv):
     try:
         (opts, args) = getopt.getopt(argv[1:],
-                                     'dP:o:t:O:c:s:R:Y:p:m:SCnAVM:W:L:F:')
+                                     'dP:o:t:TO:c:s:R:Y:p:m:SCnAVM:W:L:F:')
     except getopt.GetoptError:
         return usage(argv)
     if not args:
@@ -55,6 +57,7 @@ def setOptionsAndConvert(argv):
     maxpages = 0
     # output option
     outfile = None
+    chapterSplit = False
     outtype = None
     imagewriter = None
     rotation = 0
@@ -74,6 +77,8 @@ def setOptionsAndConvert(argv):
             outfile = v
         elif k == '-t':
             outtype = v
+        elif k == '-T':
+            chapterSplit = True
         elif k == '-O':
             imagewriter = ImageWriter(v)
         elif k == '-c':
@@ -108,20 +113,21 @@ def setOptionsAndConvert(argv):
             laparams.boxes_flow = float(v)
     pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
-              maxpages, password, rotation)
-    return (debug, caching, outtype, outfile, encoding,
+              maxpages, password, rotation, chapterSplit)
+    return (debug, caching, outtype, outfile, encoding, chapterSplit,
             imagewriter, stripcontrol, scale, layoutmode, pagenos,
             maxpages, password, rotation)
 
 
 def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
               imagewriter, stripcontrol, scale, layoutmode, pagenos,
-              maxpages, password, rotation):
+              maxpages, password, rotation, chapterSplit):
     PDFDocument.debug = debug
     PDFParser.debug = debug
     CMapDB.debug = debug
     PDFPageInterpreter.debug = debug
     rsrcmgr = PDFResourceManager(caching=caching)
+
     if not outtype:
         outtype = 'text'
         if outfile:
@@ -135,8 +141,13 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
         outfp = open(outfile, 'w', encoding=encoding)
     else:
         outfp = sys.stdout
+        if chapterSplit:
+            outfp = open('chaptersplit.txt', 'w', encoding=encoding)
+        else:
+            outfp = sys.stdout
+
     if outtype == 'text':
-        device = TextConverter(rsrcmgr, outfp, laparams=laparams,
+        device = TextConverter(rsrcmgr, outfp, chapterSplit, laparams=laparams,
                                imagewriter=imagewriter)
     elif outtype == 'xml':
         device = XMLConverter(rsrcmgr, outfp, laparams=laparams,
@@ -160,9 +171,16 @@ def pdfToText(args, debug, caching, outtype, outfile, encoding, laparams,
                                           caching=caching,
                                           check_extractable=True):
                 page.rotate = (page.rotate + rotation) % 360
+
                 interpreter.process_page(page)
+
     device.close()
     outfp.close()
+    if chapterSplit:
+        cp = ChapterParser()
+        cp.split_chapters('chaptersplit.txt', '')
+        os.remove('chaptersplit.txt')
+
     return
 
 
