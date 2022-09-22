@@ -42,31 +42,31 @@ def main():
     laparams = LAParams()
     if args.debug:
         debug += 1
-    elif args.password:
+    if args.password:
         password = args.password.encode('ascii')
-    elif args.output:
+    if args.output:
         outfile = args.output
-    elif args.rotation:
+    if args.rotation:
         rotation = int(args.rotation)
-    elif args.pagenos:
+    if args.pagenos:
         pagenos.update(int(x)-1 for x in args.pagenos.split(','))
-    elif args.maxpages:
+    if args.maxpages:
         maxpages = int(args.maxpages)
-    elif args.disable_caching:
+    if args.disable_caching:
         caching = False
-    elif args.no_layout:
+    if args.no_layout:
         laparams = None
-    elif args.all_texts:
+    if args.all_texts:
         laparams.all_texts = True
-    elif args.detect_vertical:
+    if args.detect_vertical:
         laparams.detect_vertical = True
-    elif args.char_margin:
+    if args.char_margin:
         laparams.char_margin = float(args.char_margin)
-    elif args.word_margin:
+    if args.word_margin:
         laparams.word_margin = float(args.word_margin)
-    elif args.line_margin:
+    if args.line_margin:
         laparams.line_margin = float(args.line_margin)
-    elif args.boxes_flow:
+    if args.boxes_flow:
         laparams.boxes_flow = float(args.boxes_flow)
 
     #
