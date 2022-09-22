@@ -10,7 +10,7 @@ from .utils import matrix2str
 from .utils import apply_matrix_pt
 
 
-##  IndexAssigner
+# IndexAssigner
 ##
 class IndexAssigner:
 
@@ -28,7 +28,7 @@ class IndexAssigner:
         return
 
 
-##  LAParams
+# LAParams
 ##
 class LAParams:
 
@@ -54,7 +54,7 @@ class LAParams:
                 (self.char_margin, self.line_margin, self.word_margin, self.all_texts))
 
 
-##  LTItem
+# LTItem
 ##
 class LTItem:
 
@@ -63,7 +63,7 @@ class LTItem:
         return
 
 
-##  LTText
+# LTText
 ##
 class LTText:
 
@@ -75,7 +75,7 @@ class LTText:
         raise NotImplementedError
 
 
-##  LTComponent
+# LTComponent
 ##
 class LTComponent(LTItem):
 
@@ -91,10 +91,13 @@ class LTComponent(LTItem):
     # Disable comparison.
     def __lt__(self, _):
         raise ValueError
+
     def __le__(self, _):
         raise ValueError
+
     def __gt__(self, _):
         raise ValueError
+
     def __ge__(self, _):
         raise ValueError
 
@@ -149,7 +152,7 @@ class LTComponent(LTItem):
             return 0
 
 
-##  LTCurve
+# LTCurve
 ##
 class LTCurve(LTComponent):
 
@@ -163,7 +166,7 @@ class LTCurve(LTComponent):
         return ','.join('%.3f,%.3f' % p for p in self.pts)
 
 
-##  LTLine
+# LTLine
 ##
 class LTLine(LTCurve):
 
@@ -172,17 +175,18 @@ class LTLine(LTCurve):
         return
 
 
-##  LTRect
+# LTRect
 ##
 class LTRect(LTCurve):
 
     def __init__(self, linewidth, bbox):
         (x0, y0, x1, y1) = bbox
-        LTCurve.__init__(self, linewidth, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        LTCurve.__init__(self, linewidth, [
+                         (x0, y0), (x1, y0), (x1, y1), (x0, y1)])
         return
 
 
-##  LTImage
+# LTImage
 ##
 class LTImage(LTComponent):
 
@@ -205,7 +209,7 @@ class LTImage(LTComponent):
                  bbox2str(self.bbox), self.srcsize))
 
 
-##  LTAnno
+# LTAnno
 ##
 class LTAnno(LTItem, LTText):
 
@@ -217,7 +221,7 @@ class LTAnno(LTItem, LTText):
         return self._text
 
 
-##  LTChar
+# LTChar
 ##
 class LTChar(LTComponent, LTText):
 
@@ -278,7 +282,7 @@ class LTChar(LTComponent, LTText):
         return True
 
 
-##  LTContainer
+# LTContainer
 ##
 class LTContainer(LTComponent):
 
@@ -308,7 +312,7 @@ class LTContainer(LTComponent):
         return
 
 
-##  LTExpandableContainer
+# LTExpandableContainer
 ##
 class LTExpandableContainer(LTContainer):
 
@@ -323,7 +327,7 @@ class LTExpandableContainer(LTContainer):
         return
 
 
-##  LTTextContainer
+# LTTextContainer
 ##
 class LTTextContainer(LTExpandableContainer, LTText):
 
@@ -336,7 +340,7 @@ class LTTextContainer(LTExpandableContainer, LTText):
         return ''.join(obj.get_text() for obj in self if isinstance(obj, LTText))
 
 
-##  LTTextLine
+# LTTextLine
 ##
 class LTTextLine(LTTextContainer):
 
@@ -411,10 +415,10 @@ class LTTextLineVertical(LTTextLine):
                      abs(obj.y1-self.y1) < d))]
 
 
-##  LTTextBox
+# LTTextBox
 ##
-##  A set of text objects that are grouped within
-##  a certain rectangular area.
+# A set of text objects that are grouped within
+# a certain rectangular area.
 ##
 class LTTextBox(LTTextContainer):
 
@@ -451,7 +455,7 @@ class LTTextBoxVertical(LTTextBox):
         return 'tb-rl'
 
 
-##  LTTextGroup
+# LTTextGroup
 ##
 class LTTextGroup(LTTextContainer):
 
@@ -483,7 +487,7 @@ class LTTextGroupTBRL(LTTextGroup):
         return
 
 
-##  LTLayoutContainer
+# LTLayoutContainer
 ##
 class LTLayoutContainer(LTContainer):
 
@@ -538,7 +542,7 @@ class LTLayoutContainer(LTContainer):
                            max(obj0.height, obj1.height) * laparams.char_margin))
 
                 if ((halign and isinstance(line, LTTextLineHorizontal)) or
-                    (valign and isinstance(line, LTTextLineVertical))):
+                        (valign and isinstance(line, LTTextLineVertical))):
                     line.add(obj1)
                 elif line is not None:
                     yield line
@@ -571,7 +575,8 @@ class LTLayoutContainer(LTContainer):
         boxes = {}
         for line in lines:
             neighbors = line.find_neighbors(plane, laparams.line_margin)
-            if line not in neighbors: continue
+            if line not in neighbors:
+                continue
             members = []
             for obj1 in neighbors:
                 members.append(obj1)
@@ -586,7 +591,8 @@ class LTLayoutContainer(LTContainer):
                 boxes[obj] = box
         done = set()
         for line in lines:
-            if line not in boxes: continue
+            if line not in boxes:
+                continue
             box = boxes[line]
             if box in done:
                 continue
@@ -628,8 +634,8 @@ class LTLayoutContainer(LTContainer):
             return objs.difference((obj1, obj2))
 
         def key_obj(t):
-            (c,d,_,_) = t
-            return (c,d)
+            (c, d, _, _) = t
+            return (c, d)
 
         # XXX this still takes O(n^2)  :(
         dists = []
@@ -648,14 +654,14 @@ class LTLayoutContainer(LTContainer):
                 dists.append((1, d, obj1, obj2))
                 continue
             if (isinstance(obj1, (LTTextBoxVertical, LTTextGroupTBRL)) or
-                isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
+                    isinstance(obj2, (LTTextBoxVertical, LTTextGroupTBRL))):
                 group = LTTextGroupTBRL([obj1, obj2])
             else:
                 group = LTTextGroupLRTB([obj1, obj2])
             plane.remove(obj1)
             plane.remove(obj2)
-            dists = [ (c,d,obj1,obj2) for (c,d,obj1,obj2) in dists
-                      if (obj1 in plane and obj2 in plane) ]
+            dists = [(c, d, obj1, obj2) for (c, d, obj1, obj2) in dists
+                     if (obj1 in plane and obj2 in plane)]
             for other in plane:
                 dists.append((0, dist(group, other), group, other))
             dists = csort(dists, key=key_obj)
@@ -694,7 +700,7 @@ class LTLayoutContainer(LTContainer):
         return
 
 
-##  LTFigure
+# LTFigure
 ##
 class LTFigure(LTLayoutContainer):
 
@@ -719,7 +725,7 @@ class LTFigure(LTLayoutContainer):
         return
 
 
-##  LTPage
+# LTPage
 ##
 class LTPage(LTLayoutContainer):
 
