@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-import sys
 import argparse
 import os
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfparser import PDFParser
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfdevice import TagExtractor
-from pdfminer.pdfpage import PDFPage
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+import sys
+
 from pdfminer.cmapdb import CMapDB
-from pdfminer.layout import LAParams
+from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.image import ImageWriter
+from pdfminer.layout import LAParams
+from pdfminer.pdfdevice import TagExtractor
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
 
 
 def main():
@@ -80,7 +81,7 @@ def main():
     if args.layout_mode:
         layoutmode = args.layout_mode
     if args.pagenos:
-        pagenos.update(int(x)-1 for x in args.pagenos.split(','))
+        pagenos.update(int(x) - 1 for x in args.pagenos.split(','))
     if args.maxpages:
         maxpages = int(args.maxpages)
     if args.strip_control:
@@ -149,10 +150,10 @@ def main():
         with open(fname, 'rb') as fp:
             interpreter = PDFPageInterpreter(rsrcmgr, device)
             for page in PDFPage.get_pages(
-                fp, pagenos, maxpages=maxpages, password=password,
-                caching=caching, check_extractable=True
+                    fp, pagenos, maxpages=maxpages, password=password,
+                    caching=caching, check_extractable=True
             ):
-                page.rotate = (page.rotate+rotation) % 360
+                page.rotate = (page.rotate + rotation) % 360
                 interpreter.process_page(page)
     device.close()
 
@@ -164,7 +165,7 @@ def main():
 
         with open(outfile, 'r') as fp:
 
-            chapters_name = 'preface'
+            chapters_name = 'preface' + '.txt'
             file = open(os.path.join(path, chapters_name), 'w')
             while True:
                 cur_line = fp.readline()
@@ -172,12 +173,13 @@ def main():
                 line = cur_line.split(' ')
                 if len(line) == 3 and line[0].lower() == chapter_definition.lower():
                     file.close()
-                    chapters_name = line[0] + line[1]
+                    chapters_name = line[0] + line[1] + '.txt'
                     file = open(os.path.join(path, chapters_name), 'w')
 
                 file.write(cur_line)
                 if cur_line == '':
                     file.close()
+                    print('Files were created successfully in ' + str(os.path.join(path)))
                     break
 
     if outfile:
