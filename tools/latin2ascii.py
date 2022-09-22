@@ -115,7 +115,7 @@ def main(argv):
     import fileinput
 
     def usage():
-        print('usage: %s [-c codec] file ...' % argv[0])
+        print('usage: %s file ...' % argv[0])
         return 100
 
     try:
@@ -125,12 +125,12 @@ def main(argv):
     if not args:
         return usage()
 
-    lines = b''
+    output_lines = b''
     for line in fileinput.input(args):
         line = latin2ascii(line)
         encoded_line = line.encode('ascii', 'replace')
-        lines += encoded_line
-    return 0, lines
+        output_lines += encoded_line
+    return 0, output_lines
 
 
 if __name__ == '__main__':
