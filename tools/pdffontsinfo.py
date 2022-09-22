@@ -100,10 +100,12 @@ def main():
                 page.rotate = (page.rotate + rotation) % 360
                 interpreter.process_page(page)
 
-        l_font_names = []
-        l_font_types = []
-        l_font_enc = []
-        l_font_uni = []
+        fonts = {
+            'names': list(),
+            'types': list(),
+            'encoding': list(),
+            'to_unicode': list()
+        }
 
         # Collecting data from sources
         for fontkey in rsrcmgr._cached_fonts:
@@ -118,16 +120,10 @@ def main():
 
             font_uni = font.get_toUnicode()
 
-            l_font_types.append(font_type)
-            l_font_names.append(font_name)
-            l_font_enc.append(font_enc)
-            l_font_uni.append(font_uni)
-
-        fonts = {}
-        fonts['names'] = l_font_names
-        fonts['types'] = l_font_types
-        fonts['encoding'] = l_font_enc
-        fonts['to_unicode'] = l_font_uni
+            fonts['names'].append(font_name)
+            fonts['types'].append(font_type)
+            fonts['encoding'].append(font_enc)
+            fonts['to_unicode'].append(font_uni)
 
         device.close()
         outfp.write(fname+" fonts:\n")
@@ -136,6 +132,7 @@ def main():
 
         # delete the cache
         rsrcmgr._cached_fonts = {}
+        fonts = {}
 
     if outfile:
         outfp.close()
