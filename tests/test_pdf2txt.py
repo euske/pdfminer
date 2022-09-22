@@ -81,3 +81,26 @@ class TestPdf2Txt(unittest.TestCase):
         self.run_tests(
             tests, ['pdf2txt.py', '-t', 'xml', 'samples/equations.pdf']
         )
+
+    def test_equations_text_output(self):
+        def tests(fake_stdout):
+            self.assertIn(
+                "3x3\n"
+                "-----\n"
+                "3x2 + 5",
+                fake_stdout.getvalue()
+            )
+            # Assert that there are three lines between the equations
+            self.assertRegex(
+                fake_stdout.getvalue(),
+                re.compile('<line.*<line.*<line', re.DOTALL)
+            )
+            # Assert that one of the equations are in the output
+            self.assertRegex(
+                fake_stdout.getvalue(),
+                re.compile('3.*x.*2.*\+.*5', re.DOTALL)
+            )
+
+        self.run_tests(
+            tests, ['pdf2txt.py', 'samples/equations.pdf']
+        )
