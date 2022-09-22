@@ -181,8 +181,11 @@ class TextConverter(PDFConverter):
             elif isinstance(item, LTImage):
                 if self.imagewriter is not None:
                     self.imagewriter.export_image(item)
+            elif isinstance(item, LTLine):
+                self.write_text("-----\n")
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)
+        ltpage._objs.sort(key=lambda obj: -obj.y1)
         render(ltpage)
         self.write_text('\f')
         return

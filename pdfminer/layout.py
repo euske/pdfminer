@@ -174,6 +174,10 @@ class LTLine(LTCurve):
         LTCurve.__init__(self, linewidth, [p0, p1])
         return
 
+    def is_compatible(self, obj):
+        """Returns True if two lines can coexist."""
+        return True
+
 
 # LTRect
 ##
