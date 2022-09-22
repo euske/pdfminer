@@ -102,7 +102,7 @@ class TestPDFFonts(unittest.TestCase):
 
             Name                       Type     Encoding             Uni
             -------------------------- -------- -------------------- ---
-            (No font)                          
+            (No font)
 
             Params:
                 fake_stdout: a fake stdout mimicking the real output

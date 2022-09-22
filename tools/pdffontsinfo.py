@@ -1,7 +1,6 @@
 import sys
 import argparse
 from pdfminer.cmapdb import CMapDB
-from pdfminer.image import ImageWriter
 from pdfminer.layout import LAParams
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
