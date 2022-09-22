@@ -171,7 +171,8 @@ def main():
                 cur_line = fp.readline()
 
                 line = cur_line.split(' ')
-                if len(line) == 3 and line[0].lower() == chapter_definition.lower():
+                if len(line) == 3 and \
+                        line[0].lower() == chapter_definition.lower():
                     file.close()
                     chapters_name = line[0] + line[1] + '.txt'
                     file = open(os.path.join(path, chapters_name), 'w')
@@ -179,7 +180,8 @@ def main():
                 file.write(cur_line)
                 if cur_line == '':
                     file.close()
-                    print('Files were created successfully in ' + str(os.path.join(path)))
+                    print('Files were created successfully in ' +
+                          str(os.path.join(path)))
                     break
 
     if outfile:
