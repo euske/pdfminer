@@ -167,21 +167,25 @@ def fonts2txt(fonts):
                 - uni: list of booleans that shows if it is unicode or not
 
     '''
-    def process_line(list_info):
+    def process_line(name, type, encoding, unicode):
         '''
         Processes the table line to a nice distribution for the table disposal
         Params:
-            -list_info: 4 string values are expected in the list, the name,
-                the type, the encoding and the toUnicode value
+            -name: string with the name of the font
+            -type: string with the type of the font (TrueType, Type 1,
+                 Type 3 or Type CID)
+            -encoding: string with the encoding of the font
+            -unicode: string with the boolean representation of the'toUnicode'
+                value of the font (yes or no)
         '''
         name_space = 25
         type_space = 10
         encoding_space = 20
-        uni_space = 7
-        return list_info[0].ljust(name_space) + \
-            ' ' + list_info[1].ljust(type_space) + \
-            ' ' + list_info[2].ljust(encoding_space) + \
-            ' ' + list_info[3].ljust(uni_space)
+        unicode_space = 7
+        return name.ljust(name_space) + \
+            ' ' + type.ljust(type_space) + \
+            ' ' + encoding.ljust(encoding_space) + \
+            ' ' + unicode.ljust(unicode_space)
 
     typename = {
         # Dictionary to change type name
@@ -196,21 +200,21 @@ def fonts2txt(fonts):
         False: "no",
     }
 
-    table = process_line(["Name", "Type", "Encoding", "Unicode"]) + "\n"
-    table += process_line(['-'*25, '-'*10, '-'*20, '-'*7]) + "\n"
+    table = process_line("Name", "Type", "Encoding", "Unicode") + "\n"
+    table += process_line('-'*25, '-'*10, '-'*20, '-'*7) + "\n"
 
     if len(fonts['names']) == 0:
-        table += process_line(["(No font)",
+        table += process_line("(No font)",
                               "",
-                               "",
-                               ""]) + "\n"
+                              "",
+                              "") + "\n"
 
     for i in range(len(fonts['names'])):
         # For all values process the lines
-        table += process_line([fonts['names'][i],
+        table += process_line(fonts['names'][i],
                               typename[fonts['types'][i]],
                               fonts['encoding'][i],
-                              boolnames[fonts['to_unicode'][i]]]) + "\n"
+                              boolnames[fonts['to_unicode'][i]]) + "\n"
     return table
 
 
