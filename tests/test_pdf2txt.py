@@ -74,7 +74,7 @@ class TestPdf2Txt(unittest.TestCase):
             # Assert that one of the equations are in the output
             self.assertRegex(
                 fake_stdout.getvalue(),
-                re.compile('3.*x.*2.*\+.*5', re.DOTALL)
+                re.compile('3.*x.*2.*\\+.*5', re.DOTALL)
             )
 
         self.run_tests(
