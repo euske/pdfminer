@@ -126,8 +126,8 @@ def main():
         fonts = {}
         fonts['names'] = l_font_names
         fonts['types'] = l_font_types
-        fonts['enc'] = l_font_enc
-        fonts['uni'] = l_font_uni
+        fonts['encoding'] = l_font_enc
+        fonts['to_unicode'] = l_font_uni
 
         device.close()
         outfp.write(fname+" fonts:\n")
@@ -145,23 +145,23 @@ def fonts2txt(fonts):
     ''' Transforms the font information in a nice text table following
         this pattern:
 
-        Name                       Type     Encoding             Uni
-        -------------------------- -------- -------------------- ---
+        Name                       Type     Encoding             Unicode
+        -------------------------- -------- -------------------- -------
         Times-Roman                Type 1   Custom               no
         Times-Bold                 Type 1   Standard             no
         Helvetica                  Type 1   Custom               no
         Helvetica-Bold             Type 1   Standard             no
 
-        The table header: 4 titles: 'Name', 'Type', 'Encoding', 'Uni'.
+        The table header: 4 titles: 'Name', 'Type', 'Encoding', 'Unicode'.
         The width of the columns in chars is the following: 25 for Name,
-            10 for Type, 20 for Encoding & 3 for Uni.
+            10 for Type, 20 for Encoding & 7 for Unicode.
         Between each column there is a separating whitespace.
         The header is separated from the data with a sequence of dashes
             ('-') as the width of each column.
 
         Params:
             - fonts : dictionary with 4 lists. The keys are the following:
-                'names', 'types', 'enc', 'uni'
+                'names', 'types', 'encoding', 'to_unicode'
                 All lists have the same number of items
                 - names: list of strings with the names of the fonts
                 - types: list of strings with the names of the types
@@ -180,7 +180,7 @@ def fonts2txt(fonts):
         name_space = 25
         type_space = 10
         encoding_space = 20
-        uni_space = 3
+        uni_space = 7
         return list_info[0].ljust(name_space) + \
             ' ' + list_info[1].ljust(type_space) + \
             ' ' + list_info[2].ljust(encoding_space) + \
@@ -199,8 +199,8 @@ def fonts2txt(fonts):
         False: "no",
     }
 
-    table = process_line(["Name", "Type", "Encoding", "Uni"]) + "\n"
-    table += process_line(['-'*25, '-'*10, '-'*20, '-'*3]) + "\n"
+    table = process_line(["Name", "Type", "Encoding", "Unicode"]) + "\n"
+    table += process_line(['-'*25, '-'*10, '-'*20, '-'*7]) + "\n"
 
     if len(fonts['names']) == 0:
         table += process_line(["(No font)",
@@ -212,8 +212,8 @@ def fonts2txt(fonts):
         # For all values process the lines
         table += process_line([fonts['names'][i],
                               typename[fonts['types'][i]],
-                              fonts['enc'][i],
-                              boolnames[fonts['uni'][i]]]) + "\n"
+                              fonts['encoding'][i],
+                              boolnames[fonts['to_unicode'][i]]]) + "\n"
     return table
 
 
