@@ -185,7 +185,13 @@ class TextConverter(PDFConverter):
                 self.write_text("-----\n")
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)
+
+        # Since objs are not sorted but instead are rendered using their coordinates
+        # in other converter classes, we sort the objs based on their y coordinate
+        # to replicate the order of the elements. The y coordinate is negated
+        # since the origo of a pdf page starts in the bottom left
         ltpage._objs.sort(key=lambda obj: -obj.y1)
+
         render(ltpage)
         self.write_text('\f')
         return

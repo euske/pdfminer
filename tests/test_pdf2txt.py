@@ -47,7 +47,7 @@ class TestPdf2Txt(unittest.TestCase):
 
     def test_equations_html_output(self):
         def tests(fake_stdout):
-            # Assert that there are three lines between the equations
+            # Assert that there are two lines between the equations
             self.assertRegex(
                 fake_stdout.getvalue(),
                 re.compile(
@@ -66,7 +66,7 @@ class TestPdf2Txt(unittest.TestCase):
 
     def test_equations_xml_output(self):
         def tests(fake_stdout):
-            # Assert that there are three lines between the equations
+            # Assert that there are two lines between the equations
             self.assertRegex(
                 fake_stdout.getvalue(),
                 re.compile('<line.*<line', re.DOTALL)
@@ -83,6 +83,7 @@ class TestPdf2Txt(unittest.TestCase):
 
     def test_equations_text_output(self):
         def tests(fake_stdout):
+            # Assert that the equation and the division line is in the output
             self.assertIn(
                 "3x3\n\n"
                 "-----\n"
