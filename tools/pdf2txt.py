@@ -15,6 +15,10 @@ from pdfminer.pdfparser import PDFParser
 
 
 def main():
+    """
+    Converts pdf files into either txt, html or xml file.
+    """
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('input', metavar='input.pdf', nargs='+')
     parser.add_argument('-P', '--password')
@@ -105,7 +109,8 @@ def main():
     if args.chapterize:
         chapter_definition = args.chapterize
         chapters = True
-        # If output flag is not used then we create one.
+        # If output flag is not used then we create one to
+        # parse through and create chapter file
         if not args.output:
             outfile = 'chapters'
 
@@ -157,11 +162,15 @@ def main():
                 interpreter.process_page(page)
     device.close()
 
-    # Flag if we need to create separate file for each chapter or not
+        # Flag if we need to create separate file for each chapter or not
+        # Creates folder for the chapters at the input file location.
+        # It reads from the output file created by PDFPageInterpreter to 
+        # create separate txt for each chapters.
     if chapters:
         chap_dir = str(input_file_name) + '_chapters'
         path = os.path.join(os.pardir, chap_dir)
         os.makedirs(path, exist_ok=True)
+
 
         with open(outfile, 'r') as fp:
 
@@ -171,6 +180,10 @@ def main():
                 cur_line = fp.readline()
 
                 line = cur_line.split(' ')
+                # To avoid making a new file when a chapter title
+                # is mentioned in the text, we check that 
+                # the length of chapter is 3. ex.
+                # If chapter title is "Chapter 3" == ['Chapter', '3', '\n']
                 if len(line) == 3 and \
                         line[0].lower() == chapter_definition.lower():
                     file.close()
@@ -186,7 +199,8 @@ def main():
 
     if outfile:
         outfp.close()
-    # Deletes the files that we created for reading the chapters
+    # Deletes the file as it is only created to be parse through and create
+    # different chapter file
     if not args.output and os.path.isfile(outfile):
         os.remove(outfile)
 
