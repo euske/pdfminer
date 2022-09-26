@@ -201,7 +201,7 @@ def main():
         outfp.close()
     # Deletes the file as it is only created to be parse through and create
     # different chapter file
-    if not args.output and os.path.isfile(outfile):
+    if not args.output and outfile is not None and os.path.isfile(outfile):
         os.remove(outfile)
 
 
