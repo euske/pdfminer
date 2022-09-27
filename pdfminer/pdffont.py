@@ -472,7 +472,7 @@ LITERAL_TYPE1C = LIT('Type1C')
 # PDFFont
 class PDFFont:
 
-    def __init__(self, descriptor, widths, default_width=None):
+    def __init__(self, descriptor, widths, default_width=None, encoding_name=LITERAL_STANDARD_ENCODING, toUnicode=False):
         self.descriptor = descriptor
         self.widths = widths
         self.fontname = resolve1(descriptor.get('FontName', 'unknown'))
@@ -487,6 +487,8 @@ class PDFFont:
         self.leading = num_value(descriptor.get('Leading', 0))
         self.bbox = list_value(descriptor.get('FontBBox', (0, 0, 0, 0)))
         self.hscale = self.vscale = .001
+        self.encoding_name = encoding_name
+        self.toUnicode = toUnicode
         return
 
     def __repr__(self):
@@ -534,31 +536,40 @@ class PDFFont:
     def string_width(self, s):
         return sum(self.char_width(cid) for cid in self.decode(s))
 
+    def get_encoding_name(self):
+        return self.encoding_name
+
+    def get_toUnicode(self):
+        return self.toUnicode
+
 
 # PDFSimpleFont
 class PDFSimpleFont(PDFFont):
 
     def __init__(self, descriptor, widths, spec):
+        encoding = LITERAL_STANDARD_ENCODING
+        toUnicode = False
         # Font encoding is specified either by a name of
         # built-in encoding or a dictionary that describes
         # the differences.
         if 'Encoding' in spec:
             encoding = resolve1(spec['Encoding'])
-        else:
-            encoding = LITERAL_STANDARD_ENCODING
         if isinstance(encoding, dict):
             name = literal_name(encoding.get(
                 'BaseEncoding', LITERAL_STANDARD_ENCODING))
             diff = list_value(encoding.get('Differences', None))
             self.cid2unicode = EncodingDB.get_encoding(name, diff)
         else:
-            self.cid2unicode = EncodingDB.get_encoding(literal_name(encoding))
+            self.cid2unicode = EncodingDB.get_encoding(
+                literal_name(encoding))
         self.unicode_map = None
         if 'ToUnicode' in spec:
+            toUnicode = True
             strm = stream_value(spec['ToUnicode'])
             self.unicode_map = FileUnicodeMap()
             CMapParser(self.unicode_map, BytesIO(strm.get_data())).run()
-        PDFFont.__init__(self, descriptor, widths)
+        PDFFont.__init__(self, descriptor, widths,
+                         encoding_name=encoding.name, toUnicode=toUnicode)
         return
 
     def to_unichr(self, cid):
@@ -639,6 +650,8 @@ class PDFType3Font(PDFSimpleFont):
 class PDFCIDFont(PDFFont):
 
     def __init__(self, rsrcmgr, spec):
+        encoding = LITERAL_STANDARD_ENCODING
+        toUnicode = False
         try:
             self.basefont = literal_name(spec['BaseFont'])
         except KeyError:
@@ -651,10 +664,12 @@ class PDFCIDFont(PDFFont):
         self.cidcoding = (registry + b'-' + ordering).decode('ascii')
         try:
             name = literal_name(spec['Encoding'])
+            encoding_name = name
         except KeyError:
             if STRICT:
                 raise PDFFontError('Encoding is unspecified')
             name = 'unknown'
+            encoding_name = name
         try:
             self.cmap = CMapDB.get_cmap(name)
         except CMapDB.CMapNotFound as e:
@@ -674,6 +689,7 @@ class PDFCIDFont(PDFFont):
                                BytesIO(self.fontfile.get_data()))
         self.unicode_map = None
         if 'ToUnicode' in spec:
+            toUnicode = True
             strm = stream_value(spec['ToUnicode'])
             self.unicode_map = FileUnicodeMap()
             CMapParser(self.unicode_map, BytesIO(strm.get_data())).run()
@@ -706,7 +722,8 @@ class PDFCIDFont(PDFFont):
             self.default_disp = 0
             widths = get_widths(list_value(spec.get('W', [])))
             default_width = spec.get('DW', 1000)
-        PDFFont.__init__(self, descriptor, widths, default_width=default_width)
+        PDFFont.__init__(self, descriptor, widths, default_width=default_width,
+                         encoding_name=encoding_name, toUnicode=toUnicode)
         return
 
     def __repr__(self):
