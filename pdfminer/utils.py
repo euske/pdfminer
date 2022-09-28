@@ -243,6 +243,28 @@ def bbox2str(bbox):
     return '%.3f,%.3f,%.3f,%.3f' % (x0, y0, x1, y1)
 
 
+"""
+@param param1: Takes a dict holding coordinates
+@return: returns the first and second element as a string representation
+"""
+
+
+def leftbbox2str(bbox):
+    (x0, y0, x1, y1) = bbox
+    return '%.3f,%.3f' % (x0, y0)
+
+
+"""
+@param param1: Takes a dict holding coordinates
+@return: returns the thrid and fourth element as a string representation
+"""
+
+
+def rightbbox2str(bbox):
+    (x0, y0, x1, y1) = bbox
+    return '%.3f,%.3f' % (x1, y1)
+
+
 def matrix2str(m):
     (a, b, c, d, e, f) = m
     return '[%.2f,%.2f,%.2f,%.2f, (%.2f,%.2f)]' % (a, b, c, d, e, f)

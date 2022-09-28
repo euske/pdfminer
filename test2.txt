@@ -1,0 +1,751 @@
+Introduction 
+ 
+
+novaPDF Printer is a virtual printer driver for Windows 2000/XP/XP x64/2003 Server/2003 Server x64/Vista/Vista 
+x64. Instead of printing on paper, it creates Adobe compatible PDF files. 
+ 
+What is PDF? 
+Adobe PDF (Portable Document Format) is a universal file format that preserves the fonts, images, graphics, and 
+layout of any source document, regardless of the application, hardware and operating system used to create it. 
+PDF files are compact and complete, and can be shared, viewed, and printed by anyone with free Adobe Reader® 
+software (or other third party PDF readers). PDF documents are also independent of the output device on which 
+they are to be displayed or printed. 
+ 
+PDF has become the de facto standard for the electronic exchange of documents. Major corporations, government 
+agencies, and educational institutions streamline their operations by replacing paper-based workflow with 
+electronic exchange of information. 
+ 
+Why use novaPDF Printer? 
+novaPDF Printer converts any printable file into a PDF file. Its purpose is to enable users to exchange electronic 
+documents easily, independently of the environment in which they were initially created. It also helps companies 
+to publish reports, marketing plans, price lists, contracts, and any other documents in a portable electronic 
+document format. 
+ 
+How to use novaPDF? 
+All you have to do is to click Print from the application displaying the document and choose the novaPDF to create 
+PDF files. You can generate high-quality and searchable PDF files from any Windows application. 
+ 
+You can choose a default folder and file name for generated PDF files, or you can set them at each print job. You 
+can also choose different options for the output PDF file, including custom paper size, resolution, portrait and 
+landscape orientation, scale, image compression, font embedding, PDF security and document metadata. 
+ 
+To create a PDF file you only need a windows application that can print (like Notepad or WordPad). 
+To view PDF files, you need the FREE Adobe Acrobat Reader® (you can download it from www.adobe.com) or any 
+other PDF viewer application. 
+ 
+
+Getting Started 
+ 
+Printing a test page 
+
+After installation you can test if novaPDF is working properly by printing a test page.  
+ 
+To print a test page in Windows Vista: 
+
+1. Go to Start and click on Printers (if you have the Classic menu go to Start->Settings->Printers) 
+
+2. In the Printers window, right-click novaPDF and select Properties 
+
+ 
+
+ 
+ 
+
+  
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+3. In the novaPDF Properties window, click on Print Test Page 
+
+ 
+
+4. You will be prompted to select a location and name for the test PDF file. Choose one and click Save. 
+
+ 
+
+ 
+ 
+
+  
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+5. After the PDF was created and saved, it will open in your default PDF reader and you will see the printed test 
+
+page. If novaPDF is not registered, a notice is printed at the end of the PDF file. This can be removed from 
+further created PDF files by purchasing a license and registering it. 
+
+ 
+
+  
+
+ 
+To print a test page in Windows XP or Windows 2003 Server: 
+
+>Printers and Faxes) 
+
+1. Go to Start and click on Printers and Faxes (if you have the Classic menu go to Start->Settings-
+2. In the Printers and Faxes window, right-click novaPDF and select Properties 
+3. In the novaPDF Properties window, click on Print Test Page 
+4. You will be prompted to select a location and name for the test PDF file. Choose one and click Save. 
+5. After the PDF was created and saved, it will open in your default PDF reader and you will see the printed test 
+
+page. If novaPDF is not registered, a notice is printed at the end of the PDF file. This can be removed from 
+further created PDF files by purchasing a license and registering it. 
+
+  
+
+ 
+To print a test page in Windows 2000: 
+
+1. Go to Start and click on Printers  
+2. In the Printers window, right-click novaPDF and select Properties 
+
+ 
+ 
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+3. In the novaPDF Properties window, click on Print Test Page 
+4. You will be prompted to select a location and name for the test PDF file. Choose one and click Save. 
+5. After the PDF was created and saved, it will open in your default PDF reader and you will see the printed test 
+
+page. If novaPDF is not registered, a notice is printed at the end of the PDF file. This can be removed from 
+further created PDF files by purchasing a license and registering it. 
+
+Accessing the novaPDF Printing Preferences – test the 
+multiline bookmark detection option 
+
+You can access the Printing Preferences window and change the various settings available. 
+ 
+To access the novaPDF Printing Preferences window in Windows Vista: 
+
+1. Go to Start and click on Printers (if you have the Classic menu go to Start->Settings->Printers) 
+2. In the Printers window, right-click novaPDF and select Printing Preferences 
+3. novaPDF Printing Preferences window will be displayed and you will have the option to change the 
+
+various settings available (grouped in tabs)   
+
+ 
+
+ 
+To access the novaPDF Printing Preferences window in Windows XP and Windows 2003 Server: 
+1. Go to Start and click on Printers and Faxes (if you have the Classic menu go to Start->Settings-
+2. In the Printers and Faxes window, right-click novaPDF and select Printing Preferences 
+3. novaPDF Printing Preferences window will be displayed and you will have the option to change the 
+
+>Printers and Faxes) 
+
+various settings available (grouped in tabs) 
+
+ 
+
+ 
+
+ 
+ 
+
+ 
+To access the novaPDF Printing Preferences window in Windows 2000: 
+
+1. Go to Start and click on Printers 
+2. In the Printers window, right-click novaPDF and select Printing Preferences 
+3. novaPDF Printing Preferences window will be displayed and you will have the option to change the various 
+
+settings available (grouped in tabs) 
+
+  
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+Creating PDF Files 
+
+novaPDF installs itself as a virtual printer driver so there is no exe file to run in order to create PDF files.  
+To create PDF files, you just have to print your documents to the novaPDF Printer, like you would print to a normal 
+printer. 
+ 
+How to create PDF files from Microsoft Word 
+
+1. Open the Word document that you want to convert to a PDF file 
+2. Go to File->Print and select novaPDF from the Printers combo-box 
+3. Click on Ok and choose a location for your PDF file 
+
+  
+
+ 
+How to create PDF files from Microsoft WordPad 
+
+1. Open the document that you want to convert to a PDF file 
+2. Go to File->Print and select novaPDF from the Printers' list 
+3. Click on Print and choose a location for your PDF file  
+
+ 
+
+ 
+ 
+
+  
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+  
+
+ 
+How to create PDF files from NotePad 
+
+1. Open the NotePad document that you want to convert to a PDF file 
+2. Go to File->Print and select novaPDF from the Printers' list 
+3. Click on Print and choose a location for your PDF file 
+
+ 
+
+ 
+
+ 
+ 
+
+  
+
+C
+r
+e
+a
+t
+e
+ 
+P
+D
+F
+ 
+f
+i
+l
+e
+s
+ 
+w
+i
+t
+h
+o
+u
+t
+ 
+t
+h
+i
+s
+ 
+m
+e
+s
+s
+a
+g
+e
+ 
+b
+y
+ 
+p
+u
+r
+c
+h
+a
+s
+i
+n
+g
+ 
+n
+o
+v
+a
+P
+D
+F
+ 
+p
+r
+i
+n
+t
+e
+r
+ 
+(
+h
+t
+t
+p
+:
+/
+/
+w
+w
+w
+.
+n
+o
+v
+a
+p
+d
+f
+.
+c
+o
+m
+)
+
