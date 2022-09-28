@@ -28,6 +28,7 @@ def check_output(expected_output, directory, count):
         with open(expected_output[i], 'rb') as expected:
             with open(directory + '/' + f, 'rb') as output:
                 if expected.read() != output.read():
+                    print(f'{expected_output[i]} != {f}')
                     return False
     return len(directory_content) == count
 
