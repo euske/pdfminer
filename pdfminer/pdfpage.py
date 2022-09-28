@@ -121,10 +121,12 @@ class PDFPage:
     def get_pages(klass, fp,
                   pagenos=None, maxpages=0, password=b'',
                   caching=True, check_extractable=True):
+
         # Create a PDF parser object associated with the file object.
         parser = PDFParser(fp)
         # Create a PDF document object that stores the document structure.
         doc = PDFDocument(parser, password=password, caching=caching)
+
         # Check if the document allows text extraction. If not, abort.
         if check_extractable and not doc.is_extractable:
             raise PDFTextExtractionNotAllowed(

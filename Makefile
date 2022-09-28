@@ -3,7 +3,7 @@
 
 PACKAGE=pdfminer
 
-PYTHON=python -B
+PYTHON=python3
 TWINE=twine
 RM=rm -f
 CP=cp -f
@@ -12,7 +12,7 @@ MKDIR=mkdir
 all:
 
 install:
-	$(PYTHON) setup.py install --home=$(HOME)
+	$(PYTHON) setup.py install
 
 clean:
 	-$(PYTHON) setup.py clean
@@ -67,4 +67,5 @@ test: cmap
 	$(PYTHON) -m tests.test_dumpoutline
 	$(PYTHON) -m tests.test_util
 	$(PYTHON) -m tests.test_pdf2XmlConversion
+	$(PYTHON) -m tests.test_chapterparser
 	cd samples && $(MAKE) test
