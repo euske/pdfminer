@@ -30,7 +30,10 @@ def check_output(expected_output, directory, count):
                 if expected.read() != output.read():
                     print(f'{expected_output[i]} != {f}')
                     return False
-    return len(directory_content) == count
+    if len(directory_content) != count:
+        print(f'{len(directory_content)} != {count}')
+        return False
+    return True
 
 
 class TestImageWriter(unittest.TestCase):
