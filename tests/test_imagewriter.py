@@ -15,21 +15,27 @@ _ARGV = ['',
          _TEST_OUTPUT_DIR]
 
 
+def equal_binary(f1, f2):
+    with open(f1, 'rb') as f1_binary:
+        with open(f2, 'rb') as f2_binary:
+            return f1_binary.read() == f2_binary.read()
+
+
 def check_output(expected_output, directory, count):
     """
     Checks whether the output images from pdf2txt is what is expected
-    @param expected_output The path expected output files in an array
+    @param expected_output Array containing tuple with path to expected output
+           content and expected output filename
     @param directory The output directory for pdf2txt
     @param count The number of expected output files
     """
     directory_content = os.listdir(directory)
     os.makedirs(directory, exist_ok=True)
-    for i, f in enumerate(directory_content):
-        with open(expected_output[i], 'rb') as expected:
-            with open(directory + '/' + f, 'rb') as output:
-                if expected.read() != output.read():
-                    print(f'{expected_output[i]} != {f}')
-                    return False
+    for i, expected_pair in enumerate(expected_output):
+        if not equal_binary(expected_pair[0],
+                            directory + '/' + expected_pair[1]):
+            return False
+
     if len(directory_content) != count:
         print(f'{len(directory_content)} != {count}')
         return False
@@ -41,7 +47,7 @@ class TestImageWriter(unittest.TestCase):
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
         setOptionsAndConvert(_ARGV + ['./samples/example-pdf-jpg.pdf'])
         self.assertTrue(
-            check_output([_OUT_DIR + 'example-pdf-jpg.jpg'],
+            check_output([(_OUT_DIR + 'example-pdf-jpg.jpg', 'X5.jpg')],
                          _TEST_OUTPUT_DIR,
                          1))
 
@@ -49,7 +55,8 @@ class TestImageWriter(unittest.TestCase):
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
         setOptionsAndConvert(_ARGV + ['./samples/example-pdf-png.pdf'])
         self.assertTrue(
-            check_output([_OUT_DIR + 'example-pdf-png.bmp'],
+            check_output([(_OUT_DIR + 'example-pdf-png.bmp',
+                           'X5.800x600.bmp')],
                          _TEST_OUTPUT_DIR,
                          1))
 
@@ -58,8 +65,11 @@ class TestImageWriter(unittest.TestCase):
         setOptionsAndConvert(
             _ARGV + ['./samples/example-pdf-png-grayscale.pdf'])
         self.assertTrue(
-            check_output([_OUT_DIR + 'example-pdf-png-grayscale_2.bmp',
-                          _OUT_DIR + 'example-pdf-png-grayscale_1.bmp'],
+            check_output([(_OUT_DIR + 'example-pdf-png-grayscale_2.bmp',
+                           'X6.600x375.bmp'),
+                          (_OUT_DIR + 'example-pdf-png-grayscale_1.bmp',
+                           'X5.768x512.bmp')
+                          ],
                          _TEST_OUTPUT_DIR,
                          2))
         shutil.rmtree(_TEST_OUTPUT_DIR, ignore_errors=True)
