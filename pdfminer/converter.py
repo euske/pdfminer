@@ -184,9 +184,17 @@ class TextConverter(PDFConverter):
             elif isinstance(item, LTImage):
                 if self.imagewriter is not None:
                     self.imagewriter.export_image(item)
-
+            elif isinstance(item, LTLine):
+                self.write_text("-----\n")
         if self.showpageno:
             self.write_text('Page %s\n' % ltpage.pageid)
+
+        # Since objs are not sorted but instead are rendered using their coordinates
+        # in other converter classes, we sort the objs based on their y coordinate
+        # to replicate the order of the elements. The y coordinate is negated
+        # since the origo of a pdf page starts in the bottom left
+        ltpage._objs.sort(key=lambda obj: -obj.y1)
+
         render(ltpage)
         self.write_text('\f')
         return
@@ -198,9 +206,6 @@ class TextConverter(PDFConverter):
         if self.imagewriter is None:
             return
         PDFConverter.render_image(self, name, stream)
-        return
-
-    def paint_path(self, gstate, stroke, fill, evenodd, path):
         return
 
 
@@ -255,10 +260,8 @@ class HTMLConverter(PDFConverter):
     def write_header(self):
         self.write('<html><head>\n')
         self.write(
-
             '<meta http-equiv="Content-Type" '
             'content="text/html; charset=utf-8">\n')
-
         self.write('</head><body>\n')
         return
 
