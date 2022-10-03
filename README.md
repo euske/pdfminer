@@ -31,6 +31,9 @@ For the active project, check out its fork
 1. `python3 -m tools.pdf2txt [-t html, xml, text] samples/equations.pdf`
 1. `python3 -m tools.pdffontsinfo samples/simple1.pdf`
 
+## How to use the new feature
+1. `python3 -m tools.pdf2txt -ch [Chapter definition (ex. chapter)] samples/Crime_and_Punishment_T_short.pdf`
+
 ## How to test
 
 Run `python3 -m unittest` in the root folder
