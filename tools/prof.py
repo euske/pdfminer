@@ -14,16 +14,14 @@ def prof_main(argv):
         return usage()
     name = args.pop(0)
     prof = name+'.prof'
+    lefti = name.index('.')
     i = name.rindex('.')
     (modname, funcname) = (name[:i], name[i+1:])
-    module = __import__(modname, fromlist=1)
+    module = __import__(modname, fromlist=[name[:lefti]])
     func = getattr(module, funcname)
     if args:
         args.insert(0, argv[0])
-        prof = cProfile(prof)
-        prof.runcall(lambda: func(args))
-        prof.close()
-    else:
+        cProfile.runctx('func(args)', globals(), locals(), prof)
         stats = pstats.Stats(prof)
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
