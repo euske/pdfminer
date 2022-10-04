@@ -29,7 +29,7 @@ class LZWDecoder:
                 # |-bpos-|-bits-|  |
                 # |      |----r----|
                 v = (v << bits) | (
-                        (self.buff >> (r - bits)) & ((1 << bits) - 1))
+                    (self.buff >> (r - bits)) & ((1 << bits) - 1))
                 self.bpos += bits
                 break
             else:

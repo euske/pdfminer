@@ -471,9 +471,10 @@ class PDFStandardSecurityHandlerV4(PDFStandardSecurityHandler):
         return data
 
     def decrypt_aes128(self, objid, genno, data):
-        key = self.key + struct.pack('<L', objid)[:3] + struct.pack('<L',
-                                                                    genno)[
-                                                        :2] + b'sAlT'
+        key = self.key \
+            + struct.pack('<L', objid)[:3] \
+            + struct.pack('<L', genno)[:2] \
+            + b'sAlT'
         hash = md5.md5(key)
         key = hash.digest()[:min(len(key), 16)]
         return AES.new(key, mode=AES.MODE_CBC, IV=data[:16]).decrypt(data[16:])
