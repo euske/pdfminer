@@ -232,10 +232,9 @@ def decode_text(s):
 
 def q(s):
     """Quotes html string."""
-    return (s.replace('&', '&amp;')
-            .replace('<', '&lt;')
-            .replace('>', '&gt;')
-            .replace('"', '&quot;'))
+    table = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}
+    trans_table = s.maketrans(table)
+    return s.translate(trans_table)
 
 
 def bbox2str(bbox):
