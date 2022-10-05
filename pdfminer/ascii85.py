@@ -5,12 +5,10 @@
 This code is in the public domain.
 
 """
-
 import re
-import struct
+import base64
 
 
-# ascii85decode(data)
 def ascii85decode(data):
     """
     In ASCII85 encoding, every four bytes are encoded with five ASCII
@@ -23,35 +21,25 @@ def ascii85decode(data):
 
     The sample string is taken from:
       http://en.wikipedia.org/w/index.php?title=Ascii85
-
-    >>> ascii85decode(b'9jqo^BlbD-BleB1DJ+*+F(f,q')
-    b'Man is distinguished'
-    >>> ascii85decode(b'E,9)oF*2M7/c~>')
-    b'pleasure.'
     """
-    n = b = 0
-    out = b''
-    for c in data:
-        if 33 <= c and c <= 117:  # b'!' <= c and c <= b'u'
-            n += 1
-            b = b*85+(c-33)
-            if n == 5:
-                out += struct.pack('>L', b)
-                n = b = 0
-        elif c == 122:  # b'z'
-            assert n == 0
-            out += b'\0\0\0\0'
-        elif c == 126:  # b'~'
-            if n:
-                for _ in range(5-n):
-                    b = b*85+84
-                out += struct.pack('>L', b)[:n-1]
-            break
-    return out
+    # Some ascii85 strings found in pdfs can be encoded as
+    # a normal ascii85 string and some with adobe's version
+    # of ascii85. The difference with adobe is that it allows
+    # a string to start with <~ and end with ~>. We first try
+    # decoding the string with the adobe version of ascii85.
+    # If that fails, we try decoding it as a normal ascii85 string.
+    try:
+        return base64.a85decode(data, adobe=True)
+    except ValueError:
+        return base64.a85decode(data)
 
 
-# asciihexdecode(data)
+# Every pair of hexadecimal characters (a-f, A-F, 0-9)
 hex_re = re.compile(r'([a-f\d]{2})', re.IGNORECASE)
+# If the number of hexadecimal characters is an odd number, the regex finds the
+# last hexadecimal character that does not belong to a pair. This character
+# can be followed by zero or more > (whitespace between the brackets is
+# allowed)
 trail_re = re.compile(r'^(?:[a-f\d]{2}|\s)*([a-f\d])[\s>]*$', re.IGNORECASE)
 
 
@@ -64,22 +52,17 @@ def asciihexdecode(data):
     EOD. Any other characters will cause an error. If the filter encounters
     the EOD marker after reading an odd number of hexadecimal digits, it
     will behave as if a 0 followed the last digit.
-
-    >>> asciihexdecode(b'61 62 2e6364   65')
-    b'ab.cde'
-    >>> asciihexdecode(b'61 62 2e6364   657>')
-    b'ab.cdep'
-    >>> asciihexdecode(b'7>')
-    b'p'
     """
+
     data = data.decode('latin1')
-    out = [int(hx, 16) for hx in hex_re.findall(data)]
-    m = trail_re.search(data)
-    if m:
-        out.append(int(m.group(1), 16) << 4)
-    return bytes(out)
+    # Convert pairs of hexadecimal to decimal
+    decimal_values = [int(hx, base=16) for hx in hex_re.findall(data)]
 
-
-if __name__ == '__main__':
-    import doctest
-    print('pdfminer.ascii85', doctest.testmod())
+    # Find if the last character has no hexadecimal pair
+    pairless_character = trail_re.search(data)
+    if pairless_character:
+        # Group 1 contains the pairless character. Group 0 would pick the
+        # entire matched string.
+        character = pairless_character.group(1) + '0'
+        decimal_values.append(int(character, base=16))
+    return bytes(decimal_values)
