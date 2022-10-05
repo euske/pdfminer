@@ -5,3 +5,4 @@ exclude =
     cmaprsrc/*
     docs/*
     venv/*
+    build/*
