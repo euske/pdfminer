@@ -10,7 +10,6 @@ from .utils import matrix2str
 from .utils import apply_matrix_pt
 
 
-
 #  IndexAssigner
 #
 class IndexAssigner:
@@ -27,7 +26,6 @@ class IndexAssigner:
             for x in obj:
                 self.run(x)
         return
-
 
 
 #  LAParams
@@ -58,7 +56,6 @@ class LAParams:
                  self.all_texts))
 
 
-
 #  LTItem
 #
 class LTItem:
@@ -66,7 +63,6 @@ class LTItem:
     def analyze(self, laparams):
         """Perform the layout analysis."""
         return
-
 
 
 #  LTText
@@ -158,7 +154,6 @@ class LTComponent(LTItem):
             return 0
 
 
-
 #  LTCurve
 #
 class LTCurve(LTComponent):
@@ -193,7 +188,7 @@ class LTRect(LTCurve):
     def __init__(self, linewidth, bbox):
         (x0, y0, x1, y1) = bbox
         LTCurve.__init__(self, linewidth, [
-                         (x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+            (x0, y0), (x1, y0), (x1, y1), (x0, y1)])
         return
 
 
@@ -230,7 +225,6 @@ class LTAnno(LTItem, LTText):
 
     def get_text(self):
         return self._text
-
 
 
 #  LTChar

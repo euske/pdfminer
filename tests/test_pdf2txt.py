@@ -2,10 +2,11 @@ import contextlib
 import io
 import re
 import unittest
-from unittest.mock import mock_open, patch, MagicMock
+from unittest.mock import patch
 from pdfminer.layout import LAParams
 from tools.pdf2txt import create_chapters
 from tools.pdf2txt import main, create_file
+
 
 class TestPdf2Txt(unittest.TestCase):
     def run_tests(self, func_with_tests, args):
@@ -45,7 +46,6 @@ class TestPdf2Txt(unittest.TestCase):
         self.run_tests(
             tests, ['pdf2txt.py', '-t', 'html', 'samples/simple1.pdf']
         )
-
 
     def test_equations_html_output(self):
         def tests(fake_stdout):
@@ -97,7 +97,6 @@ class TestPdf2Txt(unittest.TestCase):
             tests, ['pdf2txt.py', 'samples/equations.pdf']
         )
 
-
     @patch('tools.pdf2txt.create_file')
     def test_create_html(self, mock_output):
         # Test for the '.html' files
@@ -109,7 +108,7 @@ class TestPdf2Txt(unittest.TestCase):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = None # If a file needs to be created
+        outfile = None  # If a file needs to be created
         outtype = 'html'
         imagewriter = None
         rotation = 0
@@ -118,21 +117,26 @@ class TestPdf2Txt(unittest.TestCase):
         encoding = 'utf-8'
         scale = 1
         caching = False
-        chapter_definition = None
         input_file = ['samples/simple1.pdf']
-            
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertEqual(create_file_check, True)
-        
+
         outfile = 'html'
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertTrue(create_file_check)
-        
-        self.assertTrue(main(['-t', 'html', '-o', 'output_html.html', 'samples/simple1.pdf']))
+
+        self.assertTrue(main(['-t', 'html', 'samples/simple1.pdf']))
 
     @patch('tools.pdf2txt.create_file')
     def test_create_xml(self, mock_output):
@@ -145,7 +149,7 @@ class TestPdf2Txt(unittest.TestCase):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = None # If a file needs to be created
+        outfile = None  # If a file needs to be created
         outtype = 'xml'
         imagewriter = None
         rotation = 0
@@ -154,20 +158,25 @@ class TestPdf2Txt(unittest.TestCase):
         encoding = 'utf-8'
         scale = 1
         caching = False
-        chapter_definition = None
         input_file = ['samples/simple1.pdf']
-            
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertEqual(create_file_check, True)
 
         outfile = 'xml'
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertTrue(create_file_check)
-        self.assertTrue(main(['-t', 'xml', '-o', 'output_xml.xml', 'samples/simple1.pdf']))
+        self.assertTrue(main(['-t', 'xml', 'samples/simple1.pdf']))
 
     @patch('tools.pdf2txt.create_file')
     def test_create_tag(self, mock_output):
@@ -180,7 +189,7 @@ class TestPdf2Txt(unittest.TestCase):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = None # If a file needs to be created
+        outfile = None  # If a file needs to be created
         outtype = 'tag'
         imagewriter = None
         rotation = 0
@@ -189,21 +198,26 @@ class TestPdf2Txt(unittest.TestCase):
         encoding = 'utf-8'
         scale = 1
         caching = False
-        chapter_definition = None
         input_file = ['samples/simple1.pdf']
-            
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertEqual(create_file_check, True)
 
         outfile = 'tag'
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertTrue(create_file_check)
 
-        self.assertTrue(main(['-t', 'tag', '-o', 'output_tag.tag', 'samples/simple1.pdf']))
+        self.assertTrue(main(['-t', 'tag', 'samples/simple1.pdf']))
 
     @patch('tools.pdf2txt.create_file')
     def test_create_text(self, mock_output):
@@ -216,7 +230,7 @@ class TestPdf2Txt(unittest.TestCase):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = None # If a file needs to be created
+        outfile = None  # If a file needs to be created
         outtype = 'text'
         imagewriter = None
         rotation = 0
@@ -225,24 +239,27 @@ class TestPdf2Txt(unittest.TestCase):
         encoding = 'utf-8'
         scale = 1
         caching = False
-        chapter_definition = None
         input_file = ['samples/simple1.pdf']
-            
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertEqual(create_file_check, True)
 
         outfile = 'text'
-        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
+        create_file_check = create_file(debug, caching, outfile, laparams,
+                                        imagewriter,
+                                        stripcontrol, scale, layoutmode,
+                                        pagenos,
+                                        maxpages, password, rotation, encoding,
+                                        input_file, outtype)
         self.assertTrue(create_file_check)
-        
-        self.assertTrue(main(['-t', 'text', '-o', 'output_text.text', 'samples/Crime_and_Punishment_T_short.pdf']))
-        
-        
-   
+
+        self.assertTrue(
+            main(['-t', 'text', 'samples/Crime_and_Punishment_T_short.pdf']))
 
     @patch('tools.pdf2txt.create_chapters')
     def test_create_create_chapters(self, mock_output):
@@ -255,7 +272,7 @@ class TestPdf2Txt(unittest.TestCase):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = 'chapters' # If a file needs to be created
+        outfile = 'chapters'  # If a file needs to be created
         outtype = ''
         imagewriter = None
         rotation = 0
@@ -266,13 +283,19 @@ class TestPdf2Txt(unittest.TestCase):
         caching = False
         chapter_definition = 'chapter'
         input_file = ['samples/Crime_and_Punishment_T_short.pdf']
-            
-        create_file_check = create_chapters(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype, chapter_definition)
+
+        create_file_check = create_chapters(debug, caching, outfile, laparams,
+                                            imagewriter,
+                                            stripcontrol, scale, layoutmode,
+                                            pagenos,
+                                            maxpages, password, rotation,
+                                            encoding, input_file, outtype,
+                                            chapter_definition)
         self.assertEqual(create_file_check, True)
-        
-        self.assertTrue(main(['-ch', 'chapters', 'samples/Crime_and_Punishment_T_short.pdf']))
-        
+
+        self.assertTrue(main(
+            ['-ch', 'chapters', 'samples/Crime_and_Punishment_T_short.pdf']))
+
+
 if __name__ == '__main__':
     unittest.main()

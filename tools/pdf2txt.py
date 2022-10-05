@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-from ast import LShift
 import os
 import sys
 from typing import Set, List
@@ -15,8 +14,10 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
-# Creating a new method for refactoring ()
-def create_file(debug: int, 
+
+# Creating a new method for refactoring
+# (divide the main functions into different methods)
+def create_file(debug: int,
                 caching: bool,
                 outfile: str,
                 laparams: LAParams,
@@ -30,11 +31,28 @@ def create_file(debug: int,
                 rotation: int,
                 encoding: str,
                 input_file: List[str],
-                outtype: str,) -> bool: 
-            
+                outtype: str, ) -> bool:
     """
-    Parses through a pdf file and creates a either a xml, html, tag or txt file.
-    The output can also be shown in the command line instead of creating a file.
+    Parses through a pdf file and creates a either a xml, html,
+    tag or txt file.
+    The output can also be shown in the command line instead of
+    creating a file.
+    :param
+        debug: A integer representing either to turn debug output or not.
+        caching: A boolean representing if is chatching or not the file.
+        outfile: The name of outfile to create and write the parsed pdf file.
+        laparams: Laparam instance stores information regarding the pdf pages.
+        imageWriter: An object that has informatioin about pictures.
+        stripcontrol: A boolean representing if strip or not the characters.
+        scale: either to scale the output or not
+        layoutmode: layoutmode of the output
+        pagenos: Processes certain pages only.
+        maxpages: Limits the number of maximum pages to process.
+        password: PDF password.
+        rotation: Rotates the page in degree.
+        encoding: Output encoding. (default: utf-8)
+        input_file: Pdf file to parse through
+        outtype: A string defines witch type of the file to create.
     """
     PDFDocument.debug = debug
     PDFParser.debug = debug
@@ -56,24 +74,25 @@ def create_file(debug: int,
             outfp = open(outfile, 'w', encoding=encoding)
         else:
             outfp = sys.stdout
-            
+
         if outtype == 'text':
             device = TextConverter(rsrcmgr, outfp, laparams=laparams,
-                                imagewriter=imagewriter)
+                                   imagewriter=imagewriter)
         elif outtype == 'xml':
             device = XMLConverter(rsrcmgr, outfp, laparams=laparams,
-                                imagewriter=imagewriter,
-                                stripcontrol=stripcontrol)
+                                  imagewriter=imagewriter,
+                                  stripcontrol=stripcontrol)
         elif outtype == 'html':
             device = HTMLConverter(rsrcmgr, outfp, scale=scale,
-                                layoutmode=layoutmode, laparams=laparams,
-                                imagewriter=imagewriter, debug=debug)
+                                   layoutmode=layoutmode, laparams=laparams,
+                                   imagewriter=imagewriter, debug=debug)
         elif outtype == 'tag':
             device = TagExtractor(rsrcmgr, outfp)
 
         for fname in input_file:
             # input_file_name = fname.split('/')[-1]
-            # Get the input file name to create a directory with all the chapters
+            # Get the input file name to create a directory
+            # with all the chapters
             # input_file_name = input_file_name.replace('.pdf', '')
 
             with open(fname, 'rb') as fp:
@@ -88,40 +107,59 @@ def create_file(debug: int,
 
         if outfile:
             outfp.close()
-            
+
         return True
 
 
-def create_chapters(debug: int, 
-                caching: bool,
-                outfile: str,
-                laparams: LAParams,
-                imagewriter: ImageWriter,
-                stripcontrol: bool,
-                scale: int,
-                layoutmode: str,
-                pagenos: Set[int],
-                maxpages: int,
-                password: str,
-                rotation: int,
-                encoding: str,
-                input_file: List[str],
-                outtype: str,
-                chapter_definition: str) -> bool:
+def create_chapters(debug: int,
+                    caching: bool,
+                    outfile: str,
+                    laparams: LAParams,
+                    imagewriter: ImageWriter,
+                    stripcontrol: bool,
+                    scale: int,
+                    layoutmode: str,
+                    pagenos: Set[int],
+                    maxpages: int,
+                    password: str,
+                    rotation: int,
+                    encoding: str,
+                    input_file: List[str],
+                    outtype: str,
+                    chapter_definition: str) -> bool:
     """
-    TOOD: Write Comments
+    Creates a separate text file for each chapter in a book.
+    :param
+        debug: A integer representing either to turn debug output or not.
+        caching: A boolean representing if is chatching or not the file.
+        outfile: The name of outfile to create and write the parsed pdf file.
+        laparams: Laparam instance stores information regarding the pdf pages.
+        imageWriter: An object that has informatioin about pictures.
+        stripcontrol: A boolean representing if strip or not the characters.
+        scale: either to scale the output or not
+        layoutmode: layoutmode of the output
+        pagenos: Processes certain pages only.
+        maxpages: Limits the number of maximum pages to process.
+        password: PDF password.
+        rotation: Rotates the page in degree.
+        encoding: Output encoding. (default: utf-8)
+        input_file: Pdf file to parse through
+        outtype: A string defines witch type of the file to create.
+        chapter_definition: Keyword to define the chapter definitions
+                            in the book.
     """
-                
+
     # Creates a large text which then create_chapter iterates over
-    chapter = create_file(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, input_file, outtype)
-                        
+    create_file(debug, caching, outfile, laparams, imagewriter,
+                stripcontrol, scale, layoutmode, pagenos,
+                maxpages, password, rotation, encoding, input_file,
+                outtype)
+
     for fname in input_file:
         input_file_name = fname.split('/')[-1]
         # Get the input file name to create a directory with all the chapters
         input_file_name = input_file_name.replace('.pdf', '')
-    
+
     input_file_path = os.fspath(fname).replace('.pdf', '_chapters')
     os.makedirs(input_file_path, exist_ok=True)
 
@@ -129,7 +167,7 @@ def create_chapters(debug: int,
 
         chapters_name = 'preface' + '.txt'
         file = open(os.path.join(input_file_path, chapters_name), 'w')
-        
+
         while 1:
             cur_line = fp.readline()
             line = cur_line.split(' ')
@@ -153,17 +191,18 @@ def create_chapters(debug: int,
 
     if outfile is not None and os.path.isfile(outfile_path):
         os.remove(os.path.join(outfile))
-        print('Files were created successfully in ' + str(os.path.join(input_file_path)))
+        print('Files were created successfully in ' + str(
+            os.path.join(input_file_path)))
         return True
 
     return True
-        
 
-def main(raw_args=sys.argv[1:]):    
+
+def main(raw_args=sys.argv[1:]):
     """
     Converts pdf files into either txt, html or xml file.
     """
-        
+
     parser = argparse.ArgumentParser()
     parser.add_argument('input', metavar='input.pdf', nargs='+')
     parser.add_argument('-P', '--password')
@@ -264,18 +303,18 @@ def main(raw_args=sys.argv[1:]):
     # It reads from the output file created by PDFPageInterpreter to
     # create separate txt for each chapter.
     if chapters:
-        chapter = create_chapters(debug, caching, outfile, laparams, imagewriter, 
-                        stripcontrol, scale, layoutmode, pagenos, 
-                        maxpages, password, rotation, encoding, args.input, outtype, chapter_definition)
+        chapter = create_chapters(debug, caching, outfile, laparams,
+                                  imagewriter,
+                                  stripcontrol, scale, layoutmode, pagenos,
+                                  maxpages, password, rotation, encoding,
+                                  args.input, outtype, chapter_definition)
         return chapter
     else:
-        file = create_file(debug, caching, outfile, laparams, imagewriter, 
-                          stripcontrol, scale, layoutmode, pagenos, 
-                          maxpages, password, rotation, encoding, args.input, outtype)
+        file = create_file(debug, caching, outfile, laparams, imagewriter,
+                           stripcontrol, scale, layoutmode, pagenos,
+                           maxpages, password, rotation, encoding, args.input,
+                           outtype)
         return file
-    
-
-
 
 
 if __name__ == '__main__':
