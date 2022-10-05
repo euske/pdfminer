@@ -3,10 +3,7 @@ import argparse
 from ast import LShift
 import os
 import sys
-from tokenize import String
-from typing import Set
-from xmlrpc.client import Boolean
-from typing import List
+from typing import Set, List
 
 from pdfminer.cmapdb import CMapDB
 from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
@@ -110,11 +107,13 @@ def create_chapters(debug: int,
                 encoding: str,
                 input_file: List[str],
                 outtype: str,
-                chapter_definition: str) -> None:
-
+                chapter_definition: str) -> bool:
+    """
+    TOOD: Write Comments
+    """
                 
     # Creates a large text which then create_chapter iterates over
-    chapter = create_chapters(debug, caching, outfile, laparams, imagewriter, 
+    chapter = create_file(debug, caching, outfile, laparams, imagewriter, 
                         stripcontrol, scale, layoutmode, pagenos, 
                         maxpages, password, rotation, encoding, input_file, outtype)
                         
@@ -130,9 +129,9 @@ def create_chapters(debug: int,
 
         chapters_name = 'preface' + '.txt'
         file = open(os.path.join(input_file_path, chapters_name), 'w')
-        while True:
+        
+        while 1:
             cur_line = fp.readline()
-
             line = cur_line.split(' ')
             # To avoid making a new file when a chapter title
             # is mentioned in the text, we check that
@@ -148,14 +147,17 @@ def create_chapters(debug: int,
             file.write(cur_line)
             if cur_line == '':
                 file.close()
-                outfile.close()
-                print('Files were created successfully in ' +
-                        str(os.path.join(input_file_path)))
-                # return True
-    # Deletes the file as it is only created to be parse through and create
-    # different chapter file
-    if not args.output and outfile is not None and os.path.isfile(outfile):
-        os.remove(outfile)
+                outfile_path = os.path.join(outfile)
+                fp.close()
+                break
+
+    if outfile is not None and os.path.isfile(outfile_path):
+        os.remove(os.path.join(outfile))
+        print('Files were created successfully in ' + str(os.path.join(input_file_path)))
+        return True
+
+    return True
+        
 
 def main(raw_args=sys.argv[1:]):    
     """
@@ -254,7 +256,7 @@ def main(raw_args=sys.argv[1:]):
         chapters = True
         # If output flag is not used then we create one to
         # parse through and create chapter file
-        if not args.output:
+        if args.output is None or not args.output:
             outfile = 'chapters'
 
     # Flag if we need to create separate file for each chapter or not
@@ -265,54 +267,16 @@ def main(raw_args=sys.argv[1:]):
         chapter = create_chapters(debug, caching, outfile, laparams, imagewriter, 
                         stripcontrol, scale, layoutmode, pagenos, 
                         maxpages, password, rotation, encoding, args.input, outtype, chapter_definition)
+        return chapter
     else:
         file = create_file(debug, caching, outfile, laparams, imagewriter, 
                           stripcontrol, scale, layoutmode, pagenos, 
                           maxpages, password, rotation, encoding, args.input, outtype)
+        return file
     
-    
-                        
-    
-    # if chapters:
-    #     input_file_path = os.fspath(fname).replace('.pdf', '_chapters')
-    #     os.makedirs(input_file_path, exist_ok=True)
-
-    #     with open(outfile, 'r') as fp:
-
-    #         chapters_name = 'preface' + '.txt'
-    #         file = open(os.path.join(input_file_path, chapters_name), 'w')
-    #         while True:
-    #             cur_line = fp.readline()
-
-    #             line = cur_line.split(' ')
-    #             # To avoid making a new file when a chapter title
-    #             # is mentioned in the text, we check that
-    #             # the length of chapter is 3. ex.
-    #             # If chapter title is "Chapter 3" == ['Chapter', '3', '\n']
-    #             if len(line) == 3 and \
-    #                     line[0].lower() == chapter_definition.lower():
-    #                 file.close()
-    #                 chapters_name = line[0] + line[1] + '.txt'
-    #                 file = \
-    #                     open(os.path.join(input_file_path, chapters_name), 'w')
-
-    #             file.write(cur_line)
-    #             if cur_line == '':
-    #                 file.close()
-    #                 print('Files were created successfully in ' +
-    #                       str(os.path.join(input_file_path)))
-    #                 return True
-
-    # if outfile:
-    #     outfp.close()
-    # Deletes the file as it is only created to be parse through and create
-    # different chapter file
-    # if not args.output and outfile is not None and os.path.isfile(outfile):
-    #     os.remove(outfile)
 
 
 
 
 if __name__ == '__main__':
-    main()
     sys.exit(main())

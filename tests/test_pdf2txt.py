@@ -4,6 +4,7 @@ import re
 import unittest
 from unittest.mock import mock_open, patch, MagicMock
 from pdfminer.layout import LAParams
+from tools.pdf2txt import create_chapters
 from tools.pdf2txt import main, create_file
 
 class TestPdf2Txt(unittest.TestCase):
@@ -96,15 +97,6 @@ class TestPdf2Txt(unittest.TestCase):
             tests, ['pdf2txt.py', 'samples/equations.pdf']
         )
 
-    # @patch('tools.pdf2txt.main')
-    # def test_create_chapters(self, mock_output):
-    #     # mock_response = MagicMock()
-    #     # mock_response.return_value = 'True'
-    #     mock_output.return_value = True
-    #     self.assertTrue(main(['-ch', 'chapter', 'samples/Crime_and_Punishment_T_short.pdf']))
-    #     # mock_output.assert_any_call()
-    #     # # self.assertEqual(main(['-q chapter', '../samples/Crime_and_Punishment_T_short.pdf']), output)
-    #     # # mock_output.assert_called_once_with('/samples/Crime_and_Punishment_T_short.pdf')
 
     @patch('tools.pdf2txt.create_file')
     def test_create_html(self, mock_output):
@@ -140,7 +132,7 @@ class TestPdf2Txt(unittest.TestCase):
                         maxpages, password, rotation, encoding, input_file, outtype)
         self.assertTrue(create_file_check)
         
-        # self.assertTrue(main(['-t', 'html', '-o', 'output_html.html', 'samples/simple1.pdf']))
+        self.assertTrue(main(['-t', 'html', '-o', 'output_html.html', 'samples/simple1.pdf']))
 
     @patch('tools.pdf2txt.create_file')
     def test_create_xml(self, mock_output):
@@ -175,7 +167,7 @@ class TestPdf2Txt(unittest.TestCase):
                         stripcontrol, scale, layoutmode, pagenos, 
                         maxpages, password, rotation, encoding, input_file, outtype)
         self.assertTrue(create_file_check)
-        # self.assertTrue(main(['-t', 'xml', '-o', 'output_html.xml', 'samples/simple1.pdf']))
+        self.assertTrue(main(['-t', 'xml', '-o', 'output_xml.xml', 'samples/simple1.pdf']))
 
     @patch('tools.pdf2txt.create_file')
     def test_create_tag(self, mock_output):
@@ -210,9 +202,77 @@ class TestPdf2Txt(unittest.TestCase):
                         stripcontrol, scale, layoutmode, pagenos, 
                         maxpages, password, rotation, encoding, input_file, outtype)
         self.assertTrue(create_file_check)
-        # self.assertTrue(main(['-t', 'tag', '-o', 'output_html.xml', 'samples/simple1.pdf']))
 
+        self.assertTrue(main(['-t', 'tag', '-o', 'output_tag.tag', 'samples/simple1.pdf']))
 
+    @patch('tools.pdf2txt.create_file')
+    def test_create_text(self, mock_output):
+        # Test for the '.text' files
+        mock_output.return_value = True
+        laparams = LAParams()
+        debug = 0
+        # input option
+        password = b''
+        pagenos = set()
+        maxpages = 0
+        # output option
+        outfile = None # If a file needs to be created
+        outtype = 'text'
+        imagewriter = None
+        rotation = 0
+        stripcontrol = False
+        layoutmode = 'normal'
+        encoding = 'utf-8'
+        scale = 1
+        caching = False
+        chapter_definition = None
+        input_file = ['samples/simple1.pdf']
+            
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertEqual(create_file_check, True)
 
+        outfile = 'text'
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertTrue(create_file_check)
+        
+        self.assertTrue(main(['-t', 'text', '-o', 'output_text.text', 'samples/Crime_and_Punishment_T_short.pdf']))
+        
+        
+   
+
+    @patch('tools.pdf2txt.create_chapters')
+    def test_create_create_chapters(self, mock_output):
+        # Test for the '.html' files
+        mock_output.return_value = True
+        laparams = LAParams()
+        debug = 0
+        # input option
+        password = b''
+        pagenos = set()
+        maxpages = 0
+        # output option
+        outfile = 'chapters' # If a file needs to be created
+        outtype = ''
+        imagewriter = None
+        rotation = 0
+        stripcontrol = False
+        layoutmode = 'normal'
+        encoding = 'utf-8'
+        scale = 1
+        caching = False
+        chapter_definition = 'chapter'
+        input_file = ['samples/Crime_and_Punishment_T_short.pdf']
+            
+        create_file_check = create_chapters(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype, chapter_definition)
+        self.assertEqual(create_file_check, True)
+        
+        self.assertTrue(main(['-ch', 'chapters', 'samples/Crime_and_Punishment_T_short.pdf']))
+        
 if __name__ == '__main__':
     unittest.main()
