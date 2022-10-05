@@ -1,12 +1,10 @@
 import contextlib
 import io
-import shutil
 import re
 import unittest
-import os
-from unittest.mock import patch
-from tools.pdf2txt import main
-
+from unittest.mock import mock_open, patch, MagicMock
+from pdfminer.layout import LAParams
+from tools.pdf2txt import main, create_file
 
 class TestPdf2Txt(unittest.TestCase):
     def run_tests(self, func_with_tests, args):
@@ -21,25 +19,9 @@ class TestPdf2Txt(unittest.TestCase):
         fake_stdout = io.StringIO()
         with contextlib.redirect_stdout(fake_stdout):
             with patch('sys.argv', args):
-                main()
+                main(args[1:])
                 func_with_tests(fake_stdout)
         fake_stdout.close()
-    # def run_tests(self, func_with_tests, args):
-    #     # """Runs the tests provided in func_with_tests with a fake stdout.
-    #     #
-    #     # Params:
-    #     #     func_with_tests: a function that runs the actual tests. The
-    #     #     function will receive the fake stdout as an argument.
-    #     #
-    #     #     args: The arguments that will be passed to the main function
-    #     # """
-    #     # fake_stdout = io.StringIO()
-    #     # fake_open = mock_open()
-    #     # with contextlib.redirect_stdout(fake_stdout):
-    #     #     with patch('sys.argv', args, fake_open):
-    #     #         main()
-    #     #         func_with_tests(fake_stdout, fake_open)
-    #     # fake_stdout.close()
 
     def test_default(self):
         def tests(fake_stdout):
@@ -63,20 +45,7 @@ class TestPdf2Txt(unittest.TestCase):
             tests, ['pdf2txt.py', '-t', 'html', 'samples/simple1.pdf']
         )
 
-    def test_chapters_text_file(self):
 
-        # Check if the files are created and then removes them in the end
-        async def tests(fake_stdout):
-            path = 'samples/Crime_and_Punishment_T_short_chapters/'
-            await self.assertTrue(os.path.exists(path))
-            await self.assertTrue(os.path.isfile(path + 'preface.txt'))
-
-            # Cleaning up the files after creating them
-            shutil.rmtree(path)
-
-        self.run_tests(
-            tests, ['pdf2txt.py', '-ch chapter', 'samples/Crime_and_Punishment_T_short.pdf'])
-            
     def test_equations_html_output(self):
         def tests(fake_stdout):
             # Assert that there are two lines between the equations
@@ -126,3 +95,124 @@ class TestPdf2Txt(unittest.TestCase):
         self.run_tests(
             tests, ['pdf2txt.py', 'samples/equations.pdf']
         )
+
+    # @patch('tools.pdf2txt.main')
+    # def test_create_chapters(self, mock_output):
+    #     # mock_response = MagicMock()
+    #     # mock_response.return_value = 'True'
+    #     mock_output.return_value = True
+    #     self.assertTrue(main(['-ch', 'chapter', 'samples/Crime_and_Punishment_T_short.pdf']))
+    #     # mock_output.assert_any_call()
+    #     # # self.assertEqual(main(['-q chapter', '../samples/Crime_and_Punishment_T_short.pdf']), output)
+    #     # # mock_output.assert_called_once_with('/samples/Crime_and_Punishment_T_short.pdf')
+
+    @patch('tools.pdf2txt.create_file')
+    def test_create_html(self, mock_output):
+        # Test for the '.html' files
+        mock_output.return_value = True
+        laparams = LAParams()
+        debug = 0
+        # input option
+        password = b''
+        pagenos = set()
+        maxpages = 0
+        # output option
+        outfile = None # If a file needs to be created
+        outtype = 'html'
+        imagewriter = None
+        rotation = 0
+        stripcontrol = False
+        layoutmode = 'normal'
+        encoding = 'utf-8'
+        scale = 1
+        caching = False
+        chapter_definition = None
+        input_file = ['samples/simple1.pdf']
+            
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertEqual(create_file_check, True)
+        
+        outfile = 'html'
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertTrue(create_file_check)
+        
+        # self.assertTrue(main(['-t', 'html', '-o', 'output_html.html', 'samples/simple1.pdf']))
+
+    @patch('tools.pdf2txt.create_file')
+    def test_create_xml(self, mock_output):
+        # Test for the '.xml' files
+        mock_output.return_value = True
+        laparams = LAParams()
+        debug = 0
+        # input option
+        password = b''
+        pagenos = set()
+        maxpages = 0
+        # output option
+        outfile = None # If a file needs to be created
+        outtype = 'xml'
+        imagewriter = None
+        rotation = 0
+        stripcontrol = False
+        layoutmode = 'normal'
+        encoding = 'utf-8'
+        scale = 1
+        caching = False
+        chapter_definition = None
+        input_file = ['samples/simple1.pdf']
+            
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertEqual(create_file_check, True)
+
+        outfile = 'xml'
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertTrue(create_file_check)
+        # self.assertTrue(main(['-t', 'xml', '-o', 'output_html.xml', 'samples/simple1.pdf']))
+
+    @patch('tools.pdf2txt.create_file')
+    def test_create_tag(self, mock_output):
+        # Test for the '.tag' files
+        mock_output.return_value = True
+        laparams = LAParams()
+        debug = 0
+        # input option
+        password = b''
+        pagenos = set()
+        maxpages = 0
+        # output option
+        outfile = None # If a file needs to be created
+        outtype = 'tag'
+        imagewriter = None
+        rotation = 0
+        stripcontrol = False
+        layoutmode = 'normal'
+        encoding = 'utf-8'
+        scale = 1
+        caching = False
+        chapter_definition = None
+        input_file = ['samples/simple1.pdf']
+            
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertEqual(create_file_check, True)
+
+        outfile = 'tag'
+        create_file_check = create_file(debug, caching, outfile, laparams, imagewriter, 
+                        stripcontrol, scale, layoutmode, pagenos, 
+                        maxpages, password, rotation, encoding, input_file, outtype)
+        self.assertTrue(create_file_check)
+        # self.assertTrue(main(['-t', 'tag', '-o', 'output_html.xml', 'samples/simple1.pdf']))
+
+
+
+if __name__ == '__main__':
+    unittest.main()
