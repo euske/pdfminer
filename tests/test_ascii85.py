@@ -11,6 +11,14 @@ class TestAscii85Decode(unittest.TestCase):
         decoded_value = ascii85decode(b'E,9)oF*2M7/c~>')
         self.assertEqual(decoded_value, b'pleasure.')
 
+        ascii85_decode_3 = ascii85decode(b'9jqo^z')
+        decode85_ans_3 = b'Man \x00\x00\x00\x00'
+        self.assertEqual(ascii85_decode_3, decode85_ans_3)
+
+        ascii85_decode_4 = ascii85decode(b'9jqo^~>')
+        decode85_ans_4 = b'Man '
+        self.assertEqual(ascii85_decode_4, decode85_ans_4)
+
 
 class TestAsciiHexDecode(unittest.TestCase):
     def test_decode_1(self):
