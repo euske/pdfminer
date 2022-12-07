@@ -425,7 +425,7 @@ class TrueTypeFont:
                         if gid:
                             gid += delta
                         char2gid[first+c] = gid
-            elif fmttype == 4:
+            elif fmttype == 6 or fmttype == 4:
                 (segcount, _1, _2, _3) = struct.unpack('>HHHH', fp.read(8))
                 segcount //= 2
                 ecs = struct.unpack('>%dH' % segcount, fp.read(2*segcount))
